@@ -25,6 +25,7 @@ Inspired by [this post](https://www.superlinear.academy/c/share-your-projects/63
 | Packaging | `npx pawnpal` starts a local Node server and opens the browser |
 | Chess engine | Stockfish WebAssembly running in the browser (multi-threaded when possible, single-threaded fallback) |
 | LLM | Optional. Template text always works; an LLM only rewords it |
+| Pip voice model | Optional fine-tuned Qwen3 1.7B/4B (`pawnpal-pip`) trained on engine-confirmed facts, spec 13. Templates stay the fallback; baseline models are measured first |
 | LLM backend | Any OpenAI-compatible API, with Ollama (`http://127.0.0.1:11434/v1`) as the default |
 | LLM role | Rewords verified facts only. Output is checked against the facts and falls back to the template on failure or timeout |
 | Players | Knows the rules, up to ~1200. Teaching the rules is out of scope |
@@ -62,7 +63,7 @@ Defaults chosen without a separate decision: no chess clock; the kid picks White
 
 - Chess work (engine, grading, detection, templates) runs in the browser. That keeps the server small and lets a tablet run its own engine.
 - The server owns persistence, settings and every LLM call. LLM calls go through the server so API keys never reach the browser and CORS isn't an issue.
-- The rephrase validator lives in `src/shared/` so that it's unit-tested once and used by the server.
+- The rephrase validator and the prompt builder live in `src/shared/coach/` so they are unit-tested once and used by the server and by the training pipeline (spec 13).
 
 ## Repository layout
 
@@ -79,6 +80,7 @@ pawnpal/
 │   └── shared/             # types + zod schemas used by web and server
 ├── tests/e2e/              # Playwright
 ├── tools/calibrate/        # level strength measurement (spec 02)
+├── training/               # spec 13 data pipeline and fine-tuning (not in the npm package)
 └── docs/specs/
 ```
 
@@ -111,6 +113,7 @@ interface MoveAnalysis {
 }
 
 interface CoachFact {
+  schemaVersion: number;         // spec 13: the model tag names the schema it was trained on
   kind: 'allowed-mate' | 'missed-mate' | 'hanging-piece' | 'allowed-fork'
       | 'missed-capture' | 'missed-fork' | 'threat' | 'played-fork';
   pieces: PieceRef[];             // { type, color, square }
@@ -152,14 +155,15 @@ interface CoachFact {
 ```
 01 ──┬── 02
      ├── 03 ── 04 ──┬── 05
-     │              ├── 08 ──┐
-     ├── 06 ────────┼── 07   ├── 09
+     │              ├── 08 ──┬── 13
+     │              │        ├── 09
+     ├── 06 ────────┼── 07   │
      │              └── 10   │
      └── 11 ─────────────────┘
 all ── 12
 ```
 
-Suggested sequence: **01 → 03 → 04 → 05 → 06 → 02 → 07 → 08 → 09 → 10 → 11 → 12.** The coach loop (03–05) is the riskiest part, so it gets played early. Until 02 lands, the opponent uses the placeholder strength from 01.
+Suggested sequence: **01 → 03 → 04 → 08 (client, prompt builder, validator) → 13 → 05 → 06 → 02 → 07 → 09 → 10 → 11 → 12.** The coach loop (03–05) is the riskiest part, so it gets played early. Spec 13 follows 03, 04 and 08. It uses facts from that pipeline and the exact inference prompt and validator. The parts of 08 that need the settings table land after 06. Until 02 lands, the opponent uses the placeholder strength from 01.
 
 ## Quality bar
 
