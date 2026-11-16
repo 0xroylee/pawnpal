@@ -23,7 +23,7 @@ After each game, Pip walks the kid through up to five key moments in under a min
 
 **Review screen**
 - Board at the moment's position, before the kid's move.
-- The kid's move as an orange arrow; the better move as a green arrow.
+- The kid's move as a dashed orange arrow (`--pp-arrow-threat`) and the better move as a solid blue arrow (`--pp-arrow-better`), both with a white halo. A legend under the board reads "Your move" (dashed orange) and "Better idea" (solid blue), as in the design kit's Review screen.
 - Coach text from the explain and reveal templates (or praise for great moves). Spec 08 rewords it when an LLM is connected.
 - Previous / Next, and Done.
 - "See whole game": move list with a grade icon on each kid move. Tapping a move shows that position.
@@ -45,7 +45,7 @@ After each game, Pip walks the kid through up to five key moments in under a min
 1. Key-moment selection matches a table of analysis arrays → expected moments, including the clean-game case and the 5-moment cap.
 2. A 60-move game from history opens its review within 500 ms. No engine run is needed because the analysis is stored.
 3. Plies with no stored analysis (late grades) are skipped without errors.
-4. Arrows and highlights match each moment's facts.
+4. Arrows and highlights match each moment's facts and use the kit's arrow styles (dashed orange for the kid's move, solid blue for the better move).
 5. Skip and Done return to the home screen.
 6. Opening a past game from history shows the same review as right after the game.
 

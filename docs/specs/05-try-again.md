@@ -25,14 +25,14 @@ Take-backs for good moves. Undoing more than one move.
 KidToMove ──move──► Grading ──best / good / inaccuracy──► OpponentToMove
                        │
                        └── mistake / blunder ──► Nudge
-Nudge   (nudge text + highlights)    [Try again] [Show me] [Keep my move]
+Nudge   (nudge text + danger ring, no arrow)    [Try again] [Show me] [Keep my move]
   Try again    → undo the kid's move → Retry (kid to move, attempt 2)
   Show me      → Reveal
   Keep my move → explain text → OpponentToMove
 Retry ──move──► Grading
   ├── best / good / inaccuracy → "That's better!" → OpponentToMove
   └── mistake / blunder        → Reveal
-Reveal  (explain + reveal text + green arrow)    [OK]
+Reveal  (explain + reveal text + solid blue better-move arrow)    [OK]
   OK → kid to move. The next move is not intercepted.
 ```
 
@@ -52,7 +52,7 @@ Reveal  (explain + reveal text + green arrow)    [OK]
 1. A blunder opens Nudge with nudge text, highlights and the three buttons. The opponent doesn't move.
 2. Try again animates the piece back and returns to kid-to-move with the same position.
 3. A good retry shows "That's better!", and the opponent then replies.
-4. A second mistake opens Reveal with a green arrow for the best move.
+4. A second mistake opens Reveal with a solid blue arrow (white halo) for the best move.
 5. Show me goes straight to Reveal.
 6. Keep my move shows explain text, and the opponent then replies.
 7. Repeating the original mistake on the retry behaves like Keep my move.

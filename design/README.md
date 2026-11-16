@@ -97,4 +97,4 @@ Key rules:
    - This isn't legal advice.
 2. **Age bands.** Keep the 9+ "older" band, or use one size for everyone.
 3. **Animal avatars** are emoji placeholders. Final art should match Pip's flat style.
-4. **Specs 04 and 07 still say "green arrow"** for the better move. They need updating to blue and solid, with a dashed orange threat arrow.
+4. **Resolved:** specs 04, 05 and 07 now name the kit's annotations (solid blue better-move arrow, dashed orange threat arrow, coral ring with a "!" badge).
