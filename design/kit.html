@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pawnpal design kit</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  /* Kit page layout only — not part of the app. */
+  body { margin: 0; }
+  .kit { max-width: 1320px; margin: 0 auto; padding: 48px 40px 120px; }
+  .kit-head { display: flex; align-items: center; gap: 24px; margin-bottom: 56px; }
+  .kit-head img { width: 96px; }
+  .kit-head h1 { font-size: var(--pp-text-3xl); font-weight: 900; line-height: 1; margin: 0 0 8px; letter-spacing: -0.02em; }
+  .kit-head p { margin: 0; color: var(--pp-ink-2); font-size: 20px; }
+  .kit-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: -24px 0 56px; }
+  .kit-nav a { padding: 8px 14px; border-radius: 999px; background: var(--pp-surface); box-shadow: inset 0 0 0 2px var(--pp-line); color: var(--pp-ink); text-decoration: none; font-weight: 800; font-size: 15px; }
+  section { margin-bottom: 88px; scroll-margin-top: 24px; }
+  section > h2 { font-size: 34px; font-weight: 900; margin: 0 0 6px; letter-spacing: -0.01em; }
+  section > h2 small { color: var(--pp-ink-3); font-weight: 800; margin-right: 10px; }
+  section > p.lead { margin: 0 0 28px; color: var(--pp-ink-2); max-width: 820px; }
+  h3.kit-sub { font-size: 20px; font-weight: 900; margin: 36px 0 14px; }
+  .note { font-size: 15px; color: var(--pp-ink-2); }
+  .grid { display: grid; gap: 20px; }
+  .g2 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: repeat(3, 1fr); } .g4 { grid-template-columns: repeat(4, 1fr); } .g5 { grid-template-columns: repeat(5, 1fr); }
+  .row { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+  .principle { background: var(--pp-surface); border-radius: var(--pp-radius-lg); padding: 22px; box-shadow: var(--pp-shadow-1); }
+  .principle b { display: block; font-size: 19px; font-weight: 900; margin-bottom: 6px; }
+  .principle span { font-size: 16px; color: var(--pp-ink-2); line-height: 1.4; }
+  .swatch { border-radius: var(--pp-radius-md); overflow: hidden; background: var(--pp-surface); box-shadow: var(--pp-shadow-1); }
+  .swatch div { height: 76px; }
+  .swatch p { margin: 0; padding: 10px 12px 12px; font-size: 14px; line-height: 1.35; }
+  .swatch p b { display: block; font-size: 15px; }
+  .swatch code { color: var(--pp-ink-2); font-size: 13px; }
+  .type-row { display: grid; grid-template-columns: 180px 1fr; gap: 24px; align-items: baseline; padding: 14px 0; border-bottom: 1px solid var(--pp-line); }
+  .type-row code { font-size: 13px; color: var(--pp-ink-2); }
+  .token-box { display: grid; place-items: center; height: 88px; background: var(--pp-surface); box-shadow: var(--pp-shadow-1); font-size: 14px; font-weight: 800; }
+  .specimen { background: var(--pp-surface); border-radius: var(--pp-radius-lg); padding: 24px; box-shadow: var(--pp-shadow-1); }
+  .specimen > .cap { margin-top: 14px; font-size: 15px; color: var(--pp-ink-2); }
+  .specimen > .cap b { color: var(--pp-ink); }
+  .pip-card { text-align: center; }
+  .pip-card img { width: 120px; height: 140px; }
+  .pip-card b { display: block; font-weight: 900; }
+  .pip-card span { font-size: 15px; color: var(--pp-ink-2); }
+  .pieces-strip { display: flex; gap: 0; border-radius: 12px; overflow: hidden; width: max-content; box-shadow: var(--pp-shadow-1); }
+  .pieces-strip span { width: 64px; height: 64px; display: grid; place-items: center; }
+  .pieces-strip span:nth-child(odd) { background: var(--pp-board-light); } .pieces-strip span:nth-child(even) { background: var(--pp-board-dark); }
+  .pieces-strip img { width: 58px; }
+  table.kit-table { width: 100%; border-collapse: collapse; background: var(--pp-surface); border-radius: var(--pp-radius-lg); overflow: hidden; box-shadow: var(--pp-shadow-1); font-size: 16px; }
+  .kit-table th, .kit-table td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--pp-line); vertical-align: top; }
+  .kit-table th { font-weight: 900; background: var(--pp-surface-sunken); }
+  .kit-table tr:last-child td { border-bottom: 0; }
+  ul.checks { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  ul.checks li { display: flex; gap: 10px; align-items: start; }
+  ul.checks li svg { width: 22px; height: 22px; color: var(--pp-good); flex: none; margin-top: 2px; }
+
+  /* Screen frames */
+  .frame-wrap { display: grid; gap: 10px; justify-items: start; }
+  .frame-wrap figcaption { font-weight: 900; font-size: 17px; }
+  .frame-wrap figcaption span { font-weight: 700; color: var(--pp-ink-2); margin-left: 8px; font-size: 15px; }
+  .frame { position: relative; overflow: hidden; border-radius: 20px; background: var(--pp-paper); box-shadow: 0 0 0 1px var(--pp-line), var(--pp-shadow-2); }
+  .frame.desk { width: 1280px; height: 800px; zoom: 0.62; }
+  .frame.tab-p { width: 768px; height: 1024px; zoom: 0.62; }
+  .frame.small { width: 420px; height: 640px; zoom: 0.62; }
+  .frame.pp-parent { background: #f6f7f9; }
+  .frames { display: flex; flex-wrap: wrap; gap: 32px; align-items: start; }
+
+  /* Screen layouts */
+  .topbar { display: flex; align-items: center; gap: 12px; height: 80px; padding: 0 24px; }
+  .topbar .title { flex: 1; text-align: center; font-weight: 900; font-size: 20px; }
+  .topbar .who { display: inline-flex; align-items: center; gap: 10px; font-weight: 900; font-size: 20px; padding: 6px 14px 6px 6px; border-radius: 999px; background: var(--pp-surface); box-shadow: var(--pp-shadow-1); }
+  .scr-home { display: grid; justify-items: center; gap: 20px; padding: 4px 64px 0; }
+  .scr-home .hello { display: flex; align-items: center; gap: 16px; width: 100%; max-width: 980px; }
+  .scr-home .hello img { width: 110px; height: 128px; }
+  .scr-home .hello .pp-bubble { font-size: 26px; }
+  .scr-home .cards { display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; width: 100%; max-width: 980px; }
+  .play-card { display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: center; padding: 28px; }
+  .play-card h3 { margin: 0; font-size: 28px; font-weight: 900; }
+  .play-card .meta { display: flex; gap: 12px; align-items: center; color: var(--pp-ink-2); margin: 6px 0 20px; font-weight: 700; }
+  .cont-card { display: grid; justify-items: center; gap: 16px; padding: 24px; }
+  .scr-home .links { display: flex; gap: 16px; }
+  .scr-game { display: grid; grid-template-columns: 1fr 420px; gap: 32px; padding: 0 32px var(--pp-safe-bottom); height: calc(100% - 80px); }
+  .scr-game .boardcol { display: grid; align-content: center; justify-items: center; gap: 6px; }
+  .scr-game .boardcol .pp-player { width: var(--board); }
+  .scr-game .side { display: flex; flex-direction: column; gap: 20px; padding-top: 58px; }
+  .scr-game .side .spacer { flex: 1; }
+  .scr-game .side .tools { display: flex; justify-content: space-between; align-items: center; }
+  .scr-port { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 0 24px var(--pp-safe-bottom); }
+  .scr-port .pp-player { width: var(--board); }
+  .scr-port .pp-coach { width: 100%; margin-top: 8px; }
+  .scr-port .tools { display: flex; justify-content: space-between; width: 100%; margin-top: auto; }
+  .scr-result { display: grid; place-items: center; height: 100%; background: radial-gradient(circle at 50% 30%, #fff8e6, var(--pp-paper) 60%); }
+  .result-card { display: grid; justify-items: center; gap: 14px; width: 560px; padding: 24px 40px 28px; text-align: center; }
+  .result-card h2 { margin: 0; font-size: var(--pp-text-3xl); font-weight: 900; line-height: 1; }
+  .result-card ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; width: 100%; text-align: left; }
+  .result-card li { display: flex; gap: 12px; align-items: center; font-weight: 700; padding: 8px 14px; border-radius: 14px; background: var(--pp-surface-sunken); }
+  .result-card li svg { width: 22px; height: 22px; flex: none; }
+  .result-card li.ok svg { color: var(--pp-good); }
+  .result-card li.next svg { color: var(--pp-blue); }
+  .newbadge { display: flex; align-items: center; gap: 16px; width: 100%; padding: 14px 18px; border-radius: 18px; background: var(--pp-sun-soft); box-shadow: inset 0 0 0 2px #ffe3a3; text-align: left; }
+  .newbadge .pp-badge__medal { width: 64px; height: 64px; font-size: 30px; }
+  .newbadge small { display: block; font-weight: 900; color: var(--pp-oops); letter-spacing: 0.06em; font-size: 13px; }
+  .newbadge b { font-size: 20px; font-weight: 900; }
+  .result-card .actions { display: grid; gap: 12px; width: 100%; }
+  .result-card .actions .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .scr-review { display: grid; grid-template-columns: 1fr 420px; gap: 32px; padding: 0 32px 24px; height: calc(100% - 80px); }
+  .scr-review .boardcol { display: grid; align-content: center; justify-items: center; gap: 16px; }
+  .scr-review .side { display: flex; flex-direction: column; gap: 18px; padding-top: 40px; }
+  .scr-review .legend { display: flex; gap: 18px; font-size: 15px; font-weight: 700; color: var(--pp-ink-2); }
+  .scr-review .legend i { display: inline-block; width: 22px; height: 6px; border-radius: 3px; margin-right: 6px; vertical-align: middle; }
+  .scr-who { display: grid; justify-items: center; align-content: center; gap: 36px; height: 100%; }
+  .scr-who h2 { margin: 0; font-size: 44px; font-weight: 900; }
+  .scr-pin { display: grid; justify-items: center; align-content: center; gap: 28px; height: 100%; }
+  .scr-parent { display: grid; grid-template-rows: auto 1fr; height: 100%; }
+  .scr-parent header { display: flex; align-items: center; justify-content: space-between; padding: 18px 28px 0; }
+  .scr-parent main { padding: 20px 28px; display: grid; gap: 4px; align-content: start; max-width: 760px; }
+  .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; background: #dafbe1; color: #1a7f37; font-size: 13px; font-weight: 600; }
+  .status-pill::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #1a7f37; }
+  select.pp-input { padding-right: 32px; }
+  .btn-plain { height: 36px; padding: 0 14px; border-radius: 8px; border: 1px solid #d1d9e0; background: #fff; font: 500 14px var(--pp-font-parent); cursor: pointer; }
+</style>
+</head>
+<body class="pp-app">
+<div class="kit">
+
+<header class="kit-head">
+  <img src="assets/pip/pip-cheering.svg" alt="">
+  <div>
+    <h1>pawnpal design kit</h1>
+    <p>Tokens, components and screens for a calm, modern chess coach for kids 6–12. Open this file in a browser; the app imports <code>tokens.css</code> and <code>components.css</code>.</p>
+  </div>
+</header>
+
+<nav class="kit-nav">
+  <a href="#principles">Principles</a><a href="#color">Color</a><a href="#type">Type</a><a href="#shape">Space &amp; shape</a>
+  <a href="#board">Board</a><a href="#pip">Pip</a><a href="#components">Components</a><a href="#screens">Screens</a>
+  <a href="#motion">Motion</a><a href="#voice">Voice</a><a href="#a11y">Accessibility</a><a href="#research">Research</a><a href="#assets">Assets</a>
+</nav>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<section id="principles">
+  <h2><small>01</small>Principles</h2>
+  <p class="lead">Simple and modern means fewer things on screen, each one big and obvious. Every screen should pass the test "could a 6-year-old use this with the sound on and without reading?"</p>
+  <div class="grid g5">
+    <div class="principle"><b>Board first</b><span>The board is the biggest thing on every game screen. Everything else is smaller and quieter.</span></div>
+    <div class="principle"><b>One voice</b><span>Pip's bubble is the only place text appears during play. No toasts, no pop-ups.</span></div>
+    <div class="principle"><b>Show, then say</b><span>Highlights and arrows point; the bubble explains in ≤ 2 short sentences, read aloud.</span></div>
+    <div class="principle"><b>Big and pressable</b><span>Kid buttons are 72px (about 2 cm), chunky, with an icon and a word. They visibly press down.</span></div>
+    <div class="principle"><b>Quiet coach</b><span>Pip speaks on mistakes only. Stars, badges and cheering wait for the end of the game.</span></div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<section id="color">
+  <h2><small>02</small>Color</h2>
+  <p class="lead">Warm paper background, white surfaces, one ink color. Blue always means "do this" — the main button and the better-move arrow. Orange-coral means "careful". Nothing relies on color alone: grades have an icon and a word, the better-move arrow is solid and the threat arrow is dashed.</p>
+  <h3 class="kit-sub">Neutrals</h3>
+  <div class="grid g5" id="sw-neutral"></div>
+  <h3 class="kit-sub">Brand</h3>
+  <div class="grid g5" id="sw-brand"></div>
+  <h3 class="kit-sub">Move grades</h3>
+  <div class="grid g4" id="sw-grade"></div>
+  <h3 class="kit-sub">Board</h3>
+  <div class="grid g5" id="sw-board"></div>
+</section>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<section id="type">
+  <h2><small>03</small>Type</h2>
+  <p class="lead">Nunito (variable, OFL) everywhere a kid looks: rounded, open, friendly, with a large x-height. Body weight is 600 because 400 reads thin on tablets. The parent area uses the system font on purpose, so it looks like "settings", not "game".</p>
+  <p class="note" style="margin:-12px 0 20px">Sizes shown are the <b>younger band (6–8)</b>. Profiles aged 9+ get <code>data-band="older"</code>: text one step smaller (body 18, coach 21), buttons 60px, board coordinates on, read-aloud off by default. Older kids call big-kid-sized UI "for babies" (NN/g).</p>
+  <div class="specimen">
+    <div class="type-row"><code>3xl · 52 / 900</code><span style="font-size:52px;font-weight:900;line-height:1.1">You won!</span></div>
+    <div class="type-row"><code>2xl · 40 / 900</code><span style="font-size:40px;font-weight:900">Who's playing?</span></div>
+    <div class="type-row"><code>xl · 30 / 900</code><span style="font-size:30px;font-weight:900">Pick your opponent</span></div>
+    <div class="type-row"><code>lg · 24 / 700 · coach</code><span style="font-size:24px;font-weight:700">Uh-oh! Is your knight safe there? Look at who can reach it.</span></div>
+    <div class="type-row"><code>md · 20 / 600 · body</code><span style="font-size:20px">Clever Fox likes to grab pieces. Watch your knights!</span></div>
+    <div class="type-row"><code>sm · 18 / 700 · label</code><span style="font-size:18px;font-weight:700">Moment 2 of 4 · Level 4</span></div>
+    <div class="type-row" style="border:0"><code>parent · system 15 / 400</code><span style="font:15px var(--pp-font-parent)">Coach brain: Ollama · qwen3:4b · answered in 1.2 s</span></div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<section id="shape">
+  <h2><small>04</small>Space, shape, elevation</h2>
+  <p class="lead">A 4px grid. Generous radii keep things soft without looking like a toy. Two shadow levels only; kid buttons and cards get a solid 4px bottom edge instead of a shadow, which makes them look pressable.</p>
+  <div class="grid g5">
+    <div class="token-box" style="border-radius:var(--pp-radius-sm)">radius-sm · 10</div>
+    <div class="token-box" style="border-radius:var(--pp-radius-md)">radius-md · 16</div>
+    <div class="token-box" style="border-radius:var(--pp-radius-lg)">radius-lg · 24</div>
+    <div class="token-box" style="border-radius:var(--pp-radius-xl)">radius-xl · 32</div>
+    <div class="token-box" style="border-radius:var(--pp-radius-lg);box-shadow:inset 0 0 0 2px var(--pp-line),0 4px 0 var(--pp-line)">edge · 4px</div>
+  </div>
+  <div class="grid g5" style="margin-top:20px">
+    <div class="token-box" style="border-radius:16px;box-shadow:var(--pp-shadow-1)">shadow-1 · cards</div>
+    <div class="token-box" style="border-radius:16px;box-shadow:var(--pp-shadow-2)">shadow-2 · bubble</div>
+    <div class="token-box" style="border-radius:16px;box-shadow:var(--pp-shadow-board)">shadow-board</div>
+    <div class="token-box" style="border-radius:16px;height:auto;padding:14px;text-align:center">tap-kid 72 · tap-kid-2 60<br>tap-min 44 (parent)</div>
+    <div class="token-box" style="border-radius:16px;height:auto;padding:14px;text-align:center">board 512 min<br>600 target (75px squares)</div>
+  </div>
+  <p class="note" style="margin-top:16px">Space scale: 4 · 8 · 12 · 16 · 20 · 24 · 32 · 40 · 48 · 64.</p>
+</section>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<section id="board">
+  <h2><small>05</small>Board</h2>
+  <p class="lead">"Meadow" board (sage and cream) with the <b>horsey</b> pieces by cham and michael1241: hand-drawn characters with faces, the set kids love on Lichess. Our Pip-style friendly set and the classic cburnett set are options. Overlays: yellow tint for what just happened, dots for where you can go, a white-and-coral ring with a "!" badge for danger, blue tint for help, a solid blue arrow for a better move and a dashed orange arrow for a threat. Arrows get a white halo so they stay visible on both square colors, including for color-blind kids. The board aims for 600px (75px squares) and never drops under 512px.</p>
+  <div class="grid g3">
+    <div class="specimen">
+      <div class="pp-board" style="--board:360px" data-fen="r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3"
+        data-opts='{"last":["b8","c6"],"selected":["f3"],"dots":["g1","d4","h4","g5"],"captures":["e5"]}'></div>
+      <p class="cap"><b>Your turn.</b> Last move in yellow, selected piece, legal-move dots, capture ring on e5.</p>
+    </div>
+    <div class="specimen">
+      <div class="pp-board" style="--board:360px" data-fen="rnbqkbnr/ppp2ppp/3p4/4p1N1/4P3/8/PPPP1PPP/RNBQKB1R b KQkq - 1 3"
+        data-opts='{"last":["f3","g5"],"danger":["g5"],"arrows":[{"from":"d8","to":"g5","kind":"threat"}]}'></div>
+      <p class="cap"><b>Coach explains.</b> Knight in danger (ring + "!") and the threat as a dashed orange arrow.</p>
+    </div>
+    <div class="specimen">
+      <div class="pp-board" style="--board:360px" data-fen="rnbqkbnr/ppp2ppp/3p4/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3"
+        data-opts='{"hint":["d2"],"arrows":[{"from":"d2","to":"d4","kind":"better"}]}'></div>
+      <p class="cap"><b>Help.</b> Hint tier 1 tints the piece blue; tier 3 and Reveal add the solid blue better-move arrow.</p>
+    </div>
+  </div>
+  <h3 class="kit-sub">Pieces</h3>
+  <div class="pp-segment" role="group" aria-label="Piece set" id="set-toggle" style="margin-bottom:16px">
+    <button aria-pressed="true" data-set="horsey">Horsey (default)</button><button aria-pressed="false" data-set="pawnpal">Friendly</button><button aria-pressed="false" data-set="cburnett">Classic</button>
+  </div>
+  <div class="pieces-strip" id="pieces-strip"></div>
+  <p class="note"><b>Horsey</b> (default): by cham and michael1241, <b>CC BY-NC-SA 4.0</b>, shipped unmodified as a separately licensed asset with its own <code>LICENSE.md</code>, the way Lichess ships it. It is not GPL: credit is required and it can't be used commercially. <b>Friendly</b>: ours, GPL-3.0, generated by <code>scripts/build-pieces.mjs</code>, in Pip's style. <b>Classic</b>: cburnett, GPLv2+. Friendly and Classic are the fallbacks for anyone who needs a fully free build. The switch above changes every board on this page.</p>
+</section>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<section id="pip">
+  <h2><small>06</small>Pip the Pawn</h2>
+  <p class="lead">A cream pawn with a coral scarf. Flat shapes, one ink outline, no gradients. Five expressions, each tied to an event. Generated by <code>scripts/build-pip.mjs</code>.</p>
+  <div class="grid g5">
+    <div class="pip-card"><img src="assets/pip/pip-happy.svg" alt=""><b>happy</b><span>Default. Home, reveal, idle.</span></div>
+    <div class="pip-card"><img src="assets/pip/pip-thinking.svg" alt=""><b>thinking</b><span>Hints, LLM rewording, grading over 400 ms.</span></div>
+    <div class="pip-card"><img src="assets/pip/pip-surprised.svg" alt=""><b>surprised</b><span>Nudge after a mistake or blunder.</span></div>
+    <div class="pip-card"><img src="assets/pip/pip-cheering.svg" alt=""><b>cheering</b><span>Great move, better retry, win, new badge.</span></div>
+    <div class="pip-card"><img src="assets/pip/pip-encouraging.svg" alt=""><b>encouraging</b><span>Retry, after a loss, "Next time…".</span></div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<section id="components">
+  <h2><small>07</small>Components</h2>
+  <p class="lead">Every component below is plain HTML + <code>components.css</code>. In the React app each becomes one component with the same class names.</p>
+
+  <h3 class="kit-sub">Buttons</h3>
+  <div class="row">
+    <button class="pp-btn pp-btn--primary pp-btn--hero"><i data-icon="play"></i>Play</button>
+    <button class="pp-btn pp-btn--primary"><i data-icon="undo"></i>Try again</button>
+    <button class="pp-btn pp-btn--secondary"><i data-icon="eye"></i>Show me</button>
+    <button class="pp-btn pp-btn--reward"><i data-icon="star"></i>Let's look!</button>
+    <button class="pp-btn pp-btn--ghost">Keep my move</button>
+    <button class="pp-btn pp-btn--primary" disabled><i data-icon="bulb"></i>Hint</button>
+    <button class="pp-iconbtn" aria-label="Sound on"><i data-icon="volume"></i></button>
+    <button class="pp-iconbtn" aria-label="Grown-ups"><i data-icon="cog"></i></button>
+  </div>
+  <p class="note">72px tall by default, 60px with <code>pp-btn--sm</code>, 88px for the hero Play. One primary (blue) button per view. Secondary is white with a gray edge. Reward (yellow) only on the result screen. Ghost for the "quiet" choice. Press = moves down 4px and the edge disappears. The solid edge is deliberate: flat buttons hide what kids can tap.</p>
+
+  <h3 class="kit-sub">Coach bubble — every state</h3>
+  <div class="grid g2">
+    <div class="pp-coach"><img class="pp-coach__pip" src="assets/pip/pip-surprised.svg" alt="">
+      <div class="pp-bubble"><div class="pp-bubble__label"><span class="pp-grade pp-grade--bigoops"><span class="pp-grade__icon">!!</span>Big oops</span></div>
+        <p class="pp-bubble__text">Uh-oh! Is your knight safe there? Look at who can reach it.</p>
+        <div class="pp-bubble__actions"><button class="pp-btn pp-btn--primary"><i data-icon="undo"></i>Try again</button><button class="pp-btn pp-btn--secondary"><i data-icon="eye"></i>Show me</button><button class="pp-btn pp-btn--ghost">Keep my move</button></div>
+        <button class="pp-iconbtn pp-bubble__voice" aria-label="Read again"><i data-icon="volume"></i></button></div></div>
+    <div class="pp-coach"><img class="pp-coach__pip" src="assets/pip/pip-happy.svg" alt="">
+      <div class="pp-bubble"><p class="pp-bubble__text">Try pushing your pawn to the middle. It opens a path for your bishop and queen!</p>
+        <div class="pp-bubble__actions"><button class="pp-btn pp-btn--primary">OK</button></div>
+        <button class="pp-iconbtn pp-bubble__voice" aria-label="Read again"><i data-icon="volume"></i></button></div></div>
+    <div class="pp-coach"><img class="pp-coach__pip" src="assets/pip/pip-encouraging.svg" alt="">
+      <div class="pp-bubble pp-bubble--compact"><p class="pp-bubble__text">Have another look!</p></div></div>
+    <div class="pp-coach"><img class="pp-coach__pip" src="assets/pip/pip-cheering.svg" alt="">
+      <div class="pp-bubble pp-bubble--compact"><div class="pp-bubble__label"><span class="pp-grade pp-grade--great"><span class="pp-grade__icon"><i data-icon="star"></i></span>Great!</span></div><p class="pp-bubble__text">That was the only good move. Nice find!</p></div></div>
+    <div class="pp-coach"><img class="pp-coach__pip" src="assets/pip/pip-thinking.svg" alt="">
+      <div class="pp-bubble pp-bubble--compact"><p class="pp-bubble__text">Take a look at your pawns.</p>
+        <div class="pp-bubble__actions"><button class="pp-btn pp-btn--secondary"><i data-icon="bulb"></i>More help</button></div></div></div>
+    <div class="pp-coach"><img class="pp-coach__pip" src="assets/pip/pip-thinking.svg" alt="">
+      <div class="pp-bubble pp-bubble--compact"><span class="pp-typing" aria-label="Pip is thinking"><i></i><i></i><i></i></span></div></div>
+  </div>
+  <p class="note">Order: nudge · reveal · retry · praise (closes after 2.5 s) · hint · thinking. Nudges never close by themselves. The speaker button replays the message.</p>
+
+  <h3 class="kit-sub">Grade chips</h3>
+  <div class="row">
+    <span class="pp-grade pp-grade--great"><span class="pp-grade__icon"><i data-icon="star"></i></span>Great!</span>
+    <span class="pp-grade pp-grade--good"><span class="pp-grade__icon"><i data-icon="check"></i></span>Good</span>
+    <span class="pp-grade pp-grade--oops"><span class="pp-grade__icon">?</span>Oops</span>
+    <span class="pp-grade pp-grade--bigoops"><span class="pp-grade__icon">!!</span>Big oops</span>
+  </div>
+  <p class="note">Kid words, not chess symbols. "Inaccuracy" is never shown to kids; it only appears in the parent's game export.</p>
+
+  <h3 class="kit-sub">Player bar</h3>
+  <div class="grid g2">
+    <div class="pp-player card-ish"><span class="pp-avatar" style="--bg:#ffe8dc">🦊</span><span><div class="pp-player__name">Clever Fox</div><div class="pp-player__status">thinking <span class="pp-typing"><i></i><i></i><i></i></span></div></span>
+      <span class="pp-player__captured"><img src="assets/pieces/cburnett/wP.svg" alt=""><img src="assets/pieces/cburnett/wP.svg" alt=""></span></div>
+    <div class="pp-player"><span class="pp-avatar" style="--bg:#eaf2ff">🐼</span><span class="pp-player__name">Mia</span>
+      <span class="pp-player__captured"><img src="assets/pieces/cburnett/bN.svg" alt=""><img src="assets/pieces/cburnett/bP.svg" alt=""><b>+2</b></span></div>
+  </div>
+
+  <h3 class="kit-sub">Opponent level cards</h3>
+  <div class="row" id="levels"></div>
+
+  <h3 class="kit-sub">Color picker</h3>
+  <div class="pp-segment" role="group" aria-label="You play">
+    <button aria-pressed="false"><img src="assets/pieces/cburnett/wK.svg" alt="">White</button>
+    <button aria-pressed="false"><img src="assets/pieces/cburnett/bK.svg" alt="">Black</button>
+    <button aria-pressed="true"><i data-icon="shuffle"></i>Surprise me</button>
+  </div>
+
+  <h3 class="kit-sub">Stars and badges</h3>
+  <div class="row" style="gap:48px;align-items:start">
+    <div class="pp-stars" id="stars-demo"></div>
+    <div class="pp-badge"><div class="pp-badge__medal">👑</div><div class="pp-badge__name">First checkmate</div><div class="pp-badge__how">Earned Nov 12</div></div>
+    <div class="pp-badge"><div class="pp-badge__medal">🍴</div><div class="pp-badge__name">Fork finder</div><div class="pp-badge__how">Earned Nov 14</div></div>
+    <div class="pp-badge is-locked"><div class="pp-badge__medal"><i data-icon="lock"></i></div><div class="pp-badge__name">Clean game</div><div class="pp-badge__how">Play 20 moves with no oops</div></div>
+  </div>
+
+  <h3 class="kit-sub">Profile tiles, suggestion, review timeline</h3>
+  <div class="row" style="gap:20px;align-items:start">
+    <button class="pp-profile"><span class="pp-avatar" style="--size:96px;--bg:#eaf2ff">🐼</span>Mia</button>
+    <button class="pp-profile"><span class="pp-avatar" style="--size:96px;--bg:#e6f8e6">🐸</span>Leo</button>
+    <div style="display:grid;gap:20px;flex:1;min-width:480px">
+      <div class="pp-suggest"><img src="assets/pip/pip-cheering.svg" alt=""><p>You won 3 in a row! Try Wise Owl?</p><button class="pp-btn pp-btn--primary pp-btn--sm">Yes!</button><button class="pp-btn pp-btn--ghost">Not yet</button></div>
+      <div class="pp-timeline" id="timeline-demo"></div>
+    </div>
+  </div>
+
+  <h3 class="kit-sub">Parent area controls (plain on purpose)</h3>
+  <div class="pp-parent" style="border-radius:16px;padding:20px 24px;display:grid;grid-template-columns:1fr 1fr;gap:28px">
+    <div>
+      <div class="pp-field"><label>Model</label><select class="pp-input"><option>qwen3:4b (suggested for 16 GB)</option></select></div>
+      <div class="pp-row"><div><h3>Read messages aloud</h3><div class="muted">Kids can still mute it.</div></div><button class="pp-switch" role="switch" aria-checked="true" aria-label="Read aloud"></button></div>
+      <div class="pp-row"><div><h3>Offer "Try again"</h3><div class="muted">After mistakes and blunders.</div></div><button class="pp-switch" role="switch" aria-checked="false" aria-label="Offer Try again"></button></div>
+    </div>
+    <div style="display:grid;justify-items:center;gap:16px">
+      <div class="pp-pindots"><i class="on"></i><i class="on"></i><i></i><i></i></div>
+      <div class="pp-pinpad"><button>1</button><button>2</button><button>3</button><button>4</button><button>5</button><button>6</button><button>7</button><button>8</button><button>9</button><span></span><button>0</button><button aria-label="Delete">⌫</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<section id="screens">
+  <h2><small>08</small>Screens</h2>
+  <p class="lead">Built from the components above at real size, shown scaled down. Desktop frames are 1280×800; the tablet frame is 768×1024.</p>
+  <div class="frames">
+
+    <figure class="frame-wrap"><figcaption>Home <span>one tap to play</span></figcaption>
+      <div class="frame desk">
+        <div class="topbar"><span class="who"><span class="pp-avatar" style="--size:40px;--bg:#eaf2ff">🐼</span>Mia</span><span class="title"></span><button class="pp-iconbtn" aria-label="Sound"><i data-icon="volume"></i></button><button class="pp-iconbtn" aria-label="Grown-ups"><i data-icon="cog"></i></button></div>
+        <div class="scr-home">
+          <div class="hello"><img src="assets/pip/pip-happy.svg" alt=""><div class="pp-bubble" style="flex:1">Hi Mia! Ready for a game?</div></div>
+          <div class="cards">
+            <div class="pp-card play-card"><span class="pp-avatar" style="--size:120px;--bg:#ffe8dc">🦊</span>
+              <div><h3>vs Clever Fox</h3><div class="meta"><span class="pp-meter" data-level="4"></span>Level 4 · You: Surprise me</div>
+                <div class="row"><button class="pp-btn pp-btn--primary pp-btn--hero"><i data-icon="play"></i>Play</button><button class="pp-btn pp-btn--ghost">Change</button></div></div></div>
+            <div class="pp-card cont-card"><div class="pp-board" style="--board:170px;border-radius:10px" data-fen="r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4" data-opts='{"coords":false}'></div><button class="pp-btn pp-btn--secondary pp-btn--block">Continue your game</button></div>
+          </div>
+          <div class="pp-suggest" style="width:100%;max-width:980px"><img src="assets/pip/pip-cheering.svg" alt=""><p>You won 3 in a row! Try Wise Owl?</p><button class="pp-btn pp-btn--primary pp-btn--sm">Yes!</button><button class="pp-btn pp-btn--ghost">Not yet</button></div>
+          <div class="links"><button class="pp-btn pp-btn--secondary"><i data-icon="award"></i>My badges · 3/8</button><button class="pp-btn pp-btn--secondary"><i data-icon="book"></i>My games</button></div>
+        </div>
+      </div></figure>
+
+    <figure class="frame-wrap"><figcaption>Game · nudge <span>after a blunder, opponent waits</span></figcaption>
+      <div class="frame desk">
+        <div class="topbar"><button class="pp-btn pp-btn--secondary pp-btn--sm"><i data-icon="home"></i>Home</button><span class="title">Mia vs Clever Fox</span><button class="pp-btn pp-btn--ghost"><i data-icon="flag"></i>Give up</button><button class="pp-iconbtn" aria-label="Sound"><i data-icon="volume"></i></button><button class="pp-iconbtn" aria-label="Grown-ups"><i data-icon="cog"></i></button></div>
+        <div class="scr-game" style="--board:576px">
+          <div class="boardcol">
+            <div class="pp-player"><span class="pp-avatar" style="--bg:#ffe8dc">🦊</span><span class="pp-player__name">Clever Fox</span><span class="pp-player__captured"></span></div>
+            <div class="pp-board is-locked" data-fen="rnbqkbnr/ppp2ppp/3p4/4p1N1/4P3/8/PPPP1PPP/RNBQKB1R b KQkq - 1 3" data-opts='{"last":["f3","g5"],"danger":["g5"]}'></div>
+            <div class="pp-player"><span class="pp-avatar" style="--bg:#eaf2ff">🐼</span><span class="pp-player__name">Mia</span><span class="pp-player__captured"></span></div>
+          </div>
+          <div class="side">
+            <div class="pp-coach"><img class="pp-coach__pip" src="assets/pip/pip-surprised.svg" alt="">
+              <div class="pp-bubble"><div class="pp-bubble__label"><span class="pp-grade pp-grade--bigoops"><span class="pp-grade__icon">!!</span>Big oops</span></div>
+                <p class="pp-bubble__text">Uh-oh! Is your knight safe there? Look at who can reach it.</p>
+                <div class="pp-bubble__actions"><button class="pp-btn pp-btn--primary"><i data-icon="undo"></i>Try again</button><button class="pp-btn pp-btn--secondary"><i data-icon="eye"></i>Show me</button><button class="pp-btn pp-btn--ghost">Keep my move</button></div>
+                <button class="pp-iconbtn pp-bubble__voice" aria-label="Read again"><i data-icon="volume"></i></button></div></div>
+            <div class="spacer"></div>
+            <div class="tools"><button class="pp-btn pp-btn--secondary pp-btn--sm" disabled><i data-icon="bulb"></i>Hint</button><button class="pp-btn pp-btn--ghost">Moves ›</button></div>
+          </div>
+        </div>
+      </div></figure>
+
+    <figure class="frame-wrap"><figcaption>Game · reveal <span>portrait tablet</span></figcaption>
+      <div class="frame tab-p">
+        <div class="topbar"><button class="pp-btn pp-btn--secondary pp-btn--sm"><i data-icon="home"></i>Home</button>
+          <div class="pp-player" style="flex:1;justify-content:center"><span class="pp-avatar" style="--bg:#ffe8dc">🦊</span><span class="pp-player__name">Clever Fox</span></div>
+          <button class="pp-btn pp-btn--ghost"><i data-icon="flag"></i>Give up</button><button class="pp-iconbtn" aria-label="Sound"><i data-icon="volume"></i></button><button class="pp-iconbtn" aria-label="Grown-ups"><i data-icon="cog"></i></button></div>
+        <div class="scr-port" style="--board:600px;height:calc(100% - 80px)">
+          <div class="pp-board" data-fen="rnbqkbnr/ppp2ppp/3p4/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3" data-opts='{"arrows":[{"from":"d2","to":"d4","kind":"better"}]}'></div>
+          <div class="pp-player"><span class="pp-avatar" style="--bg:#eaf2ff">🐼</span><span class="pp-player__name">Mia</span><span class="pp-player__captured" style="margin-left:12px"><img src="assets/pieces/cburnett/bP.svg" alt=""></span>
+            <button class="pp-btn pp-btn--secondary pp-btn--sm" style="margin-left:auto"><i data-icon="bulb"></i>Hint</button></div>
+          <div class="pp-coach" style="min-height:200px"><img class="pp-coach__pip" src="assets/pip/pip-happy.svg" alt="">
+            <div class="pp-bubble" style="align-self:start"><p class="pp-bubble__text">Try pushing your pawn to the middle. It opens a path for your bishop and queen!</p>
+              <div class="pp-bubble__actions"><button class="pp-btn pp-btn--primary">OK</button></div>
+              <button class="pp-iconbtn pp-bubble__voice" aria-label="Read again"><i data-icon="volume"></i></button></div></div>
+        </div>
+      </div></figure>
+
+    <figure class="frame-wrap"><figcaption>Result <span>the reward moment</span></figcaption>
+      <div class="frame desk">
+        <div class="scr-result">
+          <div class="pp-card result-card">
+            <img src="assets/pip/pip-cheering.svg" alt="" style="width:96px;height:112px;margin-bottom:-6px">
+            <h2>You won!</h2>
+            <div class="pp-stars is-animated" data-on="2" style="--star:52px"></div>
+            <ul>
+              <li class="ok"><i data-icon="check"></i>You finished the game</li>
+              <li class="ok"><i data-icon="check"></i>You won</li>
+              <li class="next"><i data-icon="bulb"></i>Next time: keep all your pieces safe</li>
+            </ul>
+            <div class="newbadge"><div class="pp-badge__medal">👑</div><div><small>NEW BADGE</small><b>First checkmate</b></div></div>
+            <div class="actions"><button class="pp-btn pp-btn--reward pp-btn--block" style="min-height:64px;font-size:22px"><i data-icon="eye"></i>Let's look at your game</button>
+              <div class="two"><button class="pp-btn pp-btn--secondary"><i data-icon="play"></i>Play again</button><button class="pp-btn pp-btn--ghost"><i data-icon="home"></i>Home</button></div></div>
+          </div>
+        </div>
+      </div></figure>
+
+    <figure class="frame-wrap"><figcaption>Review <span>key moment 2 of 4</span></figcaption>
+      <div class="frame desk">
+        <div class="topbar"><button class="pp-btn pp-btn--secondary pp-btn--sm"><i data-icon="back"></i>Done</button><span class="title">Your game with Pip</span><span style="font-weight:800;color:var(--pp-ink-2)">Moment 2 of 4</span></div>
+        <div class="scr-review" style="--board:560px">
+          <div class="boardcol">
+            <div class="pp-board" data-fen="rnbqkbnr/ppp2ppp/3p4/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3" data-opts='{"arrows":[{"from":"f3","to":"g5","kind":"threat"},{"from":"d2","to":"d4","kind":"better"}]}'></div>
+            <div class="legend"><span><i style="background:repeating-linear-gradient(90deg,var(--pp-arrow-threat) 0 5px,transparent 5px 9px)"></i>Your move</span><span><i style="background:var(--pp-arrow-better)"></i>Better idea</span></div>
+            <div class="pp-timeline" id="timeline-screen" style="width:560px"></div>
+          </div>
+          <div class="side">
+            <span class="pp-grade pp-grade--bigoops" style="align-self:start"><span class="pp-grade__icon">!!</span>Big oops</span>
+            <div class="pp-coach"><img class="pp-coach__pip" src="assets/pip/pip-happy.svg" alt="">
+              <div class="pp-bubble"><p class="pp-bubble__text">Your knight jumped forward, but the queen could take it. Pushing a pawn to the middle was safer.</p></div></div>
+            <div class="row" style="justify-content:space-between;margin-top:8px"><button class="pp-btn pp-btn--secondary pp-btn--sm"><i data-icon="left"></i>Back</button><button class="pp-btn pp-btn--primary pp-btn--sm">Next<i data-icon="right"></i></button></div>
+            <button class="pp-btn pp-btn--ghost" style="align-self:center">See whole game</button>
+          </div>
+        </div>
+      </div></figure>
+
+    <figure class="frame-wrap"><figcaption>Who's playing?</figcaption>
+      <div class="frame desk">
+        <div class="scr-who">
+          <img src="assets/pip/pip-happy.svg" alt="" style="width:110px;height:128px">
+          <h2>Who's playing?</h2>
+          <div class="row" style="gap:28px"><button class="pp-profile"><span class="pp-avatar" style="--size:96px;--bg:#eaf2ff">🐼</span>Mia</button><button class="pp-profile"><span class="pp-avatar" style="--size:96px;--bg:#e6f8e6">🐸</span>Leo</button><button class="pp-profile"><span class="pp-avatar" style="--size:96px;--bg:#e8f1fa">🐧</span>Sam</button></div>
+          <button class="pp-btn pp-btn--ghost"><i data-icon="lock"></i>Add player (grown-ups)</button>
+        </div>
+      </div></figure>
+
+    <figure class="frame-wrap"><figcaption>Grown-ups only <span>PIN</span></figcaption>
+      <div class="frame small pp-parent">
+        <div class="scr-pin">
+          <div style="text-align:center"><h3 style="font-size:22px">Grown-ups only</h3><div class="muted">Enter your 4-digit PIN</div></div>
+          <div class="pp-pindots"><i class="on"></i><i class="on"></i><i></i><i></i></div>
+          <div class="pp-pinpad"><button>1</button><button>2</button><button>3</button><button>4</button><button>5</button><button>6</button><button>7</button><button>8</button><button>9</button><span></span><button>0</button><button aria-label="Delete">⌫</button></div>
+          <button class="btn-plain">Cancel</button>
+        </div>
+      </div></figure>
+
+    <figure class="frame-wrap"><figcaption>Parent area <span>coach brain</span></figcaption>
+      <div class="frame desk pp-parent">
+        <div class="scr-parent">
+          <header><h3 style="font-size:22px">pawnpal settings</h3><button class="btn-plain">Done</button></header>
+          <main>
+            <div class="pp-tabs" role="tablist"><button role="tab" aria-selected="false">Players</button><button role="tab" aria-selected="true">Coach brain</button><button role="tab" aria-selected="false">Devices</button><button role="tab" aria-selected="false">Data</button><button role="tab" aria-selected="false">PIN</button></div>
+            <div class="pp-row"><div><h3>Use a local AI model</h3><div class="muted">Makes Pip's messages friendlier. pawnpal works fine without it.</div></div><button class="pp-switch" role="switch" aria-checked="true" aria-label="Use a local AI model"></button></div>
+            <div class="pp-row"><div><h3>Ollama</h3><div class="muted">http://127.0.0.1:11434/v1</div></div><span class="status-pill">Connected</span></div>
+            <div class="pp-row" style="display:grid;grid-template-columns:1fr auto;align-items:end"><div class="pp-field"><label>Model</label><select class="pp-input"><option>qwen3:14b — suggested for this computer (48 GB)</option></select></div><button class="btn-plain" style="height:44px">Test</button></div>
+            <div class="pp-row"><div><h3>Last test</h3><div class="muted">"Oh no, your knight can be captured by the queen now!" · 1.2 s</div></div><span class="status-pill">Passed</span></div>
+            <div class="pp-row" style="border:0"><div><h3>Use another server</h3><div class="muted">LM Studio, llama.cpp or a cloud service with an API key.</div></div><button class="btn-plain">Set up…</button></div>
+          </main>
+        </div>
+      </div></figure>
+
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<section id="motion">
+  <h2><small>09</small>Motion</h2>
+  <p class="lead">Every animation explains something or rewards something. Nothing loops forever. Under reduced motion, all durations become 0 and pieces jump with the last-move highlight showing what changed.</p>
+  <table class="kit-table">
+    <tr><th>What</th><th>How</th><th>Token</th><th>Why</th></tr>
+    <tr><td>Piece moves (both sides)</td><td>Slide, ease-out</td><td>dur-fast 150ms</td><td>Shows what the opponent did</td></tr>
+    <tr><td>Button press</td><td>Moves down 4px, edge disappears</td><td>dur-fast</td><td>Feels physical; confirms the tap</td></tr>
+    <tr><td>Bubble appears</td><td>Fade + rise 8px</td><td>dur-base 200ms</td><td>Signals Pip is talking</td></tr>
+    <tr><td>Try again undo</td><td>Piece slides back to its square</td><td>dur-slow 300ms</td><td>Makes the take-back visible</td></tr>
+    <tr><td>Danger ring</td><td>Two pulses, then still</td><td>0.6s × 2</td><td>Draws the eye without nagging</td></tr>
+    <tr><td>Stars</td><td>Pop in one by one, 250ms apart</td><td>ease-pop</td><td>The reward moment, once per game</td></tr>
+    <tr><td>Pip expression change</td><td>Crossfade</td><td>dur-fast</td><td>Reacts to the move</td></tr>
+    <tr><td>Thinking dots</td><td>Bounce, only while waiting</td><td>1s loop</td><td>Shows the app isn't stuck</td></tr>
+  </table>
+  <p class="note">Never: typewriter text (slows reading, confuses screen readers), confetti during play, bouncing idle buttons, page transitions longer than 200ms.</p>
+</section>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<section id="voice">
+  <h2><small>10</small>Voice and copy</h2>
+  <p class="lead">Pip talks like a kind older sibling: short, concrete, about the board. Every line works read silently or aloud, and nothing important is only in audio.</p>
+  <table class="kit-table">
+    <tr><th>Rule</th><th>Say</th><th>Don't say</th></tr>
+    <tr><td>Praise the move or the effort, never the child's intelligence (Mueller &amp; Dweck 1998)</td><td>"Nice find! That was the only good move."</td><td>"You're so smart!"</td></tr>
+    <tr><td>Name pieces, not squares</td><td>"Your knight can be captured now."</td><td>"Nf3 hangs to Qxg5."</td></tr>
+    <tr><td>Kind about mistakes, never blaming</td><td>"Uh-oh! Is your knight safe there?"</td><td>"Wrong move." · "Bad move."</td></tr>
+    <tr><td>Plain verbs on buttons</td><td>Play · Try again · Show me · Give up · Nickname</td><td>Submit · Resign · Username</td></tr>
+    <tr><td>Two short sentences, max 25 words each</td><td>"Pushing a pawn to the middle was safer."</td><td>A paragraph about pawn structure</td></tr>
+    <tr><td>Rare, varied praise; never the same line twice in a row</td><td>"Way to go!" · "Great find!" · "Nailed it."</td><td>The same "Good job!" after every move</td></tr>
+  </table>
+  <p class="note">Duolingo Chess's most common complaint is its mascot repeating "the same 10 or so irrelevant phrases" on every puzzle; reviewers mute him. Pip stays silent on ordinary moves.</p>
+</section>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<section id="a11y">
+  <h2><small>11</small>Accessibility and kid-proofing</h2>
+  <div class="grid g2">
+    <ul class="checks">
+      <li><i data-icon="check"></i>Kid buttons 72px (secondary 60px); parent controls ≥ 44px. Board squares ≥ 64px, 75px target.</li>
+      <li><i data-icon="check"></i>Text ≥ 18px in kid screens; coach text 24px.</li>
+      <li><i data-icon="check"></i>Kid buttons stay ≥ 32px above the bottom edge (accidental taps), and destructive "Give up" lives in the top bar behind a confirm.</li>
+      <li><i data-icon="check"></i>Body text contrast ≥ 4.5:1 (checked by <code>scripts/check-contrast.mjs</code>).</li>
+      <li><i data-icon="check"></i>Shape before color: solid vs dashed arrows with a white halo, dot vs ring for moves vs captures, a "!" badge for danger.</li>
+      <li><i data-icon="check"></i>Every grade has an icon and a word, not just a color.</li>
+    </ul>
+    <ul class="checks">
+      <li><i data-icon="check"></i>Coach messages and opponent moves go to an <code>aria-live</code> region.</li>
+      <li><i data-icon="check"></i>Every control except the board works with the keyboard (react-chessboard's own keyboard support is weak).</li>
+      <li><i data-icon="check"></i>No time pressure: no clock, nudges never auto-close. Works fully with the sound off.</li>
+      <li><i data-icon="check"></i>No free text for kids; grown-up actions sit behind the PIN.</li>
+      <li><i data-icon="check"></i><code>touch-action: none</code> on the board so dragging doesn't scroll the page.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<section id="research">
+  <h2><small>12</small>Research basis</h2>
+  <p class="lead">What the kit is built on. Full notes and sources are in <code>README.md</code>.</p>
+  <table class="kit-table">
+    <tr><th>Finding</th><th>What we did</th><th>Source</th></tr>
+    <tr><td>Kids need touch targets of about 2 × 2 cm, 4× the adult size; tiny buttons defeat 7-year-olds</td><td>72px kid buttons, 75px board squares target</td><td><a href="https://www.nngroup.com/articles/children-ux-physical-development/">NN/g</a>, <a href="https://www.smashingmagazine.com/2024/02/practical-guide-design-children/">Smashing</a></td></tr>
+    <tr><td>Young kids need ~14pt text; older kids reject "babyish" UI</td><td>18px floor, 24px coach; an older band for ages 9+</td><td><a href="https://www.nngroup.com/articles/childrens-websites-usability-issues/">NN/g</a></td></tr>
+    <tr><td>Dragging is hard for under-9s; offer several input methods</td><td>Tap-tap moves first, drag also works</td><td><a href="https://www.nngroup.com/articles/children-ux-physical-development/">NN/g</a></td></tr>
+    <tr><td>Flat design hides what's tappable</td><td>Solid 4px edge on kid buttons and cards</td><td><a href="https://www.smashingmagazine.com/2016/01/designing-apps-for-kids-is-not-childs-play/">Smashing</a></td></tr>
+    <tr><td>Kids want feedback with a way forward: retry, answer, or explanation</td><td>Try again · Show me · Keep my move</td><td><a href="https://www.smashingmagazine.com/2016/01/designing-apps-for-kids-is-not-childs-play/">Smashing</a></td></tr>
+    <tr><td>A chatty mascot gets muted; reviews should cover key moments only</td><td>Pip silent on ordinary moves; 3–5 review moments</td><td><a href="https://davidwilliamrosales.com/2025/08/18/duolingo-chess-review/">Duolingo Chess review</a>, <a href="https://blog.duolingo.com/engineering-game-review/">Duolingo eng.</a></td></tr>
+    <tr><td>Kid apps simplify move labels (ChessKid merges categories; Duolingo uses 3)</td><td>Four kid words: Great · Good · Oops · Big oops</td><td><a href="https://www.chesskid.com/learn/articles/turn-every-game-into-a-learning-adventure-with-game-review">ChessKid</a>, <a href="https://blog.duolingo.com/chess-game-review/">Duolingo</a></td></tr>
+    <tr><td>Lichess hints: first circle the piece, then draw the arrow</td><td>Hint tiers: piece → idea → arrow (spec 04)</td><td><a href="https://github.com/lichess-org/lila/blob/master/ui/analyse/src/practice/practiceCtrl.ts">lila source</a></td></tr>
+    <tr><td>Red/green highlights fail color-blind players (open Lichess complaint); WCAG 1.4.1</td><td>Solid vs dashed arrows, halo, "!" badge, icons on grades</td><td><a href="https://github.com/lichess-org/lila/issues/10410">lila #10410</a>, <a href="https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html">WCAG</a></td></tr>
+    <tr><td>Kids can't tell ads from content; variable rewards and nudges harm wellbeing</td><td>No ads, no spin-wheels, no streak pressure; parent link stays small</td><td><a href="https://www.nngroup.com/articles/childrens-websites-usability-issues/">NN/g</a>, <a href="https://ico.org.uk/for-organisations/guide-to-data-protection/ico-codes-of-practice/age-appropriate-design-a-code-of-practice-for-online-services/13-nudge-techniques">ICO Children's Code</a></td></tr>
+    <tr><td>Kids accidentally hit buttons at the bottom edge</td><td>Kid buttons stay ≥ 32px above the bottom; Give up in the top bar</td><td><a href="https://www.smashingmagazine.com/2024/02/practical-guide-design-children/">Smashing</a></td></tr>
+  </table>
+</section>
+
+<!-- ─────────────────────────────────────────────────────────── -->
+<section id="assets">
+  <h2><small>13</small>Assets and licenses</h2>
+  <table class="kit-table">
+    <tr><th>Asset</th><th>License</th><th>Where</th></tr>
+    <tr><td>horsey pieces by cham and michael1241 (default)</td><td><b>CC BY-NC-SA 4.0</b> — not GPL; credit required, no commercial use</td><td><code>assets/pieces/horsey/</code> (lichess-org/lila @ 4aa07af, unmodified)</td></tr>
+    <tr><td>pawnpal friendly pieces, "Friendly" option</td><td>GPL-3.0 (ours)</td><td><code>assets/pieces/pawnpal/</code>, generated by <code>scripts/build-pieces.mjs</code></td></tr>
+    <tr><td>cburnett pieces (Colin M.L. Burnett), "Classic" option</td><td>GPLv2+</td><td><code>assets/pieces/cburnett/</code> (lichess-org/lila @ 4aa07af)</td></tr>
+    <tr><td>Nunito variable font</td><td>SIL OFL 1.1</td><td><code>assets/fonts/</code> (@fontsource-variable/nunito 5.3.0)</td></tr>
+    <tr><td>Pip the Pawn</td><td>GPL-3.0 (ours)</td><td><code>assets/pip/</code>, generated by <code>scripts/build-pip.mjs</code></td></tr>
+    <tr><td>Icons (kit uses inline copies)</td><td>Lucide, ISC</td><td>App: <code>lucide-react</code></td></tr>
+    <tr><td>Animal avatars</td><td>Placeholder (system emoji)</td><td>Final art TBD — flat style matching Pip</td></tr>
+  </table>
+</section>
+
+</div>
+
+<script>
+// ── Icons (Lucide paths, ISC) ───────────────────────────────────
+const ICONS = {
+  play: '<polygon points="6 3 20 12 6 21 6 3"/>',
+  undo: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>',
+  eye: '<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/>',
+  bulb: '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+  volume: '<path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/>',
+  cog: '<path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/><path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M12 2v2"/><path d="M12 22v-2"/><path d="m17 20.66-1-1.73"/><path d="M11 10.27 7 3.34"/><path d="m20.66 17-1.73-1"/><path d="m3.34 7 1.73 1"/><path d="M14 12h8"/><path d="M2 12h2"/><path d="m20.66 7-1.73 1"/><path d="m3.34 17 1.73-1"/><path d="m17 3.34-1 1.73"/><path d="m11 13.73-4 6.93"/>',
+  flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  star: '<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>',
+  left: '<path d="m15 18-6-6 6-6"/>',
+  right: '<path d="m9 18 6-6-6-6"/>',
+  back: '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
+  home: '<path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+  lock: '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  shuffle: '<path d="m18 14 4 4-4 4"/><path d="m18 2 4 4-4 4"/><path d="M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-8.6a4 4 0 0 1 3.3-1.7H22"/><path d="M2 6h1.972a4 4 0 0 1 3.6 2.2"/><path d="M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45"/>',
+  book: '<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+  award: '<path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle cx="12" cy="8" r="6"/>',
+};
+const svgIcon = (name) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
+document.querySelectorAll('i[data-icon]').forEach((el) => { el.outerHTML = svgIcon(el.dataset.icon); });
+
+// ── Swatches ────────────────────────────────────────────────────
+const css = getComputedStyle(document.documentElement);
+const swatch = (token, name, use) => `<div class="swatch"><div style="background:var(${token})"></div><p><b>${name}</b><code>${token} · ${css.getPropertyValue(token).trim()}</code><br>${use}</p></div>`;
+const put = (id, items) => { document.getElementById(id).innerHTML = items.map((s) => swatch(...s)).join(''); };
+put('sw-neutral', [
+  ['--pp-paper', 'Paper', 'App background'], ['--pp-surface', 'Surface', 'Cards, bubble'], ['--pp-line', 'Line', 'Borders, edges'],
+  ['--pp-ink', 'Ink', 'Text, outlines'], ['--pp-ink-2', 'Ink 2', 'Secondary text'],
+]);
+put('sw-brand', [
+  ['--pp-blue', 'Blue', 'Primary action, better move'], ['--pp-blue-soft', 'Blue soft', 'Selected cards'], ['--pp-coral', 'Coral', 'Pip, danger ring'],
+  ['--pp-sun', 'Sun', 'Stars, rewards'], ['--pp-sun-soft', 'Sun soft', 'Suggestions, badges'],
+]);
+put('sw-grade', [
+  ['--pp-great', 'Great!', 'Star icon · only-move, forks'], ['--pp-good', 'Good', 'Check icon · best and good'],
+  ['--pp-oops-fill', 'Oops', '"?" icon · mistake'], ['--pp-bigoops', 'Big oops', '"!!" icon · blunder'],
+]);
+put('sw-board', [
+  ['--pp-board-light', 'Board light', 'Meadow theme'], ['--pp-board-dark', 'Board dark', 'Meadow theme'],
+  ['--pp-hl-last', 'Last move', 'Yellow tint'], ['--pp-arrow-better', 'Better arrow', 'Reveal, review'], ['--pp-arrow-threat', 'Threat arrow', 'Threat, your move in review'],
+]);
+
+// ── Board renderer (kit only; the app uses react-chessboard) ────
+const FILES = 'abcdefgh';
+let PIECE_SET = 'horsey';
+function renderBoard(el) {
+  const opts = Object.assign({ coords: true }, JSON.parse(el.dataset.opts || '{}'));
+  const rows = el.dataset.fen.split(' ')[0].split('/');
+  const has = (key, sq) => (opts[key] || []).includes(sq);
+  let html = '';
+  rows.forEach((row, r) => {
+    let f = 0;
+    const cells = [];
+    for (const ch of row) {
+      if (/\d/.test(ch)) { for (let i = 0; i < +ch; i++) cells.push(null); }
+      else cells.push((ch === ch.toUpperCase() ? 'w' : 'b') + ch.toUpperCase());
+    }
+    cells.forEach((piece, c) => {
+      const sq = FILES[c] + (8 - r);
+      const light = (r + c) % 2 === 0;
+      const cls = ['pp-sq', light ? 'pp-sq--light' : 'pp-sq--dark'];
+      if (has('last', sq)) cls.push('is-last');
+      if (has('selected', sq)) cls.push('is-selected');
+      if (has('hint', sq)) cls.push('is-hint');
+      if (has('dots', sq)) cls.push('has-dot');
+      if (has('captures', sq)) cls.push('has-capture');
+      if (has('danger', sq)) cls.push('is-danger');
+      if (opts.check === sq) cls.push('is-check');
+      let inner = piece ? `<img src="assets/pieces/${PIECE_SET}/${piece}.svg" alt="">` : '';
+      if (opts.coords && r === 7) inner += `<span class="pp-sq__coord pp-sq__coord--file">${FILES[c]}</span>`;
+      if (opts.coords && c === 0) inner += `<span class="pp-sq__coord pp-sq__coord--rank">${8 - r}</span>`;
+      if (has('danger', sq)) inner += '<span class="pp-sq__badge">!</span>';
+      html += `<div class="${cls.join(' ')}" data-square="${sq}">${inner}</div>`;
+    });
+  });
+  const center = (sq) => [FILES.indexOf(sq[0]) + 0.5, 8 - +sq[1] + 0.5];
+  // Arrows: white halo underneath so they read on both square colors; "better" is solid, "threat" is dashed.
+  const arrows = (opts.arrows || []).map(({ from, to, kind }) => {
+    const better = kind === 'better';
+    const color = better ? 'var(--pp-arrow-better)' : 'var(--pp-arrow-threat)';
+    const dash = better ? '' : 'stroke-dasharray="0.17 0.13"';
+    const [x1, y1] = center(from), [x2, y2] = center(to);
+    const len = Math.hypot(x2 - x1, y2 - y1), ux = (x2 - x1) / len, uy = (y2 - y1) / len;
+    const tipX = x2 - ux * 0.08, tipY = y2 - uy * 0.08, bx = tipX - ux * 0.4, by = tipY - uy * 0.4;
+    const nx = -uy * 0.28, ny = ux * 0.28;
+    const head = `${tipX},${tipY} ${bx + nx},${by + ny} ${bx - nx},${by - ny}`;
+    const sx = x1 + ux * 0.12, sy = y1 + uy * 0.12;
+    return `<g>` +
+      `<line x1="${sx}" y1="${sy}" x2="${bx}" y2="${by}" stroke="var(--pp-arrow-halo)" stroke-width="0.3" stroke-linecap="round"/>` +
+      `<polygon points="${head}" fill="var(--pp-arrow-halo)" stroke="var(--pp-arrow-halo)" stroke-width="0.1" stroke-linejoin="round"/>` +
+      `<line x1="${sx}" y1="${sy}" x2="${bx + ux * 0.02}" y2="${by + uy * 0.02}" stroke="${color}" stroke-width="0.18" ${dash}/>` +
+      `<polygon points="${head}" fill="${color}" stroke="${color}" stroke-width="0.02" stroke-linejoin="round"/></g>`;
+  }).join('');
+  html += `<svg class="pp-board__arrows" viewBox="0 0 8 8" aria-hidden="true">${arrows}</svg>`;
+  el.innerHTML = html;
+}
+document.querySelectorAll('.pp-board[data-fen]').forEach(renderBoard);
+
+// Piece set switch: re-renders boards and swaps every piece image on the page.
+function setPieceSet(name) {
+  PIECE_SET = name;
+  document.getElementById('pieces-strip').innerHTML = ['wK','wQ','wR','wB','wN','wP','bK','bQ','bR','bB','bN','bP']
+    .map((p) => `<span><img src="assets/pieces/${name}/${p}.svg" alt="${p}"></span>`).join('');
+  document.querySelectorAll('.pp-board[data-fen]').forEach(renderBoard);
+  document.querySelectorAll('img[src*="assets/pieces/"]').forEach((img) => {
+    img.src = img.getAttribute('src').replace(/assets\/pieces\/[a-z]+\//, `assets/pieces/${name}/`);
+  });
+  document.querySelectorAll('#set-toggle button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.set === name)));
+}
+document.querySelectorAll('#set-toggle button').forEach((b) => b.addEventListener('click', () => setPieceSet(b.dataset.set)));
+setPieceSet(new URLSearchParams(location.search).get('pieces') || 'horsey');
+
+// Meters
+const meter = (n) => Array.from({ length: 8 }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('');
+document.querySelectorAll('.pp-meter[data-level]').forEach((el) => { el.innerHTML = meter(+el.dataset.level); });
+
+// Level cards
+const LEVELS = [
+  ['🐌', 'Sleepy Snail', '#e9f7e4'], ['🐱', 'Curious Kitten', '#fff0e0'], ['🦫', 'Busy Beaver', '#f3e8dc'], ['🦊', 'Clever Fox', '#ffe8dc'],
+  ['🦉', 'Wise Owl', '#ece7ff'], ['🐻', 'Brave Bear', '#f2e6da'], ['🦁', 'Mighty Lion', '#fff3cf'], ['🐉', 'Dragon', '#e1f5f0'],
+];
+document.getElementById('levels').innerHTML = LEVELS.map(([e, name, bg], i) => `
+  <button class="pp-level${i === 4 ? ' is-selected' : ''}" aria-pressed="${i === 4}">
+    ${i < 4 ? `<span class="pp-level__beaten" aria-label="Beaten">${svgIcon('check')}</span>` : ''}
+    <span class="pp-avatar" style="--size:72px;--bg:${bg}">${e}</span>
+    <span class="pp-level__name">${name}</span><span class="pp-meter">${meter(i + 1)}</span>
+  </button>`).join('');
+
+// Stars
+const STAR = '<svg viewBox="0 0 24 24"><path stroke-width="1.6" stroke-linejoin="round" d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg>';
+const stars = (on) => [0, 1, 2].map((i) => STAR.replace('<svg', `<svg class="${i < on ? 'on' : 'off'}"`)).join('');
+document.getElementById('stars-demo').innerHTML = stars(2);
+document.querySelectorAll('.pp-stars[data-on]').forEach((el) => { el.innerHTML = stars(+el.dataset.on); });
+
+// Timelines
+const MOMENTS = [['--pp-great', svgIcon('star')], ['--pp-bigoops', '!!'], ['--pp-oops-fill', '?'], ['--pp-good', svgIcon('check')]];
+const timeline = (current) => MOMENTS.map(([c, g], i) =>
+  `<button class="pp-timeline__moment${i === current ? ' is-current' : ''}" style="--fill:var(${c})" aria-label="Moment ${i + 1}">${g}</button>`).join('');
+document.getElementById('timeline-demo').innerHTML = timeline(1);
+document.getElementById('timeline-screen').innerHTML = timeline(1);
+</script>
+</body>
+</html>

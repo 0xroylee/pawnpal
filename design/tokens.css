@@ -1,0 +1,145 @@
+/*
+ * pawnpal design tokens.
+ * Source of truth for color, type, space, shape, elevation, touch and motion.
+ * tokens.json is generated from this file: node design/scripts/build-tokens-json.mjs
+ */
+
+@font-face {
+  font-family: 'Nunito Variable';
+  src: url('./assets/fonts/nunito-latin-wght-normal.woff2') format('woff2-variations');
+  font-weight: 200 1000;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* ── Neutrals (warm) ─────────────────────────────────────────── */
+  --pp-paper: #faf7f2;          /* app background */
+  --pp-surface: #ffffff;        /* cards, panels, bubble */
+  --pp-surface-sunken: #f3efe7; /* wells, tracks, inactive chips */
+  --pp-line: #e7e1d6;           /* borders, dividers */
+  --pp-ink: #2e2a40;            /* primary text, outlines (13.8:1 on white) */
+  --pp-ink-2: #5e5a70;          /* secondary text (6.6:1 on white) */
+  --pp-ink-3: #8c889c;          /* disabled and placeholder only (3.4:1) */
+
+  /* ── Brand ───────────────────────────────────────────────────── */
+  --pp-blue: #2563eb;           /* primary action AND "better move" — blue means "do this" */
+  --pp-blue-edge: #1a49b8;      /* 3D button edge */
+  --pp-blue-soft: #e8efff;
+  --pp-coral: #ff6b4a;          /* Pip's scarf, attention, piece in danger */
+  --pp-coral-soft: #ffe9e3;
+  --pp-sun: #ffc233;            /* stars and rewards only */
+  --pp-sun-edge: #e0a100;
+  --pp-sun-soft: #fff4d6;
+
+  /* ── Move grades (always paired with an icon and a word) ─────── */
+  --pp-great: #6b4ef0;          /* violet, star icon */
+  --pp-great-soft: #efebff;
+  --pp-good: #13855a;           /* green, check icon */
+  --pp-good-soft: #e3f5ec;
+  --pp-oops: #a35800;           /* amber text (4.6:1 on sun-soft) */
+  --pp-oops-fill: #f59e0b;
+  --pp-oops-soft: #fff1d9;
+  --pp-bigoops: #d23c41;        /* red, "!!" icon */
+  --pp-bigoops-soft: #ffe5e5;
+
+  /* ── Board: "Meadow" ─────────────────────────────────────────── */
+  --pp-board-light: #edefd6;
+  --pp-board-dark: #74985a;
+  --pp-board-coord-on-light: #557a3c;   /* 4.0:1 */
+  --pp-board-coord-on-dark: #ffffff;    /* 3.3:1, bold */
+  --pp-board-radius: 14px;
+  --pp-board-min: 512px;                /* 64px squares */
+  --pp-board-target: 600px;             /* 75px squares ≈ 2 cm, NN/g kids' target size */
+
+  /* Board overlays. Each one has a shape cue, not just a color. */
+  --pp-hl-last: rgb(255 214 79 / 0.6);        /* last move: tint on both squares */
+  --pp-hl-selected: rgb(255 214 79 / 0.85);   /* selected: stronger tint */
+  --pp-hl-dot: rgb(46 42 64 / 0.22);          /* legal move: dot; capture: ring */
+  --pp-hl-hint: rgb(37 99 235 / 0.25);        /* hint tier 1: tint + blue outline */
+  --pp-hl-danger: #ff5a36;                    /* danger: white + coral double ring and "!" badge */
+  --pp-hl-check: radial-gradient(ellipse at center, rgb(255 60 60 / 0.95) 0%, rgb(231 0 0 / 0.55) 30%, rgb(169 0 0 / 0) 85%);
+  --pp-arrow-better: #2563eb;                 /* better move: solid arrow */
+  --pp-arrow-threat: #f97316;                 /* threat / kid's move in review: dashed arrow */
+  --pp-arrow-halo: #ffffff;                   /* white halo so arrows read on both square colors */
+  --pp-arrow-opacity: 0.9;
+
+  /* ── Type ────────────────────────────────────────────────────── */
+  --pp-font: 'Nunito Variable', 'Nunito', ui-rounded, system-ui, sans-serif;
+  --pp-font-parent: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --pp-text-sm: 18px;   /* captions, labels — kid UI floor (NN/g: 14pt for young kids) */
+  --pp-text-md: 20px;   /* body */
+  --pp-text-lg: 24px;   /* coach bubble */
+  --pp-text-xl: 30px;   /* screen titles */
+  --pp-text-2xl: 40px;  /* result headline */
+  --pp-text-3xl: 52px;  /* hero */
+  --pp-text-btn: 22px;
+
+  --pp-weight-regular: 600;  /* Nunito reads thin at 400 for kids; 600 is the body weight */
+  --pp-weight-bold: 800;
+  --pp-weight-black: 900;
+
+  --pp-leading-tight: 1.15;
+  --pp-leading-body: 1.4;
+
+  /* ── Space (4px grid) ────────────────────────────────────────── */
+  --pp-space-1: 4px;
+  --pp-space-2: 8px;
+  --pp-space-3: 12px;
+  --pp-space-4: 16px;
+  --pp-space-5: 20px;
+  --pp-space-6: 24px;
+  --pp-space-8: 32px;
+  --pp-space-10: 40px;
+  --pp-space-12: 48px;
+  --pp-space-16: 64px;
+
+  /* ── Shape ───────────────────────────────────────────────────── */
+  --pp-radius-sm: 10px;
+  --pp-radius-md: 16px;
+  --pp-radius-lg: 24px;
+  --pp-radius-xl: 32px;
+  --pp-radius-pill: 999px;
+
+  /* ── Elevation ───────────────────────────────────────────────── */
+  --pp-shadow-1: 0 1px 2px rgb(46 42 64 / 0.06), 0 2px 8px rgb(46 42 64 / 0.06);
+  --pp-shadow-2: 0 2px 4px rgb(46 42 64 / 0.06), 0 10px 28px rgb(46 42 64 / 0.1);
+  --pp-shadow-board: 0 12px 32px rgb(46 42 64 / 0.16);
+  --pp-edge: 4px;  /* depth of 3D buttons and cards */
+
+  /* ── Touch ───────────────────────────────────────────────────── */
+  --pp-tap-kid: 72px;   /* main kid actions (≈ 2 cm, NN/g) */
+  --pp-tap-kid-2: 60px; /* secondary kid actions, icon buttons */
+  --pp-tap-min: 44px;   /* parent area (WCAG 2.5.5) */
+  --pp-safe-bottom: 32px; /* keep kid buttons off the bottom edge */
+
+  /* ── Motion ──────────────────────────────────────────────────── */
+  --pp-dur-fast: 150ms;   /* piece move, press */
+  --pp-dur-base: 200ms;   /* bubble enter, state change */
+  --pp-dur-slow: 300ms;   /* undo slide, stars */
+  --pp-ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --pp-ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/*
+ * Age bands. NN/g: 6–8 and 9–12 want different things; older kids call
+ * "little kid" UI babyish. Set from the profile's age (default: younger).
+ * Older band: smaller targets and text, coordinates on, read-aloud off by default.
+ */
+.pp-app[data-band='older'] {
+  --pp-text-sm: 16px;
+  --pp-text-md: 18px;
+  --pp-text-lg: 21px;
+  --pp-text-btn: 20px;
+  --pp-tap-kid: 60px;
+  --pp-tap-kid-2: 52px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --pp-dur-fast: 0ms;
+    --pp-dur-base: 0ms;
+    --pp-dur-slow: 0ms;
+  }
+}

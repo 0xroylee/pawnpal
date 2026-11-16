@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140" role="img" aria-label="Pip the Pawn, surprised">
+  <ellipse cx="60" cy="133" rx="36" ry="5" fill="#2E2A40" opacity=".08"/>
+  <rect x="24" y="112" width="72" height="17" rx="8.5" fill="#FFF4DE" stroke="#2E2A40" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M37 114 C37 96 46 85 49 72 H71 C74 85 83 96 83 114 Z" fill="#FFF4DE" stroke="#2E2A40" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M70 76 C73 88 79 97 80 112 H71 C71 98 70 86 66 76 Z" fill="#F2DDB6"/>
+  <circle cx="60" cy="38" r="28" fill="#FFF4DE" stroke="#2E2A40" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M82 26 A26 26 0 0 1 72 62 A28 28 0 0 0 82 26 Z" fill="#F2DDB6"/>
+  <ellipse cx="49" cy="24" rx="7" ry="4" fill="#fff" opacity=".7" transform="rotate(-20 49 24)"/>
+  <rect x="38" y="64" width="44" height="12" rx="6" fill="#FF6B4A" stroke="#2E2A40" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M67 74 Q77 82 82 95 L72 91 Q70 83 63 76 Z" fill="#E04E30" stroke="#2E2A40" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="50" cy="37" r="4.8" fill="#2E2A40"/><circle cx="51.68" cy="35.32" r="1.536" fill="#fff"/><circle cx="70" cy="37" r="4.8" fill="#2E2A40"/><circle cx="71.68" cy="35.32" r="1.536" fill="#fff"/>
+    <path d="M44 27 Q50 23 56 27" fill="none" stroke="#2E2A40" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M64 27 Q70 23 76 27" fill="none" stroke="#2E2A40" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <ellipse cx="60" cy="50" rx="4" ry="5" fill="#2E2A40"/>
+</svg>
