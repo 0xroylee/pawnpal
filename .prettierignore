@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+public/engine/
+playwright-report/
+test-results/
+package-lock.json
+design/
+docs/

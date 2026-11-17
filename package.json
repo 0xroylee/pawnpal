@@ -1,0 +1,59 @@
+{
+  "name": "pawnpal",
+  "version": "0.0.0",
+  "description": "A friendly chess game for kids",
+  "type": "module",
+  "license": "GPL-3.0-only",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "bin": {
+    "pawnpal": "bin/pawnpal.js"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "node scripts/copy-engine.mjs && vite build && node scripts/clean-server-dist.mjs && tsc -p tsconfig.server.json",
+    "typecheck": "tsc -p tsconfig.web.json --noEmit && tsc -p tsconfig.server.json --noEmit",
+    "lint": "eslint . && prettier --check .",
+    "test": "vitest run",
+    "e2e": "playwright test"
+  },
+  "dependencies": {
+    "@hono/node-server": "2.1.8",
+    "hono": "4.13.19",
+    "open": "11.0.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.65.1",
+    "@testing-library/dom": "10.4.2",
+    "@testing-library/react": "16.3.3",
+    "@types/node": "22.20.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.3.0",
+    "chess.js": "1.4.0",
+    "eslint": "10.15.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "eslint-plugin-react-refresh": "0.5.8",
+    "globals": "17.14.0",
+    "jsdom": "29.1.1",
+    "lucide-react": "1.73.0",
+    "prettier": "3.10.1",
+    "react": "19.3.1",
+    "react-chessboard": "5.12.1",
+    "react-dom": "19.3.1",
+    "stockfish": "19.0.1",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.72.2",
+    "vite": "8.3.8",
+    "vitest": "5.1.0"
+  }
+}

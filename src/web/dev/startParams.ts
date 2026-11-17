@@ -1,0 +1,19 @@
+import { validateFen } from "chess.js";
+
+export function parseStartParams(
+  search: string,
+  dev: boolean,
+): { fen: string; color: "w" | "b" } | null {
+  if (!dev) return null;
+  const params = new URLSearchParams(
+    search.startsWith("?") ? search.slice(1) : search,
+  );
+  const fen = params.get("fen");
+  if (!fen || !validateFen(fen).ok) return null;
+  const requestedColor = params.get("color");
+  if (requestedColor && requestedColor !== "w" && requestedColor !== "b")
+    return null;
+  const activeColor = fen.trim().split(/\s+/)[1];
+  const color = requestedColor ?? activeColor;
+  return color === "w" || color === "b" ? { fen, color } : null;
+}
