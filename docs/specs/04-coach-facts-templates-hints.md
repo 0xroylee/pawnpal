@@ -51,12 +51,12 @@ Try-again flow (05), LLM wording (08), pins, skewers, discovered attacks, openin
   > "Uh-oh, is your {piece} safe there? Look at who can reach it."
 - `explain`: says what happens.
   > "Your {piece} can be captured by the {attacker} now."
-- `reveal`: names the better move, with a green arrow on the board.
+- `reveal`: names the better move, with a solid blue arrow on the board (`--pp-arrow-better`).
   > "Moving your {betterPiece} here keeps everything safe."
 - `praise`, for `isOnlyMove` and `played-fork`:
   > "Great find! That was the only good move."
 
-**Annotations.** Each fact maps to highlights and arrows. A piece in danger is red; the attacker is orange; the opponent's threat is a red arrow. The better move gets a green arrow, in reveal mode only.
+**Annotations.** Each fact maps to highlights and arrows, drawn by pawnpal's own overlay (react-chessboard v5 arrows have no dashed style and only global width and opacity, so the app draws its own SVG layer, as `design/kit.html` does). A piece in danger gets the white and coral double ring with a "!" badge (`--pp-hl-danger`). The opponent's threat is a dashed orange arrow (`--pp-arrow-threat`, #f97316) with a white halo, drawn from the attacker to its target, so the attacker needs no separate highlight. The better move gets a solid blue arrow (`--pp-arrow-better`, #2563eb) with a white halo, in reveal mode only. Shape comes before color: solid vs dashed, ring plus badge, so nothing depends on color alone (see `design/README.md`, Key rules).
 
 **Wording rules** (enforced by a test over `en.json`):
 - No board coordinates and no numbers in template text.
@@ -65,9 +65,9 @@ Try-again flow (05), LLM wording (08), pins, skewers, discovered attacks, openin
 - No blame words such as "bad", "terrible" or "stupid".
 
 **Hint tiers** (for the current position, from the pre-move analysis):
-1. Highlights the piece that moves in the best line: "Take a look at your knight."
+1. Tints the square of the piece that moves in the best line blue with a blue outline (`--pp-hl-hint`): "Take a look at your knight."
 2. Names the idea using the detectors in "what would the best move do" mode: "There's a way to win a piece!" or "You can give checkmate!"
-3. Shows the best move as a green arrow.
+3. Shows the best move as a solid blue arrow with a white halo (`--pp-arrow-better`).
 
 Each tap moves up one tier, and the tier resets after the kid moves. The highest tier used is stored on that move's `MoveAnalysis.hintTier`.
 
@@ -81,7 +81,7 @@ Each tap moves up one tier, and the tier resets after the kid moves. The highest
 4. On a mistake or blunder, the bubble shows exactly one message with matching highlights. On an `isOnlyMove` move, it praises (rate-limited). Otherwise it stays silent.
 5. Every message mode of every fact kind has at least 2 variants, and the same variant never appears twice in a row.
 6. All template text passes the wording-rules test.
-7. Hint tier 1 highlights only the moving piece. Tier 3 shows the arrow. Tiers reset after a move.
+7. Hint tier 1 tints only the moving piece's square (blue tint and outline). Tier 3 shows the solid blue arrow. Tiers reset after a move.
 8. End-to-end: a scripted `?fen=` position plus a kid move shows the expected message and highlights for each detector kind.
 
 ## Test plan
