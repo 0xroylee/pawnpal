@@ -8,3 +8,6 @@ playwright-report/
 .env
 .env.*
 !.env.sample
+public/engine/
+.eslintcache
+*.tsbuildinfo

@@ -1,0 +1,10 @@
+{
+  "lite": {
+    "js": "stockfish-19-lite.js",
+    "wasm": "stockfish-19-lite.wasm"
+  },
+  "lite-single": {
+    "js": "stockfish-19-lite-single.js",
+    "wasm": "stockfish-19-lite-single.wasm"
+  }
+}
