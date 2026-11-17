@@ -3,6 +3,7 @@ import { Chess, type PieceSymbol, type Square } from "chess.js";
 import { Bot, Flag, House, UserRound, Volume2, VolumeX } from "lucide-react";
 import { Board } from "../board/Board.js";
 import type { GameAction, GameState } from "../game/reducer.js";
+import { DebugPanel } from "../dev/DebugPanel.js";
 import { t, type MessageKey } from "../i18n/t.js";
 import { MoveList } from "./MoveList.js";
 import { ResultBanner } from "./ResultBanner.js";
@@ -43,19 +44,23 @@ export function GameScreen({
   muted,
   onToggleSound,
   engineBuild,
+  dev = false,
 }: {
   state: GameState;
   dispatch: (action: GameAction) => void;
   muted: boolean;
   onToggleSound: () => void;
   engineBuild?: "lite" | "lite-single";
+  dev?: boolean;
 }) {
   const [confirmResign, setConfirmResign] = useState(false);
   const kidTurn = state.phase === "kidToMove";
+  const opponentThinking =
+    state.phase === "opponentToMove" || state.phase === "grading";
   const status =
     state.phase === "kidToMove"
       ? t("game.yourTurn")
-      : state.phase === "opponentToMove"
+      : opponentThinking
         ? t("game.thinking")
         : state.result
           ? t("game.title")
@@ -141,7 +146,7 @@ export function GameScreen({
             </span>
             <span className="pp-player__name">{t("game.opponent")}</span>
             <span className="pp-player__status">
-              {state.phase === "opponentToMove" ? t("game.thinking") : ""}
+              {opponentThinking ? t("game.thinking") : ""}
             </span>
           </div>
           <Board
@@ -174,6 +179,9 @@ export function GameScreen({
             />
           )}
           <MoveList moves={state.history} />
+          {dev && (
+            <DebugPanel analyses={state.analyses} kidColor={state.kidColor} />
+          )}
         </aside>
       </div>
     </main>

@@ -254,9 +254,14 @@ export class EngineClient {
       ),
     };
     this.activeSearch = active;
-    const go = options.movetimeMs
-      ? `go movetime ${Math.max(1, Math.floor(options.movetimeMs))}`
-      : `go depth ${Math.max(1, Math.floor(options.depth ?? 8))}`;
+    const depth = Math.max(1, Math.floor(options.depth ?? 8));
+    const movetimeMs = Math.max(1, Math.floor(options.movetimeMs ?? 1));
+    const go =
+      options.movetimeMs !== undefined
+        ? options.depth !== undefined
+          ? `go depth ${depth} movetime ${movetimeMs}`
+          : `go movetime ${movetimeMs}`
+        : `go depth ${depth}`;
     try {
       this.send(go);
     } catch (error) {

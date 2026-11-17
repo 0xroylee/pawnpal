@@ -6,12 +6,19 @@ import { EngineProvider } from "./EngineProvider.js";
 import { useEngine } from "./useEngine.js";
 
 describe("EngineProvider", () => {
-  it("creates and initializes the opponent only when a game starts", async () => {
-    const engine = {
+  it("creates and initializes both engines only when a game starts", async () => {
+    const opponent = {
       init: vi.fn().mockResolvedValue(undefined),
       terminate: vi.fn(),
     } as unknown as EngineClient;
-    const createEngine = vi.fn(() => engine);
+    const analyst = {
+      init: vi.fn().mockResolvedValue(undefined),
+      terminate: vi.fn(),
+    } as unknown as EngineClient;
+    const createEngine = vi
+      .fn()
+      .mockReturnValueOnce(opponent)
+      .mockReturnValueOnce(analyst);
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <EngineProvider engineFactory={createEngine}>{children}</EngineProvider>
     );
@@ -19,15 +26,84 @@ describe("EngineProvider", () => {
 
     expect(createEngine).not.toHaveBeenCalled();
     expect(result.current.opponent).toBeNull();
+    expect(result.current.analyst).toBeNull();
     await act(async () => {
       await result.current.initialize();
     });
 
-    expect(createEngine).toHaveBeenCalledOnce();
-    expect(engine.init).toHaveBeenCalledOnce();
-    expect(result.current.opponent).toBe(engine);
+    expect(createEngine).toHaveBeenCalledTimes(2);
+    expect(opponent.init).toHaveBeenCalledOnce();
+    expect(analyst.init).toHaveBeenCalledOnce();
+    expect(result.current.opponent).toBe(opponent);
+    expect(result.current.analyst).toBe(analyst);
     expect(result.current.build?.name).toBe("lite-single");
     unmount();
-    expect(engine.terminate).toHaveBeenCalledOnce();
+    expect(opponent.terminate).toHaveBeenCalledOnce();
+    expect(analyst.terminate).toHaveBeenCalledOnce();
+  });
+
+  it("starts the game when analyst initialization fails", async () => {
+    const opponent = {
+      init: vi.fn().mockResolvedValue(undefined),
+      terminate: vi.fn(),
+    } as unknown as EngineClient;
+    const analyst = {
+      init: vi.fn().mockRejectedValue(new Error("analyst unavailable")),
+      terminate: vi.fn(),
+    } as unknown as EngineClient;
+    const createEngine = vi
+      .fn()
+      .mockReturnValueOnce(opponent)
+      .mockReturnValueOnce(analyst);
+    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <EngineProvider engineFactory={createEngine}>{children}</EngineProvider>
+    );
+    const { result, unmount } = renderHook(() => useEngine(), { wrapper });
+
+    await act(async () => {
+      await result.current.initialize();
+    });
+
+    expect(result.current.opponent).toBe(opponent);
+    expect(result.current.analyst).toBeNull();
+    expect(analyst.terminate).toHaveBeenCalledOnce();
+    expect(log).toHaveBeenCalled();
+    unmount();
+    log.mockRestore();
+  });
+
+  it("starts the game when analyst creation throws synchronously", async () => {
+    const opponent = {
+      init: vi.fn().mockResolvedValue(undefined),
+      terminate: vi.fn(),
+    } as unknown as EngineClient;
+    const createEngine = vi
+      .fn()
+      .mockReturnValueOnce(opponent)
+      .mockImplementationOnce(() => {
+        throw new Error("analyst worker unavailable");
+      });
+    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <EngineProvider engineFactory={createEngine}>{children}</EngineProvider>
+    );
+    const { result, unmount } = renderHook(() => useEngine(), { wrapper });
+
+    await act(async () => {
+      await result.current.initialize();
+    });
+
+    expect(createEngine).toHaveBeenCalledTimes(2);
+    expect(opponent.init).toHaveBeenCalledOnce();
+    expect(result.current.opponent).toBe(opponent);
+    expect(result.current.analyst).toBeNull();
+    expect(log).toHaveBeenCalledWith(
+      "Analyst engine failed to create",
+      expect.any(Error),
+    );
+    unmount();
+    expect(opponent.terminate).toHaveBeenCalledOnce();
+    log.mockRestore();
   });
 });

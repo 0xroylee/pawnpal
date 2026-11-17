@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type { MoveAnalysis } from "../../shared/coach/types.ts";
 import { gameReducer, initialGame } from "../game/reducer.js";
 import { GameScreen } from "./GameScreen.js";
 
@@ -116,6 +117,11 @@ describe("GameScreen", () => {
     let state = gameReducer(initialGame(), { type: "NEW_GAME", kidColor: "w" });
     state = gameReducer(state, { type: "KID_MOVE", from: "e2", to: "e4" });
     state = gameReducer(state, {
+      type: "GRADE_TIMEOUT",
+      ply: state.history.length,
+      turnToken: state.turnToken,
+    });
+    state = gameReducer(state, {
       type: "OPPONENT_MOVE",
       uci: "b8c6",
       turnToken: state.turnToken,
@@ -132,5 +138,54 @@ describe("GameScreen", () => {
     expect(container.querySelector(".pp-game__live")?.textContent).toBe(
       "Computer moved its knight to c6.",
     );
+  });
+
+  it("locks the board while grading and shows the dev panel only in dev mode", () => {
+    let state = gameReducer(initialGame(), { type: "NEW_GAME", kidColor: "w" });
+    state = gameReducer(state, { type: "KID_MOVE", from: "e2", to: "e4" });
+    const analysis: MoveAnalysis = {
+      ply: 1,
+      fenBefore: state.startFen,
+      moveUci: "e2e4",
+      moveSan: "e4",
+      linesBefore: [{ uci: "e2e4", san: "e4", cp: 30, pv: ["e2e4"], depth: 8 }],
+      linesAfter: [
+        { uci: "e7e5", san: "e5", cp: -30, pv: ["e7e5"], depth: 12 },
+      ],
+      winBefore: 52.8,
+      winAfter: 52.8,
+      drop: 0,
+      grade: "best",
+      isOnlyMove: false,
+      facts: [],
+    };
+    state = { ...state, analyses: { 1: analysis } };
+    const { container, rerender } = render(
+      <GameScreen
+        state={state}
+        dispatch={vi.fn()}
+        muted
+        onToggleSound={vi.fn()}
+        dev
+      />,
+    );
+
+    expect(
+      container.querySelector(".pp-board")?.classList.contains("is-locked"),
+    ).toBe(true);
+    expect(container.querySelector(".pp-game__live")?.textContent).toBe(
+      "Computer is thinking",
+    );
+    expect(screen.getByTestId("debug-grade").textContent).toBe("best");
+
+    rerender(
+      <GameScreen
+        state={state}
+        dispatch={vi.fn()}
+        muted
+        onToggleSound={vi.fn()}
+      />,
+    );
+    expect(screen.queryByRole("table")).toBeNull();
   });
 });

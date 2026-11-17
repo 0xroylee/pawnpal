@@ -1,8 +1,29 @@
 import endings from "../../../tests/fixtures/endings.json";
 import { describe, expect, it } from "vitest";
+import type { MoveAnalysis } from "../../shared/coach/types.ts";
 import { gameReducer, initialGame } from "./reducer.js";
 
 const standardFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+const sampleLines = [
+  { uci: "e2e4", san: "e4", cp: 20, pv: ["e2e4"], depth: 8 },
+];
+
+function analysis(ply: number, moveUci: string): MoveAnalysis {
+  return {
+    ply,
+    fenBefore: standardFen,
+    moveUci,
+    moveSan: "e4",
+    linesBefore: sampleLines,
+    linesAfter: sampleLines,
+    winBefore: 55,
+    winAfter: 55,
+    drop: 0,
+    grade: "best",
+    isOnlyMove: false,
+    facts: [],
+  };
+}
 
 describe("gameReducer", () => {
   it("starts with the requested color and lets the side to move act first", () => {
@@ -30,13 +51,14 @@ describe("gameReducer", () => {
       to: "e4",
     });
 
-    expect(moved.phase).toBe("opponentToMove");
+    expect(moved.phase).toBe("grading");
     expect(moved.history[0]).toMatchObject({
       san: "e4",
       uci: "e2e4",
       from: "e2",
       to: "e4",
     });
+    expect(moved.history[0]).not.toHaveProperty("ending");
     expect(
       gameReducer(playing, { type: "KID_MOVE", from: "e2", to: "e5" }),
     ).toBe(playing);
@@ -46,6 +68,98 @@ describe("gameReducer", () => {
     expect(gameReducer(moved, { type: "KID_MOVE", from: "d2", to: "d4" })).toBe(
       moved,
     );
+    expect(
+      gameReducer(moved, {
+        type: "OPPONENT_MOVE",
+        uci: "e7e5",
+        turnToken: moved.turnToken,
+      }),
+    ).toBe(moved);
+  });
+
+  it("stores only pre-analysis for the current kid-to-move position", () => {
+    const playing = gameReducer(initialGame(), {
+      type: "NEW_GAME",
+      kidColor: "w",
+    });
+    const lines = sampleLines;
+    const ready = gameReducer(playing, {
+      type: "PRE_ANALYSIS_READY",
+      fen: playing.fen,
+      lines,
+    });
+    expect(ready.preAnalysis).toEqual({ fen: playing.fen, lines });
+    expect(
+      gameReducer(playing, {
+        type: "PRE_ANALYSIS_READY",
+        fen: "stale-fen",
+        lines,
+      }),
+    ).toBe(playing);
+  });
+
+  it("stores a grade by ply and releases the opponent", () => {
+    let state = gameReducer(initialGame(), {
+      type: "NEW_GAME",
+      kidColor: "w",
+    });
+    state = gameReducer(state, { type: "KID_MOVE", from: "e2", to: "e4" });
+    state = gameReducer(state, {
+      type: "GRADE_READY",
+      ply: 1,
+      analysis: analysis(1, "e2e4"),
+    });
+
+    expect(state.phase).toBe("opponentToMove");
+    expect(state.analyses[1]).toMatchObject({ moveUci: "e2e4", grade: "best" });
+  });
+
+  it("releases the opponent at the matching timeout and ignores stale timeouts", () => {
+    let state = gameReducer(initialGame(), {
+      type: "NEW_GAME",
+      kidColor: "w",
+    });
+    state = gameReducer(state, { type: "KID_MOVE", from: "e2", to: "e4" });
+    expect(
+      gameReducer(state, {
+        type: "GRADE_TIMEOUT",
+        ply: 1,
+        turnToken: state.turnToken - 1,
+      }),
+    ).toBe(state);
+    state = gameReducer(state, {
+      type: "GRADE_TIMEOUT",
+      ply: 1,
+      turnToken: state.turnToken,
+    });
+    expect(state.phase).toBe("opponentToMove");
+  });
+
+  it("stores a delayed grade as late after the game has moved on", () => {
+    let state = gameReducer(initialGame(), {
+      type: "NEW_GAME",
+      kidColor: "w",
+    });
+    state = gameReducer(state, { type: "KID_MOVE", from: "e2", to: "e4" });
+    state = gameReducer(state, {
+      type: "GRADE_TIMEOUT",
+      ply: 1,
+      turnToken: state.turnToken,
+    });
+    state = gameReducer(state, {
+      type: "OPPONENT_MOVE",
+      uci: "e7e5",
+      turnToken: state.turnToken,
+    });
+    state = gameReducer(state, { type: "KID_MOVE", from: "g1", to: "f3" });
+    state = gameReducer(state, {
+      type: "GRADE_READY",
+      ply: 1,
+      analysis: analysis(1, "e2e4"),
+    });
+
+    expect(state.phase).toBe("grading");
+    expect(state.analyses[1]).toMatchObject({ moveUci: "e2e4", late: true });
   });
 
   it("requires an explicit promotion choice and applies the selected knight", () => {
@@ -83,6 +197,13 @@ describe("gameReducer", () => {
         fen: testFixture.fen,
       });
       for (const uci of testFixture.moves) {
+        if (state.phase === "grading") {
+          state = gameReducer(state, {
+            type: "GRADE_TIMEOUT",
+            ply: state.history.length,
+            turnToken: state.turnToken,
+          });
+        }
         const action =
           state.phase === "kidToMove"
             ? {
@@ -104,8 +225,53 @@ describe("gameReducer", () => {
         reason: expectedReason,
         winner: testFixture.winner,
       });
+      expect(state.history.at(-1)?.ending).toBe(reason);
+      for (const move of state.history.slice(0, -1)) {
+        expect(move).not.toHaveProperty("ending");
+      }
     },
   );
+
+  it("records checkmate by a Black kid as the kid's move ending", () => {
+    const fixture = endings.checkmate as {
+      fen: string;
+      moves: string[];
+    };
+    let state = gameReducer(initialGame(), {
+      type: "NEW_GAME",
+      kidColor: "b",
+      fen: fixture.fen,
+    });
+    for (const uci of fixture.moves) {
+      if (state.phase === "grading") {
+        state = gameReducer(state, {
+          type: "GRADE_TIMEOUT",
+          ply: state.history.length,
+          turnToken: state.turnToken,
+        });
+      }
+      const action =
+        state.phase === "kidToMove"
+          ? {
+              type: "KID_MOVE" as const,
+              from: uci.slice(0, 2),
+              to: uci.slice(2, 4),
+              ...(uci[4] ? { promotion: uci[4] } : {}),
+            }
+          : {
+              type: "OPPONENT_MOVE" as const,
+              uci,
+              turnToken: state.turnToken,
+            };
+      state = gameReducer(state, action);
+    }
+
+    expect(state.history.at(-1)).toMatchObject({
+      color: "b",
+      ending: "checkmate",
+    });
+    expect(state.result).toEqual({ winner: "kid", reason: "checkmate" });
+  });
 
   it("rejects stale engine replies after a new game starts", () => {
     const playing = gameReducer(initialGame(), {
@@ -136,6 +302,96 @@ describe("gameReducer", () => {
     const resigned = gameReducer(playing, { type: "RESIGN" });
     expect(resigned.phase).toBe("over");
     expect(resigned.result).toEqual({ winner: "opponent", reason: "resign" });
+  });
+
+  it.each(["grading", "opponentToMove"] as const)(
+    "resigning from %s preserves history without a move ending",
+    (phase) => {
+      let state = gameReducer(initialGame(), {
+        type: "NEW_GAME",
+        kidColor: "w",
+      });
+      state = gameReducer(state, { type: "KID_MOVE", from: "e2", to: "e4" });
+      if (phase === "opponentToMove") {
+        state = gameReducer(state, {
+          type: "GRADE_READY",
+          ply: 1,
+          analysis: analysis(1, "e2e4"),
+        });
+      }
+      const history = state.history;
+      const resigned = gameReducer(state, { type: "RESIGN" });
+
+      expect(resigned.history).toBe(history);
+      expect(resigned.history.every((move) => !("ending" in move))).toBe(true);
+      expect(resigned.result).toEqual({ winner: "opponent", reason: "resign" });
+    },
+  );
+
+  it("accepts a grade at most once for both on-time and late replies", () => {
+    let state = gameReducer(initialGame(), {
+      type: "NEW_GAME",
+      kidColor: "w",
+    });
+    state = gameReducer(state, { type: "KID_MOVE", from: "e2", to: "e4" });
+    state = gameReducer(state, {
+      type: "GRADE_READY",
+      ply: 1,
+      analysis: analysis(1, "e2e4"),
+    });
+    state = gameReducer(state, { type: "RESIGN" });
+    const resigned = state;
+    const blunder = { ...analysis(1, "e2e4"), grade: "blunder" as const };
+
+    expect(
+      gameReducer(state, { type: "GRADE_READY", ply: 1, analysis: blunder }),
+    ).toBe(resigned);
+    expect(state.analyses[1]?.grade).toBe("best");
+    expect(state.analyses[1]).not.toHaveProperty("late");
+
+    state = gameReducer(initialGame(), { type: "NEW_GAME", kidColor: "w" });
+    state = gameReducer(state, { type: "KID_MOVE", from: "e2", to: "e4" });
+    state = gameReducer(state, {
+      type: "GRADE_TIMEOUT",
+      ply: 1,
+      turnToken: state.turnToken,
+    });
+    state = gameReducer(state, {
+      type: "OPPONENT_MOVE",
+      uci: "e7e5",
+      turnToken: state.turnToken,
+    });
+    state = gameReducer(state, { type: "KID_MOVE", from: "g1", to: "f3" });
+    state = gameReducer(state, {
+      type: "GRADE_READY",
+      ply: 1,
+      analysis: analysis(1, "e2e4"),
+    });
+    const late = state;
+
+    expect(
+      gameReducer(state, {
+        type: "GRADE_READY",
+        ply: 1,
+        analysis: blunder,
+      }),
+    ).toBe(late);
+    expect(state.analyses[1]).toMatchObject({ grade: "best", late: true });
+  });
+
+  it("clears stored analyses when starting or replaying a game", () => {
+    let state = gameReducer(initialGame(), { type: "NEW_GAME", kidColor: "w" });
+    state = gameReducer(state, { type: "KID_MOVE", from: "e2", to: "e4" });
+    state = gameReducer(state, {
+      type: "GRADE_READY",
+      ply: 1,
+      analysis: analysis(1, "e2e4"),
+    });
+
+    expect(
+      gameReducer(state, { type: "NEW_GAME", kidColor: "w" }).analyses,
+    ).toEqual({});
+    expect(gameReducer(state, { type: "PLAY_AGAIN" }).analyses).toEqual({});
   });
 
   it("chooses either color from the supplied random source", () => {

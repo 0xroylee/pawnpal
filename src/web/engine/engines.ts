@@ -22,8 +22,12 @@ export function createEngines(
 ): { opponent: () => EngineClient; analyst: () => EngineClient } {
   let opponent: EngineClient | undefined;
   let analyst: EngineClient | undefined;
+  const analystBuild = {
+    ...build,
+    threads: Math.max(1, Math.floor(build.threads / 2)),
+  };
   return {
     opponent: () => (opponent ??= factory(build)),
-    analyst: () => (analyst ??= factory(build)),
+    analyst: () => (analyst ??= factory(analystBuild)),
   };
 }

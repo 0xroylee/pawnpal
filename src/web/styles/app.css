@@ -160,6 +160,22 @@ body {
   padding-top: var(--pp-space-12);
 }
 
+.pp-debug-panel {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.pp-debug-panel__table-wrap {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.pp-debug-panel__table-wrap table {
+  width: max-content;
+  min-width: 100%;
+}
+
 .pp-game__live {
   margin: 0;
   min-height: 28px;

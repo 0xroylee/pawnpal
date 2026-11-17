@@ -48,6 +48,23 @@ describe("EngineClient", () => {
     ]);
   });
 
+  it("includes depth and movetime when both limits are requested", async () => {
+    const transport = new FakeTransport((command) =>
+      command.startsWith("go ")
+        ? ["info depth 12 score cp 24 pv d2d4", "bestmove d2d4"]
+        : undefined,
+    );
+    const client = createEngineClient(transport);
+    await client.init();
+
+    await client.analyze(
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      { depth: 12, movetimeMs: 3000 },
+    );
+
+    expect(transport.sent).toContain("go depth 12 movetime 3000");
+  });
+
   it("returns Stockfish's selected bestmove instead of the first PV move", async () => {
     const transport = new FakeTransport((command) =>
       command.startsWith("go ")

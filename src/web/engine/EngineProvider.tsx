@@ -19,8 +19,10 @@ export function EngineProvider({
   engineFactory?: EngineFactory;
 }) {
   const engineRef = useRef<EngineClient | null>(null);
+  const analystRef = useRef<EngineClient | null>(null);
   const initialization = useRef<Promise<EngineClient> | null>(null);
   const [opponent, setOpponent] = useState<EngineClient | null>(null);
+  const [analyst, setAnalyst] = useState<EngineClient | null>(null);
   const [build, setBuild] = useState<EngineSelection | null>(null);
 
   const initialize = useCallback(() => {
@@ -35,20 +37,52 @@ export function EngineProvider({
             ? 1
             : navigator.hardwareConcurrency || 1,
       });
-      const client = engineFactory
-        ? engineFactory(selection)
-        : createEngines(selection).opponent();
-      engineRef.current = client;
+      const engines = createEngines(selection, engineFactory);
+      const client = engines.opponent();
+      let analystClient: EngineClient | null = null;
+      let analystCreationError: unknown;
       try {
-        await client.init();
-        setBuild(selection);
-        setOpponent(client);
-        return client;
+        analystClient = engines.analyst();
       } catch (error) {
-        engineRef.current = null;
-        client.terminate();
-        throw error;
+        analystCreationError = error;
       }
+      engineRef.current = client;
+      analystRef.current = analystClient;
+
+      const [opponentResult, analystResult] = await Promise.allSettled([
+        client.init(),
+        analystClient
+          ? analystClient.init()
+          : Promise.reject(analystCreationError),
+      ]);
+      if (opponentResult.status === "rejected") {
+        engineRef.current = null;
+        analystRef.current = null;
+        client.terminate();
+        analystClient?.terminate();
+        throw opponentResult.reason;
+      }
+
+      setBuild(selection);
+      setOpponent(client);
+      if (analystClient && analystResult.status === "fulfilled") {
+        setAnalyst(analystClient);
+      } else {
+        const analystError =
+          analystResult.status === "rejected"
+            ? analystResult.reason
+            : analystCreationError;
+        console.error(
+          analystClient
+            ? "Analyst engine failed to initialize"
+            : "Analyst engine failed to create",
+          analystError,
+        );
+        analystClient?.terminate();
+        analystRef.current = null;
+        setAnalyst(null);
+      }
+      return client;
     })();
     initialization.current = pending;
     const clearPending = () => {
@@ -61,13 +95,14 @@ export function EngineProvider({
   useEffect(
     () => () => {
       engineRef.current?.terminate();
+      analystRef.current?.terminate();
     },
     [],
   );
 
   const value = useMemo(
-    () => ({ opponent, build, initialize }),
-    [opponent, build, initialize],
+    () => ({ opponent, analyst, build, initialize }),
+    [opponent, analyst, build, initialize],
   );
   return (
     <EngineContext.Provider value={value}>{children}</EngineContext.Provider>

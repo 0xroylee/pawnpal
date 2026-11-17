@@ -4,6 +4,7 @@ import type { EngineSelection } from "./chooseBuild.js";
 
 export type EngineContextValue = {
   opponent: EngineClient | null;
+  analyst: EngineClient | null;
   build: EngineSelection | null;
   initialize: () => Promise<EngineClient>;
 };

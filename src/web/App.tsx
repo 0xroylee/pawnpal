@@ -9,6 +9,7 @@ import {
 import type { Color } from "chess.js";
 import { EngineProvider } from "./engine/EngineProvider.js";
 import { useEngine } from "./engine/useEngine.js";
+import { useGrading } from "./game/useGrading.js";
 import { useOpponent } from "./game/useOpponent.js";
 import { gameReducer, initialGame } from "./game/reducer.js";
 import { parseStartParams } from "./dev/startParams.js";
@@ -36,9 +37,15 @@ export function App() {
 
 function AppContent() {
   const [state, dispatch] = useReducer(gameReducer, undefined, initialGame);
-  const { opponent: engine, build: engineBuild, initialize } = useEngine();
+  const {
+    opponent: engine,
+    analyst,
+    build: engineBuild,
+    initialize,
+  } = useEngine();
   const starting = useRef(false);
   const [startingGame, setStartingGame] = useState(false);
+  const [dev, setDev] = useState(false);
   const sounds = useMemo(
     () =>
       createSounds({
@@ -97,6 +104,7 @@ function AppContent() {
       .then((response) => response.json() as Promise<{ dev?: boolean }>)
       .then((health) => {
         if (cancelled) return;
+        setDev(health.dev === true);
         const startParams = parseStartParams(
           window.location.search,
           health.dev === true,
@@ -113,6 +121,7 @@ function AppContent() {
   useOpponent(state, dispatch, {
     engine: engine ?? idleEngine,
   });
+  useGrading(state, dispatch, { analyst });
 
   if (state.phase === "setup") {
     return <SetupScreen onStart={startGame} disabled={startingGame} />;
@@ -124,6 +133,7 @@ function AppContent() {
       muted={muted}
       onToggleSound={() => sounds.setMuted(!sounds.muted)}
       engineBuild={engineBuild?.name}
+      dev={dev}
     />
   );
 }
