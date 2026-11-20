@@ -13,6 +13,7 @@ import { useGrading } from "./game/useGrading.js";
 import { useOpponent } from "./game/useOpponent.js";
 import { gameReducer, initialGame } from "./game/reducer.js";
 import { parseStartParams } from "./dev/startParams.js";
+import { replayAnalystFactory } from "./dev/replayAnalyst.js";
 import {
   createSounds,
   selectMoveSound,
@@ -83,12 +84,24 @@ function AppContent() {
     previousResult.current = hasResult;
   }, [sounds, state.checkSquare, state.history, state.result]);
   const startGame = useCallback(
-    async ({ kidColor, fen }: { kidColor: Color | "random"; fen?: string }) => {
+    async ({
+      kidColor,
+      fen,
+      analyst,
+    }: {
+      kidColor: Color | "random";
+      fen?: string;
+      analyst?: "replay";
+    }) => {
       if (starting.current) return;
       starting.current = true;
       setStartingGame(true);
       try {
-        await initialize();
+        await initialize(
+          analyst === "replay"
+            ? { analyst: replayAnalystFactory() }
+            : undefined,
+        );
         dispatch({ type: "NEW_GAME", kidColor, ...(fen ? { fen } : {}) });
       } finally {
         starting.current = false;
@@ -110,7 +123,11 @@ function AppContent() {
           health.dev === true,
         );
         if (startParams)
-          void startGame({ kidColor: startParams.color, fen: startParams.fen });
+          void startGame({
+            kidColor: startParams.color,
+            fen: startParams.fen,
+            analyst: startParams.analyst,
+          });
       })
       .catch(() => undefined);
     return () => {

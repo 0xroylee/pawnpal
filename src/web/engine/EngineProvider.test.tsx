@@ -106,4 +106,61 @@ describe("EngineProvider", () => {
     expect(opponent.terminate).toHaveBeenCalledOnce();
     log.mockRestore();
   });
+
+  it("uses an analyst override while leaving opponent creation unchanged", async () => {
+    const opponent = {
+      init: vi.fn().mockResolvedValue(undefined),
+      terminate: vi.fn(),
+    } as unknown as EngineClient;
+    const replayAnalyst = {
+      init: vi.fn().mockResolvedValue(undefined),
+      terminate: vi.fn(),
+    } as unknown as EngineClient;
+    const createEngine = vi.fn(() => opponent);
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <EngineProvider engineFactory={createEngine}>{children}</EngineProvider>
+    );
+    const { result } = renderHook(() => useEngine(), { wrapper });
+
+    await act(async () => {
+      await result.current.initialize({ analyst: () => replayAnalyst });
+    });
+
+    expect(createEngine).toHaveBeenCalledOnce();
+    expect(opponent.init).toHaveBeenCalledOnce();
+    expect(replayAnalyst.init).toHaveBeenCalledOnce();
+    expect(result.current.opponent).toBe(opponent);
+    expect(result.current.analyst).toBe(replayAnalyst);
+  });
+
+  it("logs an analyst override creation error and continues without the analyst", async () => {
+    const opponent = {
+      init: vi.fn().mockResolvedValue(undefined),
+      terminate: vi.fn(),
+    } as unknown as EngineClient;
+    const createEngine = vi.fn(() => opponent);
+    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <EngineProvider engineFactory={createEngine}>{children}</EngineProvider>
+    );
+    const { result } = renderHook(() => useEngine(), { wrapper });
+
+    await act(async () => {
+      await result.current.initialize({
+        analyst: () => {
+          throw new Error("Replay recording missing");
+        },
+      });
+    });
+
+    expect(createEngine).toHaveBeenCalledOnce();
+    expect(opponent.init).toHaveBeenCalledOnce();
+    expect(result.current.opponent).toBe(opponent);
+    expect(result.current.analyst).toBeNull();
+    expect(log).toHaveBeenCalledWith(
+      "Analyst engine failed to create",
+      expect.objectContaining({ message: "Replay recording missing" }),
+    );
+    log.mockRestore();
+  });
 });

@@ -1,0 +1,70 @@
+[
+  {
+    "kind": "allowed-mate",
+    "fixture": "allowed-mate-1",
+    "mode": "explain",
+    "dangerSquares": ["h1"],
+    "arrows": [],
+    "pieceWords": { "explain": ["queen"], "reveal": ["rook"] }
+  },
+  {
+    "kind": "missed-mate",
+    "fixture": "missed-mate-6",
+    "mode": "explain",
+    "dangerSquares": [],
+    "arrows": [],
+    "pieceWords": { "explain": ["queen"], "reveal": ["queen"] }
+  },
+  {
+    "kind": "hanging-piece",
+    "fixture": "hanging-piece-7",
+    "mode": "explain",
+    "dangerSquares": ["g3"],
+    "arrows": [{ "kind": "threat", "from": "g8", "to": "g3" }],
+    "pieceWords": { "explain": ["rook"], "reveal": ["rook"] }
+  },
+  {
+    "kind": "allowed-fork",
+    "fixture": "allowed-fork-2",
+    "mode": "explain",
+    "dangerSquares": ["e1", "e3"],
+    "arrows": [],
+    "pieceWords": { "explain": ["knight"], "reveal": ["queen"] }
+  },
+  {
+    "kind": "missed-capture",
+    "fixture": "missed-capture-2",
+    "mode": "explain",
+    "dangerSquares": [],
+    "arrows": [],
+    "pieceWords": { "explain": ["rook", "queen"], "reveal": ["rook", "queen"] }
+  },
+  {
+    "kind": "threat",
+    "fixture": "missed-fork-depth-qualified-negative-1",
+    "mode": "explain",
+    "dangerSquares": ["c8"],
+    "arrows": [],
+    "pieceWords": {
+      "explain": ["queen", "knight"],
+      "reveal": ["knight"]
+    }
+  },
+  {
+    "kind": "missed-fork",
+    "fixture": "missed-fork-e2e-1",
+    "mode": "explain",
+    "dangerSquares": [],
+    "arrows": [],
+    "pieceWords": { "explain": ["knight"], "reveal": ["knight"] }
+  },
+  {
+    "kind": "played-fork",
+    "fixture": "played-fork-1",
+    "mode": "reveal",
+    "dangerSquares": [],
+    "arrows": [],
+    "pieceWords": { "explain": ["knight"], "reveal": ["knight"] },
+    "debugOnly": true
+  }
+]

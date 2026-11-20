@@ -7,6 +7,7 @@ import {
 } from "../coach/analysisPipeline.js";
 import { defaultGradeConfig } from "../coach/gradeConfig.js";
 import { gradeMove } from "../coach/grade.js";
+import { buildContext, runDetectors } from "../coach/detectors/index.js";
 import type { GameAction, GameState } from "./reducer.js";
 
 export type GradingPipeline = ReturnType<typeof createAnalysisPipeline>;
@@ -108,7 +109,7 @@ export function useGrading(
       .analyzeKidMove(fenBefore, state.fen, analysisOptions)
       .then(({ linesBefore, linesAfter }) => {
         if (!canDispatch() || !lastMove) return;
-        const analysis = gradeMove({
+        const graded = gradeMove({
           ply,
           fenBefore,
           move: { uci: lastMove.uci, san: lastMove.san },
@@ -117,6 +118,14 @@ export function useGrading(
           linesAfter,
           ending: lastMove.ending,
         });
+        const analysis = {
+          ...graded,
+          facts: lastMove.ending
+            ? []
+            : runDetectors(
+                buildContext({ analysis: graded, kidColor: state.kidColor }),
+              ),
+        };
         dispatch({ type: "GRADE_READY", ply, analysis });
       })
       .catch(() => {

@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import type { BoardAnnotations } from "../coach/annotations.js";
 import { Board } from "./Board.js";
 
 describe("Board", () => {
@@ -50,6 +51,36 @@ describe("Board", () => {
     expect(dark.style.color).toBe("var(--pp-board-coord-on-dark)");
   });
 
+  it("renders danger badges, hint tints, and annotated arrows", () => {
+    const annotations: BoardAnnotations = {
+      danger: ["e4"],
+      hint: ["e2"],
+      arrows: [{ from: "e2", to: "e4", kind: "better" }],
+    };
+    const { container } = render(
+      <Board
+        fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        orientation="white"
+        interactive
+        annotations={annotations}
+        onMove={vi.fn()}
+      />,
+    );
+
+    expect(
+      container.querySelector('[data-square="e4"] .pp-sq.is-danger'),
+    ).not.toBeNull();
+    expect(
+      container.querySelector('[data-square="e4"] .pp-sq__badge')?.textContent,
+    ).toBe("!");
+    expect(
+      container.querySelector('[data-square="e2"] .pp-sq.is-hint'),
+    ).not.toBeNull();
+    expect(
+      container.querySelector('.pp-board > svg [data-arrow-kind="better"]'),
+    ).not.toBeNull();
+  });
+
   it("sizes the board from viewport space between the kit minimum and target", () => {
     const { container } = render(
       <Board
@@ -62,10 +93,8 @@ describe("Board", () => {
     const board = container.querySelector(".pp-board") as HTMLElement;
 
     expect(board.style.display).toBe("block");
-    expect(board.style.width).toContain("var(--pp-board-target)");
-    expect(board.style.width).toContain("var(--pp-board-min)");
-    expect(board.style.width).toContain("100vh");
-    expect(board.style.maxWidth).toBe("calc(100vw - 32px)");
+    expect(board.style.width).toBe("");
+    expect(board.style.maxWidth).toBe("");
   });
 
   it("shows legal move dots and emits one move after tap-tap", () => {

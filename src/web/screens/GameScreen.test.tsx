@@ -1,8 +1,15 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { MoveAnalysis } from "../../shared/coach/types.ts";
-import { gameReducer, initialGame } from "../game/reducer.js";
+import { finalizeFact, type MoveAnalysis } from "../../shared/coach/types.js";
+import { gameReducer, initialGame, type GameState } from "../game/reducer.js";
 import { GameScreen } from "./GameScreen.js";
 
 afterEach(cleanup);
@@ -28,7 +35,6 @@ describe("GameScreen", () => {
     const sound = screen.getByRole("button", { name: "Mute sounds" });
 
     expect(screen.getByText("Computer")).toBeTruthy();
-    expect(screen.queryByText("Pip")).toBeNull();
     expect(
       container.querySelector(".pp-player .pp-avatar svg.lucide-bot"),
     ).not.toBeNull();
@@ -187,5 +193,259 @@ describe("GameScreen", () => {
       />,
     );
     expect(screen.queryByRole("table")).toBeNull();
+  });
+
+  it("shows a Hint button in the kid row and requests the first tier", () => {
+    const dispatch = vi.fn();
+    const state = gameReducer(initialGame(), {
+      type: "NEW_GAME",
+      kidColor: "w",
+    });
+    const { container } = render(
+      <GameScreen
+        state={state}
+        dispatch={dispatch}
+        muted
+        onToggleSound={vi.fn()}
+      />,
+    );
+    const kidRow = container.querySelectorAll(".pp-player")[1] as HTMLElement;
+    const hint = within(kidRow).getByRole("button", { name: "Hint" });
+
+    expect((hint as HTMLButtonElement).disabled).toBe(false);
+    fireEvent.click(hint);
+    expect(dispatch).toHaveBeenCalledWith({ type: "HINT", tier: 1 });
+  });
+
+  it("shows More help after the first tier and requests the next tier", () => {
+    const dispatch = vi.fn();
+    const state = {
+      ...gameReducer(initialGame(), { type: "NEW_GAME", kidColor: "w" }),
+      hintTier: 1 as const,
+    };
+    const { container } = render(
+      <GameScreen
+        state={state}
+        dispatch={dispatch}
+        muted
+        onToggleSound={vi.fn()}
+      />,
+    );
+    const kidRow = container.querySelectorAll(".pp-player")[1] as HTMLElement;
+    const moreHelp = within(kidRow).getByRole("button", { name: "More help" });
+    fireEvent.click(moreHelp);
+    expect(dispatch).toHaveBeenCalledWith({ type: "HINT", tier: 2 });
+  });
+
+  it.each([
+    ["the kid turn has ended", "b" as const, 0],
+    ["the last hint tier is used", "w" as const, 3],
+  ])("disables hints when %s", (_reason, kidColor, hintTier) => {
+    const dispatch = vi.fn();
+    const started = gameReducer(initialGame(), {
+      type: "NEW_GAME",
+      kidColor,
+    });
+    const state = { ...started, hintTier: hintTier as 0 | 1 | 2 | 3 };
+    const { container } = render(
+      <GameScreen
+        state={state}
+        dispatch={dispatch}
+        muted
+        onToggleSound={vi.fn()}
+      />,
+    );
+    const kidRow = container.querySelectorAll(".pp-player")[1] as HTMLElement;
+    const hintButton = within(kidRow).getByRole("button", {
+      name: hintTier === 0 ? "Hint" : "More help",
+    }) as HTMLButtonElement;
+    expect(hintButton.disabled).toBe(true);
+  });
+
+  it("shows the coach bubble, board annotations, and live announcement for a mistake", async () => {
+    let state = gameReducer(initialGame(), { type: "NEW_GAME", kidColor: "w" });
+    state = gameReducer(state, { type: "KID_MOVE", from: "e2", to: "e4" });
+    const fact = finalizeFact({
+      kind: "hanging-piece",
+      subject: { type: "p", color: "w", square: "e4" },
+      attacker: { type: "q", color: "b", square: "d8" },
+      threatMoveSan: "Qh4+",
+      threatMoveUci: "d8h4",
+    });
+    const analysis: MoveAnalysis = {
+      ply: 1,
+      fenBefore: state.startFen,
+      moveUci: "e2e4",
+      moveSan: "e4",
+      linesBefore: [{ uci: "d2d4", san: "d4", cp: 20, pv: ["d2d4"], depth: 8 }],
+      linesAfter: [{ uci: "e7e5", san: "e5", cp: -20, pv: ["e7e5"], depth: 8 }],
+      winBefore: 55,
+      winAfter: 30,
+      drop: 25,
+      grade: "mistake",
+      isOnlyMove: false,
+      facts: [fact],
+    };
+    state = { ...state, analyses: { 1: analysis } };
+    const dispatch = vi.fn();
+    const { container } = render(
+      <GameScreen
+        state={state}
+        dispatch={dispatch}
+        muted
+        onToggleSound={vi.fn()}
+      />,
+    );
+
+    await waitFor(() =>
+      expect(
+        container.querySelector(
+          '.pp-bubble__text[data-fact-kind="hanging-piece"][data-mode="explain"]',
+        ),
+      ).not.toBeNull(),
+    );
+    const message =
+      container.querySelector(".pp-bubble__text")?.textContent ?? "";
+    expect(container.querySelector(".pp-grade--oops")).not.toBeNull();
+    expect(
+      container.querySelector(
+        '[data-square="e4"] .pp-sq.is-danger .pp-sq__badge',
+      ),
+    ).not.toBeNull();
+    expect(
+      container.querySelector('.pp-board__arrows [data-arrow-kind="better"]'),
+    ).toBeNull();
+    expect(container.querySelector(".pp-game__live")?.textContent).toContain(
+      message,
+    );
+  });
+
+  it("holds the board for coaching and releases the opponent from the OK button", async () => {
+    let moved = gameReducer(initialGame(), { type: "NEW_GAME", kidColor: "w" });
+    moved = gameReducer(moved, { type: "KID_MOVE", from: "e2", to: "e4" });
+    const fact = finalizeFact({
+      kind: "hanging-piece",
+      subject: { type: "p", color: "w", square: "e4" },
+      attacker: { type: "q", color: "b", square: "d8" },
+      threatMoveSan: "Qh4+",
+      threatMoveUci: "d8h4",
+    });
+    const analysis: MoveAnalysis = {
+      ply: 1,
+      fenBefore: moved.startFen,
+      moveUci: "e2e4",
+      moveSan: "e4",
+      linesBefore: [{ uci: "d2d4", san: "d4", cp: 20, pv: ["d2d4"], depth: 8 }],
+      linesAfter: [{ uci: "e7e5", san: "e5", cp: -20, pv: ["e7e5"], depth: 8 }],
+      winBefore: 55,
+      winAfter: 30,
+      drop: 25,
+      grade: "mistake",
+      isOnlyMove: false,
+      facts: [fact],
+    };
+    const state = {
+      ...moved,
+      phase: "coaching",
+      analyses: { 1: analysis },
+    } as unknown as GameState;
+    const dispatch = vi.fn();
+    const { container } = render(
+      <GameScreen
+        state={state}
+        dispatch={dispatch}
+        muted
+        onToggleSound={vi.fn()}
+      />,
+    );
+
+    await waitFor(() =>
+      expect(
+        container.querySelector('.pp-bubble__text[data-mode="explain"]'),
+      ).not.toBeNull(),
+    );
+    expect(
+      container.querySelector(".pp-board")?.classList.contains("is-locked"),
+    ).toBe(true);
+    expect(container.querySelector(".pp-game__live")?.textContent).toContain(
+      "Listen to Pip",
+    );
+    expect(
+      container.querySelector('[data-square="e4"] .is-danger'),
+    ).not.toBeNull();
+    expect(
+      container.querySelector('.pp-board__arrows [data-arrow-kind="better"]'),
+    ).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "OK" }));
+    expect(dispatch).toHaveBeenCalledWith({ type: "KEEP_MOVE" });
+    await waitFor(() =>
+      expect(container.querySelector(".pp-bubble__text")).toBeNull(),
+    );
+  });
+
+  it("shows a late coach message after the reply without stale annotations", async () => {
+    let state = gameReducer(initialGame(), { type: "NEW_GAME", kidColor: "w" });
+    state = gameReducer(state, { type: "KID_MOVE", from: "e2", to: "e4" });
+    state = gameReducer(state, {
+      type: "GRADE_TIMEOUT",
+      ply: 1,
+      turnToken: state.turnToken,
+    });
+    state = gameReducer(state, {
+      type: "OPPONENT_MOVE",
+      uci: "e7e5",
+      turnToken: state.turnToken,
+    });
+    state = gameReducer(state, { type: "KID_MOVE", from: "g1", to: "f3" });
+    const fact = finalizeFact({
+      kind: "hanging-piece",
+      subject: { type: "p", color: "w", square: "e4" },
+      attacker: { type: "q", color: "b", square: "d8" },
+      threatMoveSan: "Qh4+",
+      threatMoveUci: "d8h4",
+    });
+    const late = gameReducer(state, {
+      type: "GRADE_READY",
+      ply: 1,
+      analysis: {
+        ply: 1,
+        fenBefore: state.startFen,
+        moveUci: "e2e4",
+        moveSan: "e4",
+        linesBefore: [
+          { uci: "d2d4", san: "d4", cp: 20, pv: ["d2d4"], depth: 8 },
+        ],
+        linesAfter: [
+          { uci: "e7e5", san: "e5", cp: -20, pv: ["e7e5"], depth: 8 },
+        ],
+        winBefore: 55,
+        winAfter: 30,
+        drop: 25,
+        grade: "mistake",
+        isOnlyMove: false,
+        facts: [fact],
+      },
+    });
+    const { container } = render(
+      <GameScreen
+        state={late}
+        dispatch={vi.fn()}
+        muted
+        onToggleSound={vi.fn()}
+      />,
+    );
+
+    await waitFor(() =>
+      expect(
+        container.querySelector('.pp-bubble__text[data-mode="explain"]'),
+      ).not.toBeNull(),
+    );
+    expect(container.querySelector(".pp-board .pp-sq.is-danger")).toBeNull();
+    expect(container.querySelector(".pp-board .pp-sq.is-hint")).toBeNull();
+    expect(
+      container.querySelector(".pp-board__arrows [data-arrow-kind]"),
+    ).toBeNull();
+    expect(screen.getByRole("button", { name: "OK" })).toBeTruthy();
   });
 });

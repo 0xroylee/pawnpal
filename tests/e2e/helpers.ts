@@ -44,13 +44,30 @@ export async function expectReplyWithinFiveSeconds(
   page: Page,
   previousMoves: number,
 ) {
+  const coachOk = page.getByRole("button", { name: "OK", exact: true });
+  let released = false;
   await expect
-    .poll(async () => page.getByTestId("move").count(), { timeout: 5_000 })
+    .poll(
+      async () => {
+        if (!released && (await coachOk.isVisible())) {
+          released = true;
+          await coachOk.click();
+        }
+        return page.getByTestId("move").count();
+      },
+      { timeout: 5_000 },
+    )
     .toBe(previousMoves + 2);
 }
 
-export async function openDevFen(page: Page, fen: string, color?: "w" | "b") {
+export async function openDevFen(
+  page: Page,
+  fen: string,
+  color?: "w" | "b",
+  options: { replay?: boolean } = {},
+) {
   const params = new URLSearchParams({ fen });
   if (color) params.set("color", color);
+  if (options.replay) params.set("analyst", "replay");
   await page.goto(`/?${params.toString()}`);
 }

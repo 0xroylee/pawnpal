@@ -1,14 +1,19 @@
 import { Chess, type Color, type Square } from "chess.js";
-import type { EngineLine, MoveAnalysis } from "../../shared/coach/types.ts";
+import {
+  isCoachedGrade,
+  type EngineLine,
+  type MoveAnalysis,
+} from "../../shared/coach/types.js";
 
 export type GamePhase =
-  "setup" | "kidToMove" | "grading" | "opponentToMove" | "over";
+  "setup" | "kidToMove" | "grading" | "coaching" | "opponentToMove" | "over";
 export type MoveEnding =
   "checkmate" | "stalemate" | "threefold" | "fifty-move" | "insufficient";
 export type GameResult = {
   winner: "kid" | "opponent" | "draw";
   reason: MoveEnding | "resign";
 };
+export type HintTier = 0 | 1 | 2 | 3;
 export type GameMove = {
   san: string;
   uci: string;
@@ -28,6 +33,8 @@ export type GameState = {
   result?: GameResult;
   turnToken: number;
   analyses: Record<number, MoveAnalysis>;
+  hintTier: HintTier;
+  hintTiersByPly: Record<number, HintTier>;
   preAnalysis?: { fen: string; lines: EngineLine[] };
 };
 
@@ -39,10 +46,12 @@ export type GameAction =
       rng?: () => number;
     }
   | { type: "KID_MOVE"; from: string; to: string; promotion?: string }
+  | { type: "HINT"; tier: Exclude<HintTier, 0> }
   | { type: "OPPONENT_MOVE"; uci: string; turnToken: number }
   | { type: "PRE_ANALYSIS_READY"; fen: string; lines: EngineLine[] }
   | { type: "GRADE_READY"; ply: number; analysis: MoveAnalysis }
   | { type: "GRADE_TIMEOUT"; ply: number; turnToken: number }
+  | { type: "KEEP_MOVE" }
   | { type: "RESIGN" }
   | { type: "PLAY_AGAIN" };
 
@@ -57,6 +66,8 @@ export function initialGame(): GameState {
     history: [],
     turnToken: 0,
     analyses: {},
+    hintTier: 0,
+    hintTiersByPly: {},
   };
 }
 
@@ -84,11 +95,32 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         history: [],
         turnToken: state.turnToken + 1,
         analyses: {},
+        hintTier: 0,
+        hintTiersByPly: {},
       };
     }
     case "KID_MOVE": {
       if (state.phase !== "kidToMove") return state;
-      return applyMove(state, action.from, action.to, action.promotion);
+      const moved = applyMove(state, action.from, action.to, action.promotion);
+      if (moved === state) return state;
+      return {
+        ...moved,
+        hintTier: 0,
+        hintTiersByPly: {
+          ...state.hintTiersByPly,
+          [moved.history.length]: state.hintTier,
+        },
+      };
+    }
+    case "HINT": {
+      if (
+        state.phase !== "kidToMove" ||
+        state.hintTier >= 3 ||
+        action.tier !== state.hintTier + 1
+      ) {
+        return state;
+      }
+      return { ...state, hintTier: action.tier };
     }
     case "OPPONENT_MOVE": {
       if (
@@ -121,16 +153,28 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const onTime =
         state.phase === "grading" && action.ply === state.history.length;
       const analysis = { ...action.analysis };
+      analysis.hintTier = state.hintTiersByPly[action.ply] ?? 0;
       delete analysis.late;
+      const hintTiersByPly = { ...state.hintTiersByPly };
+      delete hintTiersByPly[action.ply];
+      const phase = onTime
+        ? isCoachedGrade(analysis.grade)
+          ? "coaching"
+          : "opponentToMove"
+        : state.phase;
       return {
         ...state,
-        phase: onTime ? "opponentToMove" : state.phase,
+        phase,
+        hintTiersByPly,
         analyses: {
           ...state.analyses,
           [action.ply]: onTime ? analysis : { ...analysis, late: true },
         },
       };
     }
+    case "KEEP_MOVE":
+      if (state.phase !== "coaching") return state;
+      return { ...state, phase: "opponentToMove" };
     case "GRADE_TIMEOUT": {
       if (
         state.phase !== "grading" ||

@@ -3,8 +3,10 @@ import { Chess, type PieceSymbol, type Square } from "chess.js";
 import { Bot, Flag, House, UserRound, Volume2, VolumeX } from "lucide-react";
 import { Board } from "../board/Board.js";
 import type { GameAction, GameState } from "../game/reducer.js";
+import { useCoach } from "../game/useCoach.js";
 import { DebugPanel } from "../dev/DebugPanel.js";
 import { t, type MessageKey } from "../i18n/t.js";
+import { CoachBubble } from "./CoachBubble.js";
 import { MoveList } from "./MoveList.js";
 import { ResultBanner } from "./ResultBanner.js";
 import { resultMessageKey } from "./resultMessage.js";
@@ -54,24 +56,40 @@ export function GameScreen({
   dev?: boolean;
 }) {
   const [confirmResign, setConfirmResign] = useState(false);
+  const { coach, dismiss } = useCoach(state);
+  const coachMessage = coach.message;
+  const coachAnnotations = coach.annotations;
   const kidTurn = state.phase === "kidToMove";
   const opponentThinking =
     state.phase === "opponentToMove" || state.phase === "grading";
   const status =
     state.phase === "kidToMove"
       ? t("game.yourTurn")
-      : opponentThinking
-        ? t("game.thinking")
-        : state.result
-          ? t("game.title")
-          : t("game.yourTurn");
+      : state.phase === "coaching"
+        ? t("game.coachTurn")
+        : opponentThinking
+          ? t("game.thinking")
+          : state.result
+            ? t("game.title")
+            : t("game.yourTurn");
   const moveAnnouncement = opponentMoveAnnouncement(state);
   const resultAnnouncement = state.result
     ? t(resultMessageKey(state.result))
     : null;
-  const liveAnnouncement = state.result
+  const statusAnnouncement = state.result
     ? [moveAnnouncement, resultAnnouncement].filter(Boolean).join(" ")
     : (moveAnnouncement ?? status);
+  const liveAnnouncement = [coachMessage?.text, statusAnnouncement]
+    .filter(Boolean)
+    .join(" ");
+  const requestHint = () => {
+    if (!kidTurn || state.hintTier >= 3) return;
+    dispatch({ type: "HINT", tier: (state.hintTier + 1) as 1 | 2 | 3 });
+  };
+  const dismissCoach = () => {
+    dismiss();
+    dispatch({ type: "KEEP_MOVE" });
+  };
 
   return (
     <main
@@ -157,6 +175,7 @@ export function GameScreen({
             checkSquare={state.checkSquare}
             onMove={(move) => dispatch({ type: "KID_MOVE", ...move })}
             engineBuild={engineBuild}
+            annotations={coachAnnotations}
           />
           <div className="pp-player">
             <span className="pp-avatar" aria-hidden="true">
@@ -166,9 +185,18 @@ export function GameScreen({
             <span className="pp-player__status">
               {kidTurn ? t("game.yourTurn") : ""}
             </span>
+            <button
+              className="pp-btn pp-btn--secondary pp-btn--sm pp-player__hint"
+              type="button"
+              disabled={!kidTurn || state.hintTier >= 3}
+              onClick={requestHint}
+            >
+              {t(state.hintTier === 0 ? "hint.button" : "hint.more")}
+            </button>
           </div>
         </section>
         <aside className="pp-game__side-column">
+          <CoachBubble message={coachMessage} onDismiss={dismissCoach} />
           <p className="pp-game__live" aria-live="polite">
             {liveAnnouncement}
           </p>
@@ -180,7 +208,25 @@ export function GameScreen({
           )}
           <MoveList moves={state.history} />
           {dev && (
-            <DebugPanel analyses={state.analyses} kidColor={state.kidColor} />
+            <>
+              <DebugPanel analyses={state.analyses} kidColor={state.kidColor} />
+              <output
+                className="pp-debug-panel__facts"
+                data-testid="debug-facts"
+                aria-label={t("debug.facts")}
+              >
+                {Object.values(state.analyses)
+                  .flatMap((analysis) => analysis.facts)
+                  .map((fact, index) => (
+                    <span
+                      data-fact-kind={fact.kind}
+                      key={`${fact.kind}-${index}`}
+                    >
+                      {fact.kind}
+                    </span>
+                  ))}
+              </output>
+            </>
           )}
         </aside>
       </div>

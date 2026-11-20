@@ -3,6 +3,8 @@ import { Chess, type Color, type Square } from "chess.js";
 import { Chessboard, type ChessboardOptions } from "react-chessboard";
 import { legalTargets, needsPromotion } from "../game/rules.js";
 import { t } from "../i18n/t.js";
+import type { BoardAnnotations } from "../coach/annotations.js";
+import { BoardOverlay } from "./BoardOverlay.js";
 import { PromotionPicker } from "./PromotionPicker.js";
 import { horseyPieces } from "./pieces.js";
 import { selectionReducer, type SelectionState } from "./selection.js";
@@ -16,6 +18,7 @@ export type BoardProps = {
   onMove: (move: { from: string; to: string; promotion?: string }) => void;
   animationMs?: number;
   engineBuild?: "lite" | "lite-single";
+  annotations?: BoardAnnotations;
 };
 
 export function Board({
@@ -27,6 +30,7 @@ export function Board({
   onMove,
   animationMs = 150,
   engineBuild,
+  annotations = EMPTY_ANNOTATIONS,
 }: BoardProps) {
   const kidColor: Color = orientation === "white" ? "w" : "b";
   const [selection, setSelection] = useState<SelectionState>({
@@ -127,6 +131,9 @@ export function Board({
       if (square === checkSquare) classes.push("is-check");
       if (lastMove && (square === lastMove.from || square === lastMove.to))
         classes.push("is-last");
+      const isDanger = annotations.danger.includes(square);
+      if (isDanger) classes.push("is-danger");
+      if (annotations.hint.includes(square)) classes.push("is-hint");
       const colorStyles: React.CSSProperties = {
         backgroundColor: `var(--pp-board-${color})`,
         color: `var(--pp-board-coord-on-${color})`,
@@ -144,6 +151,11 @@ export function Board({
           }}
         >
           {children}
+          {isDanger && (
+            <span className="pp-sq__badge" aria-hidden="true">
+              !
+            </span>
+          )}
         </div>
       );
     },
@@ -155,9 +167,6 @@ export function Board({
       data-engine-build={engineBuild}
       style={{
         display: "block",
-        width:
-          "min(100%, var(--pp-board-target), max(var(--pp-board-min), calc(100vh - var(--pp-safe-bottom) - 192px)))",
-        maxWidth: "calc(100vw - 32px)",
       }}
     >
       <div
@@ -178,6 +187,7 @@ export function Board({
           }}
         />
       </div>
+      <BoardOverlay arrows={annotations.arrows} orientation={orientation} />
       {promotionMove && (
         <PromotionPicker
           color={kidColor}
@@ -192,6 +202,12 @@ export function Board({
     </div>
   );
 }
+
+const EMPTY_ANNOTATIONS: BoardAnnotations = {
+  danger: [],
+  hint: [],
+  arrows: [],
+};
 
 function prefersReducedMotion(): boolean {
   return (

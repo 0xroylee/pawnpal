@@ -19,7 +19,7 @@ When a kid makes a mistake or blunder, Pip says in one or two short sentences wh
   - **Anything else:** silent.
 - Hint button with three tiers.
 
-Until spec 05 lands, the coach shows explain + reveal text after a mistake, with no take-back.
+Until spec 05 lands, the opponent waits after a mistake while the coach shows explain text on the board as it stands (no reveal arrow; spec 05's Show me undoes the move first), and late grades use past-tense text.
 
 ## Out of scope
 

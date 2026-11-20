@@ -14,5 +14,9 @@ test("shows the grade when the kid hangs the queen", async ({ page }) => {
   await expect(
     page.locator('tr[data-ply="1"] [data-testid="debug-grade"]'),
   ).toHaveText("blunder", { timeout: 8_000 });
+  const coachOk = page.getByRole("button", { name: "OK", exact: true });
+  await expect(coachOk).toBeVisible({ timeout: 8_000 });
+  await expect(page.getByTestId("move")).toHaveCount(1);
+  await coachOk.click();
   await expect(page.getByTestId("move")).toHaveCount(2, { timeout: 8_000 });
 });

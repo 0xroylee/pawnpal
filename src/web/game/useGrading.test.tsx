@@ -321,6 +321,54 @@ describe("useGrading", () => {
     unmount();
   });
 
+  it("attaches detector facts to the graded move", async () => {
+    const dispatch = vi.fn();
+    const pipeline = fakePipeline();
+    const fen = "8/3R4/1q4N1/8/4k3/4q1p1/4R3/7K w - - 0 1";
+    const linesBefore: EngineLine[] = [
+      {
+        uci: "d7e7",
+        san: "Re7+",
+        cp: -1,
+        pv: ["d7e7", "e4d4", "e2e3", "b6g6"],
+        depth: 14,
+      },
+    ];
+    const linesAfter: EngineLine[] = [
+      { uci: "e3g1", san: "Qg1#", mate: 1, pv: ["e3g1"], depth: 12 },
+    ];
+    vi.mocked(pipeline.analyzeKidMove).mockResolvedValue({
+      linesBefore,
+      linesAfter,
+    });
+    const started = gameReducer(initialGame(), {
+      type: "NEW_GAME",
+      kidColor: "w",
+      fen,
+    });
+    const state = gameReducer(started, {
+      type: "KID_MOVE",
+      from: "e2",
+      to: "h2",
+    });
+
+    renderHook(() =>
+      useGrading(state, dispatch, { analyst, pipeline: () => pipeline }),
+    );
+    await act(async () => Promise.resolve());
+
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "GRADE_READY",
+        analysis: expect.objectContaining({
+          facts: expect.arrayContaining([
+            expect.objectContaining({ kind: "allowed-mate" }),
+          ]),
+        }),
+      }),
+    );
+  });
+
   it("grades a kid threefold draw as 50 from its recorded ending", async () => {
     const dispatch = vi.fn();
     const pipeline = fakePipeline();
