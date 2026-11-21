@@ -8,5 +8,6 @@ export default defineConfig({
       "tests/integration/**/*.test.ts",
     ],
     environment: "node",
+    globals: true,
   },
 });

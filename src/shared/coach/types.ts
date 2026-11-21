@@ -71,6 +71,40 @@ export type CoachFactDraft = Pick<CoachFact, "kind"> &
 export type CoachMode = "nudge" | "explain" | "reveal" | "praise";
 export type RephraseMode = CoachMode | "hint";
 
+export type RephraseRequestInput = {
+  fact: CoachFact;
+  mode: RephraseMode;
+  templateText: string;
+  kidColor: Color;
+  kidAge?: number;
+  language: "en";
+};
+
+export type RephraseReason =
+  | "empty"
+  | "meta-opening"
+  | "url"
+  | "emoji"
+  | "disallowed-character"
+  | "unsafe-word"
+  | "too-long"
+  | "too-many-sentences"
+  | "reveals-better-move"
+  | "unknown-square"
+  | "unknown-move"
+  | "digits"
+  | "unknown-piece"
+  | "timeout"
+  | "http"
+  | "network"
+  | "bad-response";
+
+export type RephraseResult = {
+  text: string;
+  source: "llm" | "template";
+  reason?: RephraseReason;
+};
+
 export function finalizeFact(draft: CoachFactDraft): CoachFact {
   const rolePieces = [
     draft.subject,
