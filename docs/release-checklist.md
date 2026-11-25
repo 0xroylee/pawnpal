@@ -16,4 +16,5 @@ Record the date, machine and result next to each manual check.
 - M4 Pro Mac. All 645 automated tests passed on Node 22.20 and Node 24.7. All 31 Chromium and WebKit tests passed, including both tablet layouts, touch input, the wizard and saved games.
 - The macOS tarball smoke test installed the package into a temporary directory, verified `/api/health` and shut down cleanly on SIGINT. The package contains 55 files and is about 4.49 MB unpacked.
 - A scripted install from the local tarball with a fresh data folder reached the first move in 1.85 seconds with the built-in coach.
+- The Linux tarball smoke test passed on Debian with Node 22.23.5.
 - The 60-move history review opened in 45 ms and displayed all 120 plies. LAN requests reached two private addresses. The protected settings still required the PIN, and `reset-pin` revoked the session.

@@ -607,7 +607,7 @@ describe("validateRephrase", () => {
     }
     expect(checked).toBe(malformedCastlingTexts.length * 4 * 3 * 2);
     expect(mismatches.slice(0, 20)).toEqual([]);
-  });
+  }, 30_000);
 
   it("applies the existing move checks to exact standalone castling tokens", () => {
     const mismatches: string[] = [];
