@@ -32,11 +32,11 @@ export type MoveSoundContext = {
 export type Sounds = {
   readonly muted: boolean;
   play: (kind: SoundKind) => void;
-  setMuted: (muted: boolean) => void;
+  setMuted: (muted: boolean, options?: { persist?: boolean }) => void;
   subscribe: (listener: (muted: boolean) => void) => () => void;
 };
 
-const storageKey = "pawnpal.soundMuted";
+export const soundStorageKey = "pawnpal.soundMuted";
 const notes: Record<
   SoundKind,
   Array<{ hz: number; durationMs: number; offsetMs: number }>
@@ -76,7 +76,7 @@ export function createSounds({
   let context: AudioContextLike | undefined;
   const listeners = new Set<(muted: boolean) => void>();
   try {
-    muted = storage.getItem(storageKey) === "true";
+    muted = storage.getItem(soundStorageKey) === "true";
   } catch {
     muted = false;
   }
@@ -111,11 +111,11 @@ export function createSounds({
       return muted;
     },
     play,
-    setMuted(value) {
+    setMuted(value, { persist = true } = {}) {
       if (muted === value) return;
       muted = value;
       try {
-        storage.setItem(storageKey, String(value));
+        if (persist) storage.setItem(soundStorageKey, String(value));
       } catch {
         // Keep the in-memory setting even when persistent storage is unavailable.
       }

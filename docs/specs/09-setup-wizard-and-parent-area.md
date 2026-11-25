@@ -40,6 +40,8 @@ A parent who isn't technical gets from `npx pawnpal` to a kid playing in under t
 
 On Windows and Linux, GPU memory can't be detected reliably, so the UI says "suggested," not "required."
 
+The measured 0.1.0 recommendation is `qwen3:1.7b-q4_K_M` at every RAM tier. With Ollama’s thinking disabled, it reached the 80% validator target at a 243 ms median. The measured 4B model passed 65% at a 597 ms median. [Model measurements](../llm-models.md)
+
 **Parent area** (gear icon → PIN prompt)
 - **Profiles:**
   - add a profile

@@ -20,6 +20,7 @@ type LlmClientOptions = {
   baseUrl: string;
   apiKey?: string;
   timeoutMs?: number;
+  reasoningEffort?: "none";
   fetch?: FetchAdapter;
 };
 
@@ -27,6 +28,7 @@ export function createLlmClient({
   baseUrl,
   apiKey,
   timeoutMs = 3000,
+  reasoningEffort,
   fetch: fetchAdapter = globalThis.fetch,
 }: LlmClientOptions): {
   chat(request: ChatCompletionRequest): Promise<{ text: string; raw: unknown }>;
@@ -37,7 +39,11 @@ export function createLlmClient({
       const raw = await requestJson(
         "POST",
         "chat/completions",
-        JSON.stringify(request),
+        JSON.stringify(
+          reasoningEffort
+            ? { ...request, reasoning_effort: reasoningEffort }
+            : request,
+        ),
       );
       if (!isRecord(raw)) throw badResponse("Chat response must be an object");
       const choices = raw.choices;

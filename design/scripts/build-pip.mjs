@@ -35,7 +35,7 @@ const cheeks = `
   <ellipse cx="77" cy="47" rx="4.5" ry="3" fill="${C.cheek}" opacity=".85"/>`;
 
 const eye = (x, y, r = 3.6) =>
-  `<circle cx="${x}" cy="${y}" r="${r}" fill="${C.ink}"/><circle cx="${x + r * 0.35}" cy="${y - r * 0.35}" r="${r * 0.32}" fill="#fff"/>`;
+  `<g class="eye"><circle cx="${x}" cy="${y}" r="${r}" fill="${C.ink}"/><circle cx="${x + r * 0.35}" cy="${y - r * 0.35}" r="${r * 0.32}" fill="#fff"/></g>`;
 
 const sparkle = (x, y, s = 1) =>
   `<path transform="translate(${x} ${y}) scale(${s})" d="M0 -8 C1 -2 2 -1 8 0 C2 1 1 2 0 8 C-1 2 -2 1 -8 0 C-2 -1 -1 -2 0 -8 Z" fill="${C.gold}" stroke="${C.ink}" stroke-width="1.5" stroke-linejoin="round"/>`;
@@ -78,7 +78,14 @@ const faces = {
 };
 
 for (const [name, face] of Object.entries(faces)) {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140" role="img" aria-label="Pip the Pawn, ${name}">${body}${face}\n</svg>\n`;
+  const blink = name === 'happy' ? `
+  <style>
+    @media (prefers-reduced-motion: no-preference) {
+      .eye { transform-box: fill-box; transform-origin: center; animation: blink 5s infinite; }
+      @keyframes blink { 0%, 94%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+    }
+  </style>` : '';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140" role="img" aria-label="Pip the Pawn, ${name}">${blink}${body}${face}\n</svg>\n`;
   writeFileSync(join(out, `pip-${name}.svg`), svg);
 }
 console.log(`wrote ${Object.keys(faces).length} Pip SVGs to ${out}`);

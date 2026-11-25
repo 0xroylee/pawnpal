@@ -2,13 +2,23 @@ import { useState } from "react";
 import { Chess, type PieceSymbol, type Square } from "chess.js";
 import { Bot, Flag, House, UserRound, Volume2, VolumeX } from "lucide-react";
 import { Board } from "../board/Board.js";
-import type { GameAction, GameState } from "../game/reducer.js";
+import {
+  gameRecord,
+  type GameAction,
+  type GameState,
+} from "../game/reducer.js";
 import { useCoach } from "../game/useCoach.js";
+import { useRephrasedMessage } from "../game/useRephrasedMessage.js";
+import type { BrainStatus } from "../parent/client.js";
+import type { Badge } from "../../shared/game/rewards.js";
+import { useReadAloud } from "../sound/readAloud.js";
+import type { SaveStatus } from "../game/autosave.js";
 import { DebugPanel } from "../dev/DebugPanel.js";
 import { t, type MessageKey } from "../i18n/t.js";
 import { CoachBubble } from "./CoachBubble.js";
 import { MoveList } from "./MoveList.js";
 import { ResultBanner } from "./ResultBanner.js";
+import { Pip } from "./Pip.js";
 import { resultMessageKey } from "./resultMessage.js";
 
 const pieceMessageKeys: Record<PieceSymbol, MessageKey> = {
@@ -47,6 +57,16 @@ export function GameScreen({
   onToggleSound,
   engineBuild,
   dev = false,
+  onLeave,
+  onReview,
+  saveStatus,
+  onRetrySave,
+  brain,
+  kidAge,
+  stars,
+  newBadges,
+  voiceOn = false,
+  onToggleVoice,
 }: {
   state: GameState;
   dispatch: (action: GameAction) => void;
@@ -54,25 +74,53 @@ export function GameScreen({
   onToggleSound: () => void;
   engineBuild?: "lite" | "lite-single";
   dev?: boolean;
+  onLeave?: (destination: "home" | "playAgain") => void;
+  onReview?: () => void;
+  saveStatus?: SaveStatus;
+  onRetrySave?: () => void;
+  brain?: BrainStatus;
+  kidAge?: number | null;
+  stars?: number | null;
+  newBadges?: Badge[];
+  voiceOn?: boolean;
+  onToggleVoice?: () => void;
 }) {
   const [confirmResign, setConfirmResign] = useState(false);
   const { coach, dismiss } = useCoach(state);
-  const coachMessage = coach.message;
+  const coachMessage = useRephrasedMessage(
+    coach.message,
+    state.kidColor,
+    kidAge,
+    brain,
+  );
   const coachAnnotations = coach.annotations;
+  const spoken = newBadges?.length
+    ? newBadges
+        .map(({ id }) =>
+          t("rewards.newBadge", { badge: t(`rewards.badge.${id}`) }),
+        )
+        .join(" ")
+    : coachMessage?.pip !== "thinking"
+      ? coachMessage?.text
+      : undefined;
+  const voiceAvailable = useReadAloud(voiceOn, spoken);
   const kidTurn = state.phase === "kidToMove";
   const opponentThinking =
     state.phase === "opponentToMove" || state.phase === "grading";
   const status =
     state.phase === "kidToMove"
       ? t("game.yourTurn")
-      : state.phase === "coaching"
+      : state.phase === "nudge" || state.phase === "reveal"
         ? t("game.coachTurn")
         : opponentThinking
           ? t("game.thinking")
           : state.result
             ? t("game.title")
             : t("game.yourTurn");
-  const moveAnnouncement = opponentMoveAnnouncement(state);
+  const moveAnnouncement =
+    state.retry && (kidTurn || state.phase === "reveal")
+      ? null
+      : opponentMoveAnnouncement(state);
   const resultAnnouncement = state.result
     ? t(resultMessageKey(state.result))
     : null;
@@ -88,7 +136,11 @@ export function GameScreen({
   };
   const dismissCoach = () => {
     dismiss();
-    dispatch({ type: "KEEP_MOVE" });
+    if (state.phase === "reveal") dispatch({ type: "REVEAL_OK" });
+  };
+  const leave = (destination: "home" | "playAgain") => {
+    if (onLeave) onLeave(destination);
+    else dispatch({ type: "PLAY_AGAIN" });
   };
 
   return (
@@ -100,7 +152,7 @@ export function GameScreen({
         <button
           className="pp-btn pp-btn--secondary pp-btn--sm pp-game__home"
           type="button"
-          onClick={() => dispatch({ type: "PLAY_AGAIN" })}
+          onClick={() => leave("home")}
         >
           <House aria-hidden="true" focusable="false" />
           {t("game.home")}
@@ -196,20 +248,59 @@ export function GameScreen({
           </div>
         </section>
         <aside className="pp-game__side-column">
-          <CoachBubble message={coachMessage} onDismiss={dismissCoach} />
+          <CoachBubble
+            message={coachMessage}
+            onDismiss={dismissCoach}
+            speech={
+              voiceAvailable && onToggleVoice
+                ? { enabled: voiceOn, onToggle: onToggleVoice }
+                : undefined
+            }
+            retryActions={
+              state.phase === "nudge"
+                ? {
+                    tryAgain: () => dispatch({ type: "TRY_AGAIN" }),
+                    showMe: () => dispatch({ type: "SHOW_ME" }),
+                    keepMove: () => dispatch({ type: "KEEP_MOVE" }),
+                  }
+                : undefined
+            }
+          />
+          {!coachMessage && !state.result && <Pip mood="happy" />}
           <p className="pp-game__live" aria-live="polite">
             {liveAnnouncement}
           </p>
           {state.result && (
             <ResultBanner
               result={state.result}
-              onPlayAgain={() => dispatch({ type: "PLAY_AGAIN" })}
+              onPlayAgain={() => leave("playAgain")}
+              onReview={onReview}
+              onSkip={onReview ? () => leave("home") : undefined}
+              stars={stars}
+              badges={newBadges}
             />
           )}
           <MoveList moves={state.history} />
+          {saveStatus && (
+            <div className="pp-library__save">
+              <span role="status">{t(`library.save.${saveStatus}`)}</span>
+              {saveStatus === "failed" && (
+                <button
+                  className="pp-btn pp-btn--secondary pp-btn--sm"
+                  type="button"
+                  onClick={onRetrySave}
+                >
+                  {t("library.retry")}
+                </button>
+              )}
+            </div>
+          )}
           {dev && (
             <>
               <DebugPanel analyses={state.analyses} kidColor={state.kidColor} />
+              <output hidden data-testid="debug-game-record">
+                {JSON.stringify(gameRecord(state))}
+              </output>
               <output
                 className="pp-debug-panel__facts"
                 data-testid="debug-facts"

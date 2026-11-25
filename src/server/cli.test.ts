@@ -57,13 +57,19 @@ describe("run", () => {
     const log = vi.fn();
     const serveApp = vi.fn(() => ({ port: 4800, close: vi.fn() }));
 
-    await run(["--no-open", "--port", "0"], {
-      serveApp,
-      openBrowser,
-      log,
-      env: {},
-      installSignals: false,
-    });
+    const home = mkdtempSync(join(tmpdir(), "pawnpal-cli-"));
+    try {
+      const server = await run(["--no-open", "--port", "0"], {
+        serveApp,
+        openBrowser,
+        log,
+        env: { PAWNPAL_HOME: home },
+        installSignals: false,
+      });
+      await server?.close();
+    } finally {
+      rmSync(home, { recursive: true, force: true });
+    }
 
     expect(serveApp).toHaveBeenCalledOnce();
     expect(log).toHaveBeenCalledWith(
@@ -72,3 +78,6 @@ describe("run", () => {
     expect(openBrowser).not.toHaveBeenCalled();
   });
 });
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";

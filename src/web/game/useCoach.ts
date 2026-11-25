@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import {
   coachReducer,
   initialCoachState,
@@ -8,7 +15,8 @@ import {
 import type { GameState } from "./reducer.js";
 
 type GameTracker = {
-  gameKey: number;
+  gameToken: number;
+  phase?: GameState["phase"];
   historyLength: number;
   analyses: Record<number, GameState["analyses"][number]>;
 };
@@ -31,40 +39,78 @@ export function useCoach(
   );
   const [coach, dispatchCoach] = useReducer(reducer, initialCoachState);
   const tracker = useRef<GameTracker | null>(null);
-  const gameKey = game.turnToken - game.history.length;
-
-  useEffect(() => {
+  useLayoutEffect(() => {
     let previous = tracker.current;
-    if (!previous) {
+    if (!previous || previous.gameToken !== game.gameToken) {
+      if (previous) dispatchCoach({ type: "NEW_GAME" });
       previous = {
-        gameKey,
+        gameToken: game.gameToken,
         historyLength: game.history.length,
         analyses: {},
       };
       tracker.current = previous;
-    } else if (previous.gameKey !== gameKey) {
-      tracker.current = {
-        gameKey,
-        historyLength: game.history.length,
-        analyses: {},
-      };
-      dispatchCoach({ type: "NEW_GAME" });
+    }
+
+    const previousPhase = previous.phase;
+    const previousLength = previous.historyLength;
+    const previousAnalyses = previous.analyses;
+    previous.phase = game.phase;
+    previous.historyLength = game.history.length;
+    previous.analyses = game.analyses;
+
+    if (game.result?.reason === "resign") {
+      if (previousPhase !== "over") dispatchCoach({ type: "DISMISS" });
       return;
     }
 
-    const newMoves = game.history.slice(previous.historyLength);
+    const newMoves = game.history.slice(previousLength);
     if (newMoves.some((move) => move.color === game.kidColor)) {
       dispatchCoach({ type: "KID_MOVED" });
+    } else if (newMoves.length) {
+      dispatchCoach({ type: "OPPONENT_MOVED" });
+    } else if (
+      game.history.length < previousLength ||
+      previousPhase === "reveal"
+    ) {
+      if (game.phase !== "reveal") dispatchCoach({ type: "DISMISS" });
     }
-    previous.historyLength = game.history.length;
 
+    if (game.phase === "reveal") {
+      const analysis = game.retry?.reveal;
+      if (analysis && previousPhase !== "reveal") {
+        dispatchCoach({ type: "REVEAL", analysis });
+      }
+      return;
+    }
+
+    const latest = game.analyses[game.history.length];
+    if (game.phase === "nudge") {
+      if (latest && previousPhase !== "nudge") {
+        dispatchCoach({ type: "NUDGE", analysis: latest });
+      }
+      return;
+    }
+    if (
+      latest &&
+      previousPhase === "nudge" &&
+      game.phase === "opponentToMove"
+    ) {
+      dispatchCoach({ type: "GRADED", analysis: latest });
+      return;
+    }
     for (const [ply, analysis] of Object.entries(game.analyses)) {
-      const numberPly = Number(ply);
-      if (previous.analyses[numberPly] === analysis) continue;
-      previous.analyses[numberPly] = analysis;
+      if (previousAnalyses[Number(ply)] === analysis) continue;
       dispatchCoach({ type: "GRADED", analysis });
     }
-  }, [game.analyses, game.history, game.kidColor, gameKey]);
+  }, [
+    game.analyses,
+    game.gameToken,
+    game.history,
+    game.kidColor,
+    game.phase,
+    game.result,
+    game.retry,
+  ]);
 
   useEffect(() => {
     if (game.hintTier === 0) return;

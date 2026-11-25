@@ -1,7 +1,9 @@
 import { expect, type Page } from "@playwright/test";
+import type { Difficulty } from "../../src/shared/game/difficulty.js";
 
 export async function startAs(page: Page, color: "White" | "Black" = "White") {
   await page.goto("/");
+  await page.getByRole("button", { name: "Play as guest" }).click();
   await page.getByRole("button", { name: color, exact: true }).click();
   await page.getByRole("button", { name: "Play!" }).click();
   await expect(page.locator(".pp-board")).toBeVisible();
@@ -34,6 +36,12 @@ export async function makeAnyLegalMove(page: Page, color: "w" | "b") {
       );
     if (target) {
       await board.locator(`[data-square="${target}"]`).click();
+      const promotion = page.getByRole("dialog", {
+        name: "Choose a piece to promote to",
+      });
+      if (await promotion.isVisible()) {
+        await promotion.getByRole("button", { name: "Queen" }).click();
+      }
       return;
     }
   }
@@ -44,14 +52,17 @@ export async function expectReplyWithinFiveSeconds(
   page: Page,
   previousMoves: number,
 ) {
-  const coachOk = page.getByRole("button", { name: "OK", exact: true });
+  const keepMove = page.getByRole("button", {
+    name: "Keep my move",
+    exact: true,
+  });
   let released = false;
   await expect
     .poll(
       async () => {
-        if (!released && (await coachOk.isVisible())) {
+        if (!released && (await keepMove.isVisible())) {
           released = true;
-          await coachOk.click();
+          await keepMove.click();
         }
         return page.getByTestId("move").count();
       },
@@ -64,10 +75,16 @@ export async function openDevFen(
   page: Page,
   fen: string,
   color?: "w" | "b",
-  options: { replay?: boolean } = {},
+  options: {
+    replay?: boolean;
+    offerTryAgain?: boolean;
+    level?: Difficulty;
+  } = {},
 ) {
   const params = new URLSearchParams({ fen });
   if (color) params.set("color", color);
   if (options.replay) params.set("analyst", "replay");
+  if (options.offerTryAgain === false) params.set("tryAgain", "off");
+  if (options.level !== undefined) params.set("level", String(options.level));
   await page.goto(`/?${params.toString()}`);
 }

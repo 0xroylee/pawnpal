@@ -4,6 +4,8 @@ import {
   isCoachedGrade,
   type EngineLine,
   type FactKind,
+  type CoachFact,
+  type RephraseReason,
   type MoveAnalysis,
 } from "../../shared/coach/types.js";
 import {
@@ -27,6 +29,9 @@ export type CoachMessage = {
   text: string;
   mode: CoachMessageMode;
   kind?: FactKind;
+  fact?: CoachFact;
+  source?: "llm" | "template";
+  reason?: RephraseReason;
   grade?: CoachGrade;
   pip: CoachPip;
   late?: boolean;
@@ -41,6 +46,7 @@ export type CoachState = {
 
 export type CoachEvent =
   | { type: "GRADED"; analysis: MoveAnalysis }
+  | { type: "NUDGE" | "REVEAL"; analysis: MoveAnalysis }
   | {
       type: "HINT";
       tier: 1 | 2 | 3;
@@ -49,6 +55,7 @@ export type CoachEvent =
       ply: number;
     }
   | { type: "KID_MOVED" }
+  | { type: "OPPONENT_MOVED" }
   | { type: "DISMISS" }
   | { type: "PRAISE_EXPIRED" }
   | { type: "NEW_GAME" };
@@ -75,6 +82,10 @@ export function coachReducer(
   switch (event.type) {
     case "GRADED":
       return gradedState(state, event.analysis, deps);
+    case "NUDGE":
+      return nudgeState(state, event.analysis, deps);
+    case "REVEAL":
+      return revealState(state, event.analysis, deps);
     case "HINT":
       return hintState(state, event, deps);
     case "KID_MOVED":
@@ -84,6 +95,8 @@ export function coachReducer(
         message: undefined,
         annotations: emptyAnnotations(),
       };
+    case "OPPONENT_MOVED":
+      return { ...state, annotations: emptyAnnotations() };
     case "PRAISE_EXPIRED":
       return state.message?.mode === "praise"
         ? { ...state, message: undefined }
@@ -91,6 +104,76 @@ export function coachReducer(
     case "NEW_GAME":
       return initialCoachState;
   }
+}
+
+function nudgeState(
+  state: CoachState,
+  analysis: MoveAnalysis,
+  deps: CoachDependencies,
+): CoachState {
+  const fact = selectFact(analysis.facts);
+  const nudge = renderMessage({
+    kind: fact?.kind ?? "noFact",
+    mode: "nudge",
+    fact,
+    history: state.variantHistory,
+    ...deps,
+  });
+  const { danger } = annotationsForHeld(
+    fact,
+    positionAfterMove(analysis),
+    deps.kidColor,
+  );
+  return {
+    ...state,
+    message: {
+      text: nudge.text,
+      mode: "nudge",
+      kind: fact?.kind,
+      ...(fact ? { fact } : {}),
+      grade: analysis.grade === "mistake" ? "oops" : "bigoops",
+      pip: analysis.grade === "blunder" ? "surprised" : "encouraging",
+    },
+    annotations: { ...EMPTY_ANNOTATIONS, danger },
+    variantHistory: nudge.history!,
+  };
+}
+
+function revealState(
+  state: CoachState,
+  analysis: MoveAnalysis,
+  deps: CoachDependencies,
+): CoachState {
+  const fact = selectFact(analysis.facts);
+  const best = analysis.linesBefore[0];
+  const explanation = renderMessage({
+    kind: fact?.kind ?? "noFact",
+    mode: "late",
+    fact,
+    history: state.variantHistory,
+    ...deps,
+  });
+  const revealFact = fact?.betterMoveUci === best?.uci ? fact : undefined;
+  const reveal = renderMessage({
+    kind: revealFact?.kind ?? "noFact",
+    mode: "reveal",
+    fact: revealFact,
+    playedMoveUci: analysis.moveUci,
+    history: explanation.history!,
+    ...deps,
+  });
+  return {
+    ...state,
+    message: {
+      text: `${explanation.text} ${reveal.text}`,
+      mode: "reveal",
+      kind: fact?.kind,
+      ...(revealFact ? { fact: revealFact } : {}),
+      pip: "encouraging",
+    },
+    annotations: annotationsFor(undefined, "hint3", moveFromUci(best?.uci)),
+    variantHistory: reveal.history!,
+  };
 }
 
 function gradedState(
@@ -117,7 +200,7 @@ function gradedState(
         message: {
           text: explain.text,
           mode: "explain",
-          ...(fact ? { kind: fact.kind } : {}),
+          ...(fact ? { kind: fact.kind, fact } : {}),
           grade: analysis.grade === "mistake" ? "oops" : "bigoops",
           pip: "surprised",
           late: true,
@@ -132,7 +215,7 @@ function gradedState(
       message: {
         text: explain.text,
         mode: "explain",
-        ...(fact ? { kind: fact.kind } : {}),
+        ...(fact ? { kind: fact.kind, fact } : {}),
         grade: analysis.grade === "mistake" ? "oops" : "bigoops",
         pip: "surprised",
       },
@@ -142,6 +225,24 @@ function gradedState(
         deps.kidColor,
       ),
       variantHistory: explain.history!,
+    };
+  }
+
+  if (
+    !analysis.late &&
+    analysis.attempts?.length &&
+    !analysis.attempts.some((attempt) => attempt.revealed)
+  ) {
+    return {
+      ...state,
+      message: {
+        text: messages["coach.retryBetter"],
+        mode: "praise",
+        grade: "good",
+        pip: "cheering",
+      },
+      annotations: emptyAnnotations(),
+      lastPraisePly: analysis.ply,
     };
   }
 
@@ -162,7 +263,7 @@ function gradedState(
       message: {
         text: praise.text,
         mode: "praise",
-        ...(praiseFact ? { kind: praiseFact.kind } : {}),
+        ...(praiseFact ? { kind: praiseFact.kind, fact: praiseFact } : {}),
         grade: "great",
         pip: "cheering",
       },
@@ -225,7 +326,7 @@ function hintState(
     message: {
       text: hint.text,
       mode: messageMode,
-      ...(templateFact ? { kind: templateFact.kind } : {}),
+      ...(templateFact ? { kind: templateFact.kind, fact: templateFact } : {}),
       pip: "encouraging",
     },
     annotations: annotationsFor(undefined, messageMode, better),

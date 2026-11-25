@@ -1,7 +1,13 @@
 import endings from "../../../tests/fixtures/endings.json";
+import { Chess } from "chess.js";
 import { describe, expect, it } from "vitest";
 import type { MoveAnalysis } from "../../shared/coach/types.ts";
-import { gameReducer, initialGame } from "./reducer.js";
+import {
+  gameRecord,
+  gameReducer,
+  initialGame,
+  type GameState,
+} from "./reducer.js";
 
 const standardFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 const sampleLines = [
@@ -24,6 +30,158 @@ function analysis(ply: number, moveUci: string): MoveAnalysis {
     facts: [],
   };
 }
+
+function kidMove(state: GameState, uci: string): GameState {
+  return gameReducer(state, {
+    type: "KID_MOVE",
+    from: uci.slice(0, 2),
+    to: uci.slice(2, 4),
+    promotion: uci[4],
+  });
+}
+
+function gradeCurrent(
+  state: GameState,
+  grade: MoveAnalysis["grade"],
+): GameState {
+  const ply = state.history.length;
+  const move = state.history[ply - 1]!;
+  return gameReducer(state, {
+    type: "GRADE_READY",
+    ply,
+    turnToken: state.turnToken,
+    analysis: { ...analysis(ply, move.uci), moveSan: move.san, grade },
+  });
+}
+
+describe("Try Again", () => {
+  const start = () =>
+    gameReducer(initialGame(), { type: "NEW_GAME", kidColor: "w" });
+
+  it("restores the turn, takes back a second miss, and records only the move that stands in PGN", () => {
+    const initial = start();
+    const first = gradeCurrent(kidMove(initial, "e2e4"), "blunder");
+    expect(first.phase).toBe("nudge");
+    expect(gameRecord(first).analyses).toEqual({});
+    const replayed = new Chess();
+    replayed.loadPgn(gameRecord(first).pgn);
+    expect(replayed.history()).toEqual([]);
+
+    const retry = gameReducer(first, { type: "TRY_AGAIN" });
+    expect(retry).toMatchObject({
+      phase: "kidToMove",
+      fen: initial.fen,
+      history: [],
+      analyses: {},
+      gameToken: initial.gameToken,
+    });
+    expect(retry.turnToken).toBeGreaterThan(first.turnToken);
+    expect(gameReducer(retry, { type: "TRY_AGAIN" })).toBe(retry);
+
+    const reveal = gradeCurrent(kidMove(retry, "d2d4"), "mistake");
+    expect(reveal).toMatchObject({
+      phase: "reveal",
+      fen: initial.fen,
+      history: [],
+    });
+    expect(
+      gameReducer(reveal, {
+        type: "OPPONENT_MOVE",
+        uci: "e7e5",
+        turnToken: reveal.turnToken,
+      }),
+    ).toBe(reveal);
+    const next = gameReducer(reveal, { type: "REVEAL_OK" });
+    const released = gradeCurrent(kidMove(next, "g1f3"), "blunder");
+
+    expect(released.phase).toBe("opponentToMove");
+    const record = gameRecord(released);
+    replayed.loadPgn(record.pgn);
+    expect(replayed.history()).toEqual(["Nf3"]);
+    expect(record.analyses[1]?.attempts).toEqual([
+      {
+        moveUci: "e2e4",
+        moveSan: "e4",
+        grade: "blunder",
+        usedShowMe: false,
+        revealed: false,
+      },
+      {
+        moveUci: "d2d4",
+        moveSan: "d4",
+        grade: "mistake",
+        usedShowMe: false,
+        revealed: true,
+      },
+    ]);
+  });
+
+  it("uses the original grade when the kid retries the same move", () => {
+    const first = gradeCurrent(kidMove(start(), "e2e4"), "mistake");
+    const retry = gameReducer(first, { type: "TRY_AGAIN" });
+    const kept = kidMove(retry, "e2e4");
+    expect(kept.phase).toBe("opponentToMove");
+    expect(kept.analyses[1]).toMatchObject({
+      moveUci: "e2e4",
+      grade: "mistake",
+      attempts: [{ moveUci: "e2e4", revealed: false, usedShowMe: false }],
+    });
+  });
+
+  it("records Show me and rejects a stale grade for the same move and ply after reveal", () => {
+    const first = gradeCurrent(kidMove(start(), "e2e4"), "mistake");
+    const reveal = gameReducer(first, { type: "SHOW_ME" });
+    expect(reveal.phase).toBe("reveal");
+    expect(reveal.fen).toBe(first.startFen);
+    const retried = kidMove(gameReducer(reveal, { type: "REVEAL_OK" }), "e2e4");
+    expect(retried.phase).toBe("grading");
+    expect(
+      gameReducer(retried, {
+        type: "GRADE_READY",
+        ply: 1,
+        turnToken: first.turnToken,
+        analysis: first.analyses[1]!,
+      }),
+    ).toBe(retried);
+    const released = gradeCurrent(retried, "mistake");
+    expect(released.phase).toBe("opponentToMove");
+    expect(released.analyses[1]?.attempts).toMatchObject([
+      { moveUci: "e2e4", usedShowMe: true, revealed: true },
+    ]);
+  });
+
+  it("continues immediately when Try Again is off", () => {
+    const disabled = gameReducer(initialGame(), {
+      type: "NEW_GAME",
+      kidColor: "w",
+      offerTryAgain: false,
+    });
+    const released = gradeCurrent(kidMove(disabled, "e2e4"), "blunder");
+    expect(released.phase).toBe("opponentToMove");
+    expect(released.analyses[1]).not.toHaveProperty("late");
+  });
+
+  it("keeps attempts on a retry whose grade arrives late", () => {
+    const first = gradeCurrent(kidMove(start(), "e2e4"), "blunder");
+    const retry = gameReducer(first, { type: "TRY_AGAIN" });
+    const moved = kidMove(retry, "d2d4");
+    const released = gameReducer(moved, {
+      type: "GRADE_TIMEOUT",
+      ply: 1,
+      turnToken: moved.turnToken,
+    });
+    expect(released.phase).toBe("opponentToMove");
+    expect(gameRecord(released).attempts[1]).toMatchObject([
+      { moveUci: "e2e4" },
+    ]);
+    const late = gradeCurrent(released, "blunder");
+    expect(late.phase).toBe("opponentToMove");
+    expect(late.analyses[1]).toMatchObject({
+      late: true,
+      attempts: [{ moveUci: "e2e4" }],
+    });
+  });
+});
 
 describe("gameReducer", () => {
   it("starts with the requested color and lets the side to move act first", () => {
@@ -107,6 +265,7 @@ describe("gameReducer", () => {
     state = gameReducer(state, {
       type: "GRADE_READY",
       ply: 1,
+      turnToken: state.pendingGrades[1]?.turnToken ?? state.turnToken,
       analysis: analysis(1, "e2e4"),
     });
 
@@ -125,10 +284,11 @@ describe("gameReducer", () => {
       state = gameReducer(state, {
         type: "GRADE_READY",
         ply: 1,
+        turnToken: state.pendingGrades[1]?.turnToken ?? state.turnToken,
         analysis: { ...analysis(1, "e2e4"), grade },
       });
 
-      expect(state.phase).toBe("coaching");
+      expect(state.phase).toBe("nudge");
       expect(state.history).toHaveLength(1);
       expect(state.analyses[1]).toMatchObject({ grade, moveUci: "e2e4" });
       expect(state.analyses[1]).not.toHaveProperty("late");
@@ -146,6 +306,7 @@ describe("gameReducer", () => {
       state = gameReducer(state, {
         type: "GRADE_READY",
         ply: 1,
+        turnToken: state.pendingGrades[1]?.turnToken ?? state.turnToken,
         analysis: { ...analysis(1, "e2e4"), grade },
       });
 
@@ -159,12 +320,13 @@ describe("gameReducer", () => {
     held = gameReducer(held, {
       type: "GRADE_READY",
       ply: 1,
+      turnToken: held.pendingGrades[1]?.turnToken ?? held.turnToken,
       analysis: { ...analysis(1, "e2e4"), grade: "mistake" },
     });
     const turnToken = held.turnToken;
     const released = gameReducer(held, { type: "KEEP_MOVE" });
 
-    expect(held.phase).toBe("coaching");
+    expect(held.phase).toBe("nudge");
     expect(released.phase).toBe("opponentToMove");
     expect(released.turnToken).toBe(turnToken);
     expect(released.history).toBe(held.history);
@@ -179,6 +341,7 @@ describe("gameReducer", () => {
     held = gameReducer(held, {
       type: "GRADE_READY",
       ply: 1,
+      turnToken: held.pendingGrades[1]?.turnToken ?? held.turnToken,
       analysis: { ...analysis(1, "e2e4"), grade: "blunder" },
     });
     const rejected = [
@@ -279,7 +442,12 @@ describe("gameReducer", () => {
     (_name, createState, ply, grade) => {
       const state = createState();
       expect(
-        gameReducer(state, { type: "GRADE_READY", ply, analysis: grade }),
+        gameReducer(state, {
+          type: "GRADE_READY",
+          ply,
+          turnToken: state.turnToken,
+          analysis: grade,
+        }),
       ).toBe(state);
     },
   );
@@ -298,6 +466,7 @@ describe("gameReducer", () => {
     state = gameReducer(state, {
       type: "GRADE_READY",
       ply: 1,
+      turnToken: state.pendingGrades[1]?.turnToken ?? state.turnToken,
       analysis: analysis(1, "e2e4"),
     });
     expect(state.analyses[1]?.hintTier).toBe(2);
@@ -361,6 +530,7 @@ describe("gameReducer", () => {
     state = gameReducer(state, {
       type: "GRADE_READY",
       ply: 1,
+      turnToken: state.pendingGrades[1]?.turnToken ?? state.turnToken,
       analysis: analysis(1, "e2e4"),
     });
 
@@ -379,6 +549,7 @@ describe("gameReducer", () => {
     state = gameReducer(state, {
       type: "GRADE_READY",
       ply: 1,
+      turnToken: state.pendingGrades[1]?.turnToken ?? state.turnToken,
       analysis: {
         ...analysis(1, "f7g7"),
         moveSan: "Qg7#",
@@ -545,6 +716,7 @@ describe("gameReducer", () => {
         state = gameReducer(state, {
           type: "GRADE_READY",
           ply: 1,
+          turnToken: state.pendingGrades[1]?.turnToken ?? state.turnToken,
           analysis: analysis(1, "e2e4"),
         });
       }
@@ -566,6 +738,7 @@ describe("gameReducer", () => {
     state = gameReducer(state, {
       type: "GRADE_READY",
       ply: 1,
+      turnToken: state.pendingGrades[1]?.turnToken ?? state.turnToken,
       analysis: analysis(1, "e2e4"),
     });
     state = gameReducer(state, { type: "RESIGN" });
@@ -573,7 +746,12 @@ describe("gameReducer", () => {
     const blunder = { ...analysis(1, "e2e4"), grade: "blunder" as const };
 
     expect(
-      gameReducer(state, { type: "GRADE_READY", ply: 1, analysis: blunder }),
+      gameReducer(state, {
+        type: "GRADE_READY",
+        ply: 1,
+        turnToken: state.turnToken,
+        analysis: blunder,
+      }),
     ).toBe(resigned);
     expect(state.analyses[1]?.grade).toBe("best");
     expect(state.analyses[1]).not.toHaveProperty("late");
@@ -594,6 +772,7 @@ describe("gameReducer", () => {
     state = gameReducer(state, {
       type: "GRADE_READY",
       ply: 1,
+      turnToken: state.pendingGrades[1]?.turnToken ?? state.turnToken,
       analysis: analysis(1, "e2e4"),
     });
     const late = state;
@@ -602,6 +781,7 @@ describe("gameReducer", () => {
       gameReducer(state, {
         type: "GRADE_READY",
         ply: 1,
+        turnToken: state.pendingGrades[1]?.turnToken ?? state.turnToken,
         analysis: blunder,
       }),
     ).toBe(late);
@@ -614,6 +794,7 @@ describe("gameReducer", () => {
     state = gameReducer(state, {
       type: "GRADE_READY",
       ply: 1,
+      turnToken: state.pendingGrades[1]?.turnToken ?? state.turnToken,
       analysis: analysis(1, "e2e4"),
     });
 

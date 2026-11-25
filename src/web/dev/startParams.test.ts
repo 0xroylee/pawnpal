@@ -42,6 +42,15 @@ describe("parseStartParams", () => {
     ).toBeNull();
   });
 
+  it("allows a game to turn off Try Again through the development URL", () => {
+    const fen = "4k3/8/8/8/8/8/8/4K3 w - - 0 1";
+    const search = `?fen=${encodeURIComponent(fen)}&tryAgain=off`;
+    expect(parseStartParams(search, true)).toMatchObject({
+      offerTryAgain: false,
+    });
+    expect(parseStartParams(search, false)).toBeNull();
+  });
+
   it("ignores the replay selector when production has an injected recording", () => {
     const descriptor = Object.getOwnPropertyDescriptor(
       globalThis,

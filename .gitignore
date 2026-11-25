@@ -11,3 +11,4 @@ playwright-report/
 public/engine/
 .eslintcache
 *.tsbuildinfo
+training/runs/

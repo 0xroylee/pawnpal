@@ -9,7 +9,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { finalizeFact, type MoveAnalysis } from "../../shared/coach/types.js";
-import { gameReducer, initialGame, type GameState } from "../game/reducer.js";
+import { gameReducer, initialGame } from "../game/reducer.js";
 import { GameScreen } from "./GameScreen.js";
 
 afterEach(cleanup);
@@ -320,7 +320,7 @@ describe("GameScreen", () => {
     );
   });
 
-  it("holds the board for coaching and releases the opponent from the OK button", async () => {
+  it("holds the board for a nudge and gives the explanation when the kid keeps the move", async () => {
     let moved = gameReducer(initialGame(), { type: "NEW_GAME", kidColor: "w" });
     moved = gameReducer(moved, { type: "KID_MOVE", from: "e2", to: "e4" });
     const fact = finalizeFact({
@@ -344,13 +344,14 @@ describe("GameScreen", () => {
       isOnlyMove: false,
       facts: [fact],
     };
-    const state = {
-      ...moved,
-      phase: "coaching",
-      analyses: { 1: analysis },
-    } as unknown as GameState;
+    const state = gameReducer(moved, {
+      type: "GRADE_READY",
+      ply: 1,
+      turnToken: moved.turnToken,
+      analysis,
+    });
     const dispatch = vi.fn();
-    const { container } = render(
+    const { container, rerender } = render(
       <GameScreen
         state={state}
         dispatch={dispatch}
@@ -361,7 +362,7 @@ describe("GameScreen", () => {
 
     await waitFor(() =>
       expect(
-        container.querySelector('.pp-bubble__text[data-mode="explain"]'),
+        container.querySelector('.pp-bubble__text[data-mode="nudge"]'),
       ).not.toBeNull(),
     );
     expect(
@@ -377,11 +378,21 @@ describe("GameScreen", () => {
       container.querySelector('.pp-board__arrows [data-arrow-kind="better"]'),
     ).toBeNull();
 
-    fireEvent.click(screen.getByRole("button", { name: "OK" }));
+    expect(screen.getByRole("button", { name: "Try again" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Show me" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Keep my move" }));
     expect(dispatch).toHaveBeenCalledWith({ type: "KEEP_MOVE" });
-    await waitFor(() =>
-      expect(container.querySelector(".pp-bubble__text")).toBeNull(),
+    rerender(
+      <GameScreen
+        state={gameReducer(state, { type: "KEEP_MOVE" })}
+        dispatch={dispatch}
+        muted
+        onToggleSound={vi.fn()}
+      />,
     );
+    expect(
+      container.querySelector('.pp-bubble__text[data-mode="explain"]'),
+    ).not.toBeNull();
   });
 
   it("shows a late coach message after the reply without stale annotations", async () => {
@@ -408,6 +419,7 @@ describe("GameScreen", () => {
     const late = gameReducer(state, {
       type: "GRADE_READY",
       ply: 1,
+      turnToken: state.pendingGrades[1]!.turnToken,
       analysis: {
         ply: 1,
         fenBefore: state.startFen,

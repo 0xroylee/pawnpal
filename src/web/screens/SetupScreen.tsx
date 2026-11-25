@@ -1,18 +1,32 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { Color } from "chess.js";
+import {
+  defaultDifficulty,
+  difficulties,
+  isDifficulty,
+  type Difficulty,
+} from "../../shared/game/difficulty.js";
 import { horseyPieces } from "../board/pieces.js";
 import { t, type MessageKey } from "../i18n/t.js";
 
-export type StartGameOptions = { kidColor: Color | "random"; fen?: string };
+export type StartGameOptions = {
+  kidColor: Color | "random";
+  level: Difficulty;
+};
 
 export function SetupScreen({
   onStart,
+  initialLevel = defaultDifficulty,
   disabled = false,
+  children,
 }: {
   onStart: (options: StartGameOptions) => void;
+  initialLevel?: Difficulty;
   disabled?: boolean;
+  children?: ReactNode;
 }) {
   const [kidColor, setKidColor] = useState<Color | "random">("w");
+  const [level, setLevel] = useState(initialLevel);
   const choices: Array<{
     color: Color | "random";
     label: MessageKey;
@@ -48,14 +62,45 @@ export function SetupScreen({
             </button>
           ))}
         </div>
+        <div className="pp-setup__level">
+          <label htmlFor="opponent-level">{t("setup.level")}</label>
+          <select
+            id="opponent-level"
+            value={level}
+            disabled={disabled}
+            aria-describedby="opponent-level-description opponent-level-stars"
+            onChange={(event) => {
+              const selected = Number(event.target.value);
+              if (isDifficulty(selected)) setLevel(selected);
+            }}
+          >
+            {difficulties.map((option) => (
+              <option key={option} value={option}>
+                {t(`setup.level.${option}.name`)}
+              </option>
+            ))}
+          </select>
+          <div
+            className="pp-setup__stars"
+            id="opponent-level-stars"
+            role="img"
+            aria-label={t("setup.stars", { level })}
+          >
+            {"★".repeat(level)}
+          </div>
+          <p id="opponent-level-description">
+            {t(`setup.level.${level}.description`)}
+          </p>
+        </div>
         <button
           className="pp-btn pp-btn--primary pp-btn--hero"
           type="button"
           disabled={disabled}
-          onClick={() => onStart({ kidColor })}
+          onClick={() => onStart({ kidColor, level })}
         >
           {t("setup.play")}
         </button>
+        {children}
       </section>
     </main>
   );

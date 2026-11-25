@@ -64,10 +64,11 @@ export function Board({
     onMove({ from, to, ...(promotion ? { promotion } : {}) });
   };
 
-  const selectOrMove = (square: string, pieceColor?: "w" | "b" | null) => {
+  const selectOrMove = (square: string) => {
     const next = selectionReducer(
       selection,
-      { square, pieceColor },
+      // The rendered piece can still be on its old square during a takeback.
+      { square, pieceColor: chess.get(square as Square)?.color },
       {
         kidColor,
         legalTargets: (from) => legalTargets(fen, from),
@@ -93,6 +94,9 @@ export function Board({
     },
     animationDurationInMs: prefersReducedMotion() ? 0 : animationMs,
     allowDragging: interactive,
+    // Version 5 forwards this to dnd-kit even though its types only accept a boolean.
+    // @ts-expect-error Disable both edge scrolling and layout-shift scroll compensation.
+    allowAutoScroll: { enabled: false, layoutShiftCompensation: false },
     canDragPiece: ({ piece }) => interactive && piece.pieceType[0] === kidColor,
     onPieceDrop: ({ sourceSquare, targetSquare }) => {
       if (
@@ -111,10 +115,8 @@ export function Board({
       onMove({ from: sourceSquare, to: targetSquare });
       return true;
     },
-    onSquareClick: ({ piece, square }) => {
-      selectOrMove(square, piece ? (piece.pieceType[0] as Color) : null);
-    },
-    squareRenderer: ({ piece, square, children }) => {
+    onSquareClick: ({ square }) => selectOrMove(square),
+    squareRenderer: ({ square, children }) => {
       const color = chess.squareColor(square as Square);
       const classes = [
         "pp-sq",
@@ -123,9 +125,7 @@ export function Board({
       if (square === selection.selected) classes.push("is-selected");
       if (selection.targets.includes(square)) {
         classes.push(
-          captureTargets.includes(square as Square) || Boolean(piece)
-            ? "has-capture"
-            : "has-dot",
+          captureTargets.includes(square as Square) ? "has-capture" : "has-dot",
         );
       }
       if (square === checkSquare) classes.push("is-check");

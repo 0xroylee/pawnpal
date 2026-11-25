@@ -101,18 +101,19 @@ describe("app styles", () => {
     expect(styleRule(".pp-game__board-column")?.style.maxWidth).toBe("100%");
     expect(styleRule(".pp-board")?.style.width).toBe("100%");
     expect(
-      mediaStyleRule("max-width: 980px", ".pp-game__layout")?.style
+      mediaStyleRule("orientation: portrait", ".pp-game__layout")?.style
         .gridTemplateColumns,
     ).toBe("minmax(0, 1fr)");
     expect(
-      mediaStyleRule("max-width: 980px", ".pp-game__board-column")?.style.width,
+      mediaStyleRule("orientation: portrait", ".pp-game__board-column")?.style
+        .width,
     ).toBe("100%");
     expect(
-      mediaStyleRule("max-width: 980px", ".pp-game__board-column")?.style
+      mediaStyleRule("orientation: portrait", ".pp-game__board-column")?.style
         .maxWidth,
     ).toBe("var(--pp-board-target)");
     expect(
-      mediaStyleRule("max-width: 980px", ".pp-game__side-column")?.style
+      mediaStyleRule("orientation: portrait", ".pp-game__side-column")?.style
         .maxWidth,
     ).toBe("var(--pp-board-target)");
   });

@@ -47,6 +47,8 @@ export function messageKeys(
     prefix = "coach.reveal.escape.";
   } else if (kind === "noFact" && mode === "explain") {
     prefix = "coach.noFact.explain.";
+  } else if (kind === "noFact" && mode === "nudge") {
+    prefix = "coach.noFact.nudge.";
   } else if (kind === "noFact" && mode === "reveal") {
     prefix = "coach.reveal.generic.";
   } else if (kind === "noFact" && mode === "praise") {

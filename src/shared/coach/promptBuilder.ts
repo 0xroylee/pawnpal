@@ -10,6 +10,7 @@ export type ChatCompletionRequest = {
   temperature: 0.6;
   max_tokens: 120;
   stream: false;
+  reasoning_effort?: "none";
 };
 
 const MODE_RULES = {

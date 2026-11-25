@@ -79,12 +79,12 @@ export function useGrading(
 
     const ply = state.history.length;
     const turnToken = state.turnToken;
-    const gameToken = state.turnToken - state.history.length;
+    const gameToken = state.gameToken;
     const canDispatch = () =>
       !cancelled &&
       mounted.current &&
-      latestState.current.turnToken - latestState.current.history.length ===
-        gameToken;
+      latestState.current.gameToken === gameToken &&
+      latestState.current.result?.reason !== "resign";
     let cancelled = false;
     let timedOut = false;
     let timer: ReturnType<typeof globalThis.setTimeout> | undefined;
@@ -126,7 +126,7 @@ export function useGrading(
                 buildContext({ analysis: graded, kidColor: state.kidColor }),
               ),
         };
-        dispatch({ type: "GRADE_READY", ply, analysis });
+        dispatch({ type: "GRADE_READY", ply, turnToken, analysis });
       })
       .catch(() => {
         if (canDispatch() && grading && !timedOut) {
@@ -135,11 +135,7 @@ export function useGrading(
       });
 
     return () => {
-      if (
-        latestState.current.turnToken - latestState.current.history.length !==
-          gameToken ||
-        !mounted.current
-      ) {
+      if (latestState.current.gameToken !== gameToken || !mounted.current) {
         cancelled = true;
       }
       if (timer !== undefined) cancel(timer);
@@ -150,6 +146,7 @@ export function useGrading(
     pipeline,
     schedule,
     state.fen,
+    state.gameToken,
     state.history,
     state.kidColor,
     state.phase,

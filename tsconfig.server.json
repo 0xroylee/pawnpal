@@ -14,5 +14,9 @@
     "rewriteRelativeImportExtensions": true
   },
   "include": ["src/server/**/*.ts", "src/shared/**/*.ts"],
-  "exclude": ["src/server/**/*.test.ts", "src/shared/**/*.test.ts"]
+  "exclude": [
+    "src/server/**/*.test.ts",
+    "src/shared/**/*.test.ts",
+    "src/server/llm/mockOpenAi.ts"
+  ]
 }

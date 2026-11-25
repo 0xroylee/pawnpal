@@ -219,12 +219,40 @@ describe("coach wording", () => {
     }
 
     expect(keysFor("coach.noFact.explain.").length).toBeGreaterThanOrEqual(2);
+    expect(keysFor("coach.noFact.nudge.").length).toBeGreaterThanOrEqual(2);
     expect(keysFor("coach.noFact.late.").length).toBeGreaterThanOrEqual(2);
     expect(keysFor("coach.noFact.praise.").length).toBeGreaterThanOrEqual(2);
     expect(keysFor("coach.reveal.generic.").length).toBeGreaterThanOrEqual(2);
     expect(keysFor("hint.tier1.").length).toBeGreaterThanOrEqual(2);
     expect(keysFor("hint.tier2.generic.").length).toBeGreaterThanOrEqual(2);
     expect(keysFor("hint.tier3.").length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("keeps move notation out of every nudge variant", () => {
+    for (const kind of [...factKinds, "noFact"] as const) {
+      const fact =
+        kind === "noFact"
+          ? undefined
+          : finalizeFact({
+              kind,
+              subject: { type: "n", color: "w", square: "f3" },
+              attacker: { type: "r", color: "b", square: "f8" },
+              targets: [{ type: "q", color: "b", square: "e5" }],
+              betterMoveSan: "Nxe5",
+              betterMoveUci: "f3e5",
+              mateIn: 2,
+            });
+      for (const key of messageKeys(kind, "nudge")) {
+        const { text } = renderMessage({
+          kind,
+          mode: "nudge",
+          fact,
+          picker: { pick: () => key },
+          kidColor: "w",
+        });
+        expect(text, key).not.toMatch(/[a-h][1-8]|\b[O0]-[O0]/);
+      }
+    }
   });
 });
 

@@ -60,16 +60,17 @@ for (const position of positions) {
       `.pp-bubble__text[data-fact-kind="${position.kind}"]`,
     );
     await expect(message).toBeVisible({ timeout: 8_000 });
+    await expect(message).toHaveAttribute("data-mode", "nudge");
+    await expect(page.getByTestId("move")).toHaveCount(1);
+    await expectAnnotations(page, { ...position, arrows: [] });
+
+    await page.getByRole("button", { name: "Keep my move" }).click();
     await expect(message).toHaveAttribute("data-mode", position.mode);
     const text = await message.innerText();
     for (const word of position.pieceWords.explain) {
       expect(text.toLowerCase()).toContain(word);
     }
     expect(text).not.toMatch(/\b[a-h][1-8]\b/);
-    await expect(page.getByTestId("move")).toHaveCount(1);
-    await expectAnnotations(page, position);
-
-    await page.getByRole("button", { name: "OK", exact: true }).click();
     await expect(page.getByTestId("move")).toHaveCount(2, { timeout: 5_000 });
     await expectNoAnnotations(page);
   });

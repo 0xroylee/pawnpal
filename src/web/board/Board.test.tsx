@@ -140,6 +140,42 @@ describe("Board", () => {
     ).toBeNull();
   });
 
+  it("accepts a legal tap while the taken-back piece is animating to its square", () => {
+    const bounds = vi
+      .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+      .mockReturnValue(new DOMRect(0, 0, 64, 64));
+    const onMove = vi.fn();
+    const { container, rerender } = render(
+      <Board
+        fen="rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1"
+        orientation="white"
+        interactive={false}
+        onMove={onMove}
+        animationMs={500}
+      />,
+    );
+    try {
+      rerender(
+        <Board
+          fen="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+          orientation="white"
+          interactive
+          onMove={onMove}
+          animationMs={500}
+        />,
+      );
+      expect(
+        container.querySelector('[data-square="e4"] [data-piece="wP"]'),
+      ).not.toBeNull();
+      fireEvent.click(container.querySelector('[data-square="e2"]')!);
+      fireEvent.click(container.querySelector('[data-square="e4"]')!);
+      expect(onMove).toHaveBeenCalledOnce();
+      expect(onMove).toHaveBeenCalledWith({ from: "e2", to: "e4" });
+    } finally {
+      bounds.mockRestore();
+    }
+  });
+
   it("opens the promotion picker and emits the chosen knight move", () => {
     const onMove = vi.fn();
     const { container } = render(

@@ -18,6 +18,7 @@ export function Pip({ mood }: { mood: CoachPip }) {
   return (
     <img
       className="pp-coach__pip"
+      data-pip-mood={mood}
       src={pipImages[mood]}
       alt={t("coach.pipAlt")}
     />

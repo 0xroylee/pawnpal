@@ -14,7 +14,13 @@ describe("SetupScreen", () => {
         .getByRole("button", { name: "Surprise me" })
         .getAttribute("aria-pressed"),
     ).toBe("true");
+    const picker = screen.getByRole("combobox", { name: "Opponent level" });
+    expect(screen.getAllByRole("option")).toHaveLength(8);
+    fireEvent.change(picker, { target: { value: "8" } });
+    expect(
+      screen.getByRole("img", { name: "8 out of 8 difficulty stars" }),
+    ).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Play!" }));
-    expect(onStart).toHaveBeenCalledWith({ kidColor: "random" });
+    expect(onStart).toHaveBeenCalledWith({ kidColor: "random", level: 8 });
   });
 });

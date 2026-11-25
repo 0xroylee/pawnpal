@@ -8,7 +8,7 @@
   <ellipse cx="49" cy="24" rx="7" ry="4" fill="#fff" opacity=".7" transform="rotate(-20 49 24)"/>
   <rect x="38" y="64" width="44" height="12" rx="6" fill="#FF6B4A" stroke="#2E2A40" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
   <path d="M67 74 Q77 82 82 95 L72 91 Q70 83 63 76 Z" fill="#E04E30" stroke="#2E2A40" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
-    <circle cx="50" cy="38" r="3.6" fill="#2E2A40"/><circle cx="51.26" cy="36.74" r="1.1520000000000001" fill="#fff"/><circle cx="70" cy="38" r="3.6" fill="#2E2A40"/><circle cx="71.26" cy="36.74" r="1.1520000000000001" fill="#fff"/>
+    <g class="eye"><circle cx="50" cy="38" r="3.6" fill="#2E2A40"/><circle cx="51.26" cy="36.74" r="1.1520000000000001" fill="#fff"/></g><g class="eye"><circle cx="70" cy="38" r="3.6" fill="#2E2A40"/><circle cx="71.26" cy="36.74" r="1.1520000000000001" fill="#fff"/></g>
     <path d="M44 29 Q49 27 54 29" fill="none" stroke="#2E2A40" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
     <path d="M66 29 Q71 27 76 29" fill="none" stroke="#2E2A40" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
     <path d="M50 47 Q60 55 70 47" fill="none" stroke="#2E2A40" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>

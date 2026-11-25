@@ -150,6 +150,14 @@ function uniqueBy<T>(values: T[], keyFor: (value: T) => string): T[] {
   });
 }
 
+export type AttemptRecord = {
+  moveUci: string;
+  moveSan: string;
+  grade: Grade;
+  usedShowMe: boolean;
+  revealed: boolean;
+};
+
 export type MoveAnalysis = {
   ply: number;
   fenBefore: string;
@@ -164,6 +172,6 @@ export type MoveAnalysis = {
   isOnlyMove: boolean;
   facts: CoachFact[];
   late?: boolean;
-  attempts?: unknown[];
+  attempts?: AttemptRecord[];
   hintTier?: 0 | 1 | 2 | 3;
 };
