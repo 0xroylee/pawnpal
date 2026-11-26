@@ -1,7 +1,10 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { arch, cpus, totalmem } from "node:os";
 import { join } from "node:path";
-import { buildRephraseRequest } from "../src/shared/coach/promptBuilder.ts";
+import {
+  buildRephraseRequest,
+  type PromptVersion,
+} from "../src/shared/coach/promptBuilder.ts";
 import { stripThinking } from "../src/shared/coach/validateRephrase.ts";
 import type { RephraseResult } from "../src/shared/coach/types.ts";
 import { createLlmClient } from "../src/server/llm/client.ts";
@@ -54,8 +57,20 @@ export async function measureCase(
   model: string,
   variant: Variant,
   client: ChatClient,
+  promptVersion: PromptVersion = 1,
+  onSent?: (content: string) => void,
 ): Promise<Outcome> {
-  const variantClient = withVariant(client, variant);
+  const variantClient = withVariant(
+    onSent
+      ? {
+          chat: (request) => {
+            onSent(request.messages[1].content);
+            return client.chat(request);
+          },
+        }
+      : client,
+    variant,
+  );
   let candidate: string | undefined;
   let sent = false;
   const started = performance.now();
@@ -65,7 +80,17 @@ export async function measureCase(
     client: {
       async chat(request) {
         sent = true;
-        const response = await variantClient.chat(request);
+        const experimental =
+          promptVersion === 1
+            ? request
+            : {
+                ...request,
+                messages: buildRephraseRequest(testCase.input, {
+                  model,
+                  promptVersion,
+                }).messages,
+              };
+        const response = await variantClient.chat(experimental);
         candidate = stripThinking(response.text);
         return response;
       },
@@ -265,6 +290,131 @@ export async function runBaseline(reasoningOff = false) {
       (existingFollowup ? `\n${followupHeader}${existingFollowup}` : "");
   await writeFile(reportPath, fullReport);
   console.log(`Wrote docs/llm-models.md and ${runDirectory}`);
+}
+
+export async function runPromptAblation() {
+  const startedAt = new Date().toISOString();
+  const runId = `prompt-ablation-${startedAt.replace(/[:.]/g, "-")}`;
+  const [{ cases, fixtures }, metadata] = await Promise.all([
+    loadBaselineCases(),
+    ollamaMetadata(),
+  ]);
+  const runDirectory = join("training", "runs", runId);
+  await mkdir(runDirectory, { recursive: true });
+  const caseData = jsonl(cases);
+  await writeFile(join(runDirectory, "cases.jsonl"), caseData);
+  const client = createLlmClient({ baseUrl, timeoutMs });
+  const warmupClient = createLlmClient({ baseUrl, timeoutMs: 60_000 });
+  const measurements = [];
+  for (const model of models) {
+    for (const promptVersion of [1, 3] as const) {
+      const warmup = buildRephraseRequest(cases[0]!.input, {
+        model,
+        promptVersion,
+      });
+      await withVariant(warmupClient, "reasoning-off").chat(warmup);
+      const outcomes: Outcome[] = [];
+      const rows = [];
+      for (const testCase of cases) {
+        let userContent = "";
+        const outcome = await measureCase(
+          testCase,
+          model,
+          "reasoning-off",
+          client,
+          promptVersion,
+          (content) => {
+            userContent = content;
+          },
+        );
+        outcomes.push(outcome);
+        rows.push({
+          ...outcome,
+          mode: testCase.input.mode,
+          promptVersion,
+          userContent,
+          userContentSha256: sha256(userContent),
+        });
+        if (outcomes.length % 25 === 0)
+          console.log(
+            `${model} v${promptVersion} ${outcomes.length}/${cases.length}`,
+          );
+      }
+      await writeFile(
+        join(
+          runDirectory,
+          `${model.replace(":", "-")}-v${promptVersion}.jsonl`,
+        ),
+        jsonl(rows),
+      );
+      const byMode = Object.fromEntries(
+        [...new Set(cases.map(({ input }) => input.mode))].map((mode) => [
+          mode,
+          summarize(
+            outcomes.filter((_, index) => cases[index]!.input.mode === mode),
+          ),
+        ]),
+      );
+      measurements.push({
+        model,
+        promptVersion,
+        ...summarize(outcomes),
+        byMode,
+      });
+    }
+  }
+  const machine = {
+    cpu: cpus()[0]?.model,
+    arch: arch(),
+    memoryGiB: totalmem() / 2 ** 30,
+  };
+  await writeFile(
+    join(runDirectory, "manifest.json"),
+    JSON.stringify(
+      {
+        runId,
+        startedAt,
+        finishedAt: new Date().toISOString(),
+        machine,
+        node: process.version,
+        ollama: metadata,
+        fixtures,
+        caseCount: cases.length,
+        caseSha256: sha256(caseData),
+        timeoutMs,
+        reasoning_effort: "none",
+        measurements,
+      },
+      null,
+      2,
+    ) + "\n",
+  );
+  const lines = [
+    "# Prompt ablation",
+    "",
+    "Version 3 omits the reference note in nudge and hint as well as move fields; both changes may affect results.",
+    "",
+    `Run: ${runId}; case SHA-256: ${sha256(caseData)}.`,
+    "",
+    "| Model | Version | Mode | Accepted | Pass rate | Median | p95 | Fallbacks |",
+    "| --- | --- | --- | ---: | ---: | ---: | ---: | --- |",
+  ];
+  for (const row of measurements) {
+    for (const [mode, stats] of [
+      ["all", row],
+      ...Object.entries(row.byMode),
+    ] as const) {
+      const reasons =
+        Object.entries(stats.fallbackReasons)
+          .map(([reason, count]) => `${reason}: ${count}`)
+          .join(", ") || "None";
+      lines.push(
+        `| ${row.model} | ${row.promptVersion} | ${mode} | ${stats.accepted}/${stats.total} | ${percent(stats.passRate)} | ${Math.round(stats.medianMs)} ms | ${Math.round(stats.p95Ms)} ms | ${reasons} |`,
+      );
+    }
+  }
+  await writeFile(join(runDirectory, "ablation.md"), lines.join("\n") + "\n");
+  console.log(`Wrote ${runDirectory}`);
 }
 
 async function writePreferencePairs(

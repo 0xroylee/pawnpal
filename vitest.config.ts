@@ -6,6 +6,7 @@ export default defineConfig({
       "src/**/*.test.{ts,tsx}",
       "tests/unit/**/*.test.ts",
       "tests/integration/**/*.test.ts",
+      "training/**/*.test.ts",
     ],
     environment: "node",
     globals: true,

@@ -60,7 +60,10 @@ export async function createMatchRunner() {
   };
   await Promise.all(Object.values(engines).map((engine) => engine.init()));
   return {
-    async play(match: Match): Promise<MatchResult> {
+    async play(
+      match: Match,
+      options: { plyLimit?: number } = {},
+    ): Promise<MatchResult & { moves: string[]; startFen: string }> {
       const levels = { w: match.white, b: match.black };
       for (const side of ["w", "b"] as const) {
         const engine = engines[side];
@@ -75,18 +78,22 @@ export async function createMatchRunner() {
         w: randomGenerator(match.seed),
         b: randomGenerator(match.seed ^ 0x8db3b),
       };
-      for (let ply = 0; ply < plyLimit; ply++) {
+      const startFen = board.fen();
+      const moves: string[] = [];
+      for (let ply = 0; ply < (options.plyLimit ?? plyLimit); ply++) {
         const side = board.turn();
         const level = levels[side];
         const fen = board.fen();
         const move = await (level === "anchor"
           ? chooseLimitedMove(fen, engines[side])
           : chooseMove(fen, level, rng[side], engines[side]));
-        board.move(move);
-        if (board.isCheckmate()) return { winner: side, capped: false };
-        if (board.isDraw()) return { winner: "draw", capped: false };
+        moves.push(board.move(move).san);
+        if (board.isCheckmate())
+          return { winner: side, capped: false, moves, startFen };
+        if (board.isDraw())
+          return { winner: "draw", capped: false, moves, startFen };
       }
-      return { winner: "draw", capped: true };
+      return { winner: "draw", capped: true, moves, startFen };
     },
     close() {
       for (const engine of Object.values(engines)) engine.terminate();

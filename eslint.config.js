@@ -8,6 +8,7 @@ import tseslint from "typescript-eslint";
 export default tseslint.config(
   {
     ignores: [
+      "training/dist/**",
       "dist/**",
       "node_modules/**",
       "playwright-report/**",

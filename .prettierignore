@@ -8,3 +8,4 @@ package-lock.json
 design/
 docs/
 training/runs/
+training/dist/

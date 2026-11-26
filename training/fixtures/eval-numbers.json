@@ -1,0 +1,58 @@
+{
+  "fixtureOnly": true,
+  "metricsByModel": {
+    "base": {
+      "validatorPass": 0.72,
+      "wordingPass": 0.93,
+      "latencyMedianMs": 180,
+      "latencyP95Ms": 310,
+      "meanChars": 84,
+      "distinct2": 0.58
+    },
+    "trainedFull": {
+      "validatorPass": 0.99,
+      "wordingPass": 0.99,
+      "latencyMedianMs": 180,
+      "latencyP95Ms": 310,
+      "meanChars": 84,
+      "distinct2": 0.68
+    },
+    "trainedQ4": {
+      "validatorPass": 0.96,
+      "wordingPass": 0.98,
+      "latencyMedianMs": 120,
+      "latencyP95Ms": 220,
+      "meanChars": 73,
+      "distinct2": 0.64
+    },
+    "trainedQ8": {
+      "validatorPass": 0.98,
+      "wordingPass": 0.99,
+      "latencyMedianMs": 190,
+      "latencyP95Ms": 280,
+      "meanChars": 76,
+      "distinct2": 0.68
+    },
+    "teacher": {
+      "validatorPass": 0.99,
+      "wordingPass": 0.99,
+      "latencyMedianMs": 850,
+      "latencyP95Ms": 1400,
+      "meanChars": 81,
+      "distinct2": 0.72
+    }
+  },
+  "humanPreference": { "trainedWins": 32, "pairs": 50 },
+  "scenarios": {
+    "basePass": { "base": 0.91, "trainedWins": 32, "pairs": 50 },
+    "trainedPass": { "trainedWins": 32, "pairs": 50 },
+    "fullPrecisionGap": {
+      "trainedFull": 0.99,
+      "trainedQ4": 0.95,
+      "trainedQ8": 0.96,
+      "trainedWins": 32,
+      "pairs": 50
+    },
+    "lowPreference": { "trainedWins": 29, "pairs": 50 }
+  }
+}
