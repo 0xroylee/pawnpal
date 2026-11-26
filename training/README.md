@@ -1,12 +1,13 @@
-# Offline coach training tools
+# Local coach training tools
 
-These tools build a local data pipeline for Pip's coach voice. They do not download games, fetch a teacher response, load a language model, train, quantize, run a real-model gate evaluation, or publish artifacts as part of this implementation.
+The Node stages grade games with Stockfish, generate prompts, filter candidate replies, and split examples by game. Run them with synthetic fixtures or a teacher endpoint you configure. The Python stages fine-tune a local Qwen3 model and export it to Ollama. [Fine-tuning and export commands](py/README.md)
 
 ## Build and run
 
-Build the Node stages once:
+Install the locked dependencies and build the Node stages.
 
 ```sh
+npm ci
 npm run training:build
 ```
 
@@ -53,7 +54,7 @@ Stage 01 records engine inputs by content. For UCI engines, the resolved executa
 
 For a local fixture run without a teacher endpoint, stage 03 accepts `--fixture-candidates training/fixtures/candidates.jsonl` and does not create an LLM client. Stage 01 uses the fake engine with `--engine-uci training/test/fake-uci.mjs --engine-assets node_modules/chess.js`. Stage 03 stores each successful teacher candidate in append-only `progress.jsonl`; retries reuse saved successes, and a torn final progress record is removed before resuming. `candidates.jsonl` is replaced atomically after a complete pass, so an interrupted retry leaves the last complete candidate output in place. The fixture pipeline uses `training/fixtures/games.pgn`, `training/test/fake-uci.mjs`, and `training/fixtures/eval-numbers.json`. The last file is marked fixture-only and contains no real measurements.
 
-Stage 04 keeps the inference request messages beside each accepted completion. Stage 05 writes `train.jsonl`, `valid.jsonl`, and `test.jsonl` with one `messages` array per row, plus matching `.meta.jsonl` files containing the row id and game, mode, and age metadata. The data layout has not been checked against a real `mlx-lm` installation.
+Stage 04 keeps the inference request messages beside each accepted completion. Stage 05 writes `train.jsonl`, `valid.jsonl`, and `test.jsonl` with one `messages` array per row, plus matching `.meta.jsonl` files containing the row id and game, mode, and age metadata. Stage 06 uses the train and validation chat rows with MLX-LM 0.32.2. Keep the test split for evaluation.
 
 ## Repeat the offline fixture pipeline
 
@@ -72,11 +73,11 @@ Seed 138 deterministically assigns the existing fixture games to all three split
 
 Stage 01 accepts optional `--min-rating` and `--max-rating` (defaults 600 and 1400). Fixture candidates are synthetic, not teacher responses. The fixture file is hashed in the manifest; changing it reruns the stage. Real teacher progress is cached by prompt and teacher inputs and survives a retry; use a new run directory to isolate provenance. Real teacher runs use no gold examples unless `--gold` is supplied. The old files in `training/gold/` are unreviewed placeholders and must not be supplied for real teaching.
 
-## Manual work and current limits
+## Evaluate a trained model
 
-The following actions need the user's go-ahead before a pilot: obtaining a Lichess dump, approving a voice guide and teacher provider, calling a teacher endpoint, choosing and loading base models, running the 500-example training pilot, exporting or quantizing weights, evaluating real models and human preference, and publishing artifacts. Gold placeholders in `training/gold/` all say `reviewed: false`; the 300-item reviewed evaluation set is still manual work.
+Use the app's validator and three-second timeout to measure replies on a held-out set. Stage 08 takes measured metrics and human preference results as JSON and writes `report.md` and `gates.json` under the run directory. The numeric fixture illustrates the input format. [Evaluation input fixture](fixtures/eval-numbers.json)
 
-Only fixture metrics are covered here. Baseline results, the real ship decision, the trained model, measured report, and published model card or Ollama artifact remain unverified. The evaluation stage writes under its run directory; this unit does not create `docs/llm-models.md`.
+The local pilot report lists the compared models, exact settings, measured scores, and release decision. Spec 13 also calls for a human-reviewed gold set and blinded preference votes. The files in `training/gold/` are placeholders. [Pilot results](../docs/llm-models.md#local-pip-fine-tuning-pilot) · [Spec 13](../docs/specs/13-train-coach-model.md)
 
 ## Local self-play
 

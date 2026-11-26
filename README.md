@@ -22,6 +22,21 @@ The first run opens your browser. Choose a parent PIN, create a kid profile, and
 
 Open **Parent settings → Coach brain** to connect a model. In Ollama, start the local server and download the suggested Qwen3 1.7B model using the command shown in the app, then select it. The 1.7B model produced more valid replies and responded faster than the 4B model in the local benchmark. For LM Studio or another OpenAI-compatible server, choose **Use another server** and enter its API base URL, model, and API key if needed. Use **Test** to see an example and its response time before saving. The built-in coach is always available if the model is slow or its answer fails validation. [Measured models](docs/llm-models.md)
 
+## Train Pip locally
+
+Pip's training tools turn Stockfish-checked games into examples of how to explain a chess position to a child. Build the data pipeline from a source checkout.
+
+```sh
+npm ci
+npm run training:build
+```
+
+Start with the offline fixture run to check the pipeline without downloading a model. For a real run, generate self-play games or supply a PGN, grade the positions, and filter candidate replies before splitting the examples by game. [Data pipeline and fixture commands](training/README.md)
+
+Fine-tuning uses MLX on Apple Silicon with Python 3.12. Start with a one-step smoke test, then train the adapter and export local Ollama models. Checkpoints, models, and logs go under the gitignored `training/runs/` directory. [Fine-tuning and export commands](training/py/README.md)
+
+The pilot's trained Q4 passed 99 of 100 held-out cases. The matched untrained model passed 96. The three-point improvement fell short of the 15-point release threshold. [Pilot results](docs/llm-models.md#local-pip-fine-tuning-pilot)
+
 ## Tablet play
 
 Keep Pawnpal running on your computer and connect the tablet to the same Wi-Fi. In **Parent settings → Play on other devices**, enable Wi-Fi access and scan the QR code or open the displayed address. On an iPad, use Safari’s **Share → Add to Home Screen** for a full-screen shortcut. To enable Wi-Fi access at startup, run `npx pawnpal --lan`.

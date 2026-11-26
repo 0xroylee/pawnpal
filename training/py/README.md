@@ -1,6 +1,14 @@
 # Local MLX pilot
 
-These scripts plan or run local training and export. They do not download or upload a model. Use Python 3.12 and `mlx-lm==0.32.2` in a separately provisioned environment. The base must be the local `Qwen/Qwen3-1.7B` snapshot at revision `70d244cc86ccca08cf5af4e1e306ecf908b1ad5e`; the script records this expected revision but cannot independently authenticate a snapshot. Verify the revision and hashes when downloading. Outputs must be new, separate directories; a failed run leaves its directory for inspection, so choose a fresh one when retrying.
+Use Python 3.12 and MLX-LM on an Apple Silicon Mac. From the repository root, create and activate a dedicated environment.
+
+```sh
+python3.12 -m venv training/py/.venv
+source training/py/.venv/bin/activate
+python -m pip install 'mlx-lm==0.32.2'
+```
+
+Provide a local Qwen3 checkpoint. The full-weight path expects `Qwen/Qwen3-1.7B` at revision `70d244cc86ccca08cf5af4e1e306ecf908b1ad5e`. The pilot used the compact 4-bit option described below. Verify the revision and file hashes when you download the snapshot. Use a fresh output directory for each attempt so you can inspect earlier runs.
 
 Stage 05's `train.jsonl` and `valid.jsonl` must be nonempty chat rows with a `messages` array ending in an assistant response. Stage 06 never reads the test split. It makes disposable copies of train and validation and prefixes the first system message content with one newline to match the Ollama template, and appends ` /no_think` to the last user message if absent. It copies tokenizer configuration and symlinks base safetensors into its own model directory; it prepends `enable_thinking = false` to the copied chat template. Original data and base remain untouched. The metadata records input hashes, counts, configuration and command. Do not remove or mutate the base while the run is in progress. Iterations default to `ceil(epochs * floor(train rows / batch size))`; `--iters` overrides this for smoke tests.
 
