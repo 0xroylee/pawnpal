@@ -98,7 +98,7 @@ describe("createTrainingEngine", () => {
   );
 
   it("does not describe inputs before init resolves", async () => {
-    const engine = createTrainingEngine({ engine: { uci: fakeUciPath } });
+    const engine = createTrainingEngine({ engine: "wasm" });
 
     try {
       await expect(engine.describeInputs()).rejects.toThrow(
