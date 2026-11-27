@@ -86,7 +86,12 @@ test("connects a mock Ollama model, rewords a nudge, and falls back on an invali
       mock.requests.every(({ body }) => !body.includes("Private kid name")),
     ).toBe(true);
   } finally {
-    await new Promise<void>((resolve) => server.close(() => resolve()));
+    await new Promise<void>((resolve) => {
+      server.close(() => resolve());
+      // The page is still open and may hold a preconnected socket, which
+      // close() would wait for until the test times out.
+      if ("closeAllConnections" in server) server.closeAllConnections();
+    });
     library.close();
     await rm(home, { recursive: true, force: true });
   }
