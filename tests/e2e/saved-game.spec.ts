@@ -152,6 +152,7 @@ test("resumes the saved board after a server crash and exports the finished game
     expect(pgn.suggestedFilename()).toBe("pawnpal-games.pgn");
     expect(await pgn.failure()).toBeNull();
   } finally {
+    await page.context().close();
     if (server) await stopServer(server.child, "SIGTERM");
     await rm(home, { recursive: true, force: true });
   }

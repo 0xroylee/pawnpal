@@ -86,6 +86,7 @@ test("connects a mock Ollama model, rewords a nudge, and falls back on an invali
       mock.requests.every(({ body }) => !body.includes("Private kid name")),
     ).toBe(true);
   } finally {
+    await page.context().close();
     await new Promise<void>((resolve) => server.close(() => resolve()));
     library.close();
     await rm(home, { recursive: true, force: true });
