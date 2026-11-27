@@ -1,31 +1,39 @@
 import { expect, test } from "@playwright/test";
-import {
-  expectReplyWithinFiveSeconds,
-  makeAnyLegalMove,
-  openDevFen,
-} from "./helpers.js";
+import { expectReplyWithinFiveSeconds, openDevFen } from "./helpers.js";
+import { loadDetectorFixture, recordingFor } from "./replay.js";
 
-test("praises the only move and stays quiet on ordinary moves", async ({
+test("praises the only move and stays quiet on an ordinary move", async ({
   page,
 }) => {
-  // `played-fork-1` records a large gap between `Ng7+` and the alternatives.
-  await openDevFen(page, "4k3/8/4q3/5N2/8/8/P7/K7 w - - 0 1", "w");
-  const board = page.locator(".pp-board");
-  await expect(board).toBeVisible();
-  await board.locator('[data-square="f5"]').click();
-  await board.locator('[data-square="g7"]').click();
+  const fork = loadDetectorFixture("played-fork-1");
+  const quiet = loadDetectorFixture("quiet-pawns-3");
+  await page.addInitScript(
+    (recording) => {
+      globalThis.__pawnpalReplay = recording;
+    },
+    {
+      positions: [
+        ...recordingFor(fork).positions,
+        ...recordingFor(quiet).positions,
+      ],
+    },
+  );
 
-  await expect(page.locator(".pp-grade--great")).toBeVisible({
-    timeout: 8_000,
-  });
-  await expect(
-    page.locator('.pp-bubble__text[data-mode="praise"]'),
-  ).toBeVisible();
+  const board = page.locator(".pp-board");
+  const bubble = page.locator(".pp-bubble__text");
+  const play = async (fixture: typeof fork) => {
+    await openDevFen(page, fixture.fen, fixture.kidColor, { replay: true });
+    await board.locator(`[data-square="${fixture.move.slice(0, 2)}"]`).click();
+    await board.locator(`[data-square="${fixture.move.slice(2, 4)}"]`).click();
+  };
+
+  await play(fork);
+  await expect(page.locator(".pp-grade--great")).toBeVisible();
+  await expect(bubble).toHaveAttribute("data-mode", "praise");
   await expectReplyWithinFiveSeconds(page, 0);
 
-  await makeAnyLegalMove(page, "w");
-  await expectReplyWithinFiveSeconds(page, 2);
-  await makeAnyLegalMove(page, "w");
-  await expectReplyWithinFiveSeconds(page, 4);
-  await expect(page.locator(".pp-bubble__text")).toHaveCount(0);
+  await play(quiet);
+  await expectReplyWithinFiveSeconds(page, 0);
+  await expect(page.getByTestId("debug-grade")).toBeVisible();
+  await expect(bubble).toHaveCount(0);
 });
