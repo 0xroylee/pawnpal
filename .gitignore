@@ -12,3 +12,5 @@ public/engine/
 .eslintcache
 *.tsbuildinfo
 training/runs/
+tools/sting/out/
+tools/sting/.venv/
