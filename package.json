@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "A friendly chess game for kids",
   "type": "module",
+  "packageManager": "bun@1.4.4",
   "license": "GPL-3.0-only",
   "repository": {
     "type": "git",
@@ -23,6 +24,7 @@
   ],
   "scripts": {
     "dev": "node scripts/dev.mjs",
+    "start": "node bin/pawnpal.js",
     "build": "node scripts/copy-engine.mjs && vite build && node scripts/clean-server-dist.mjs && tsc -p tsconfig.server.json && node scripts/copy-migrations.mjs",
     "typecheck": "tsc -p tsconfig.web.json --noEmit && tsc -p tsconfig.server.json --noEmit && tsc -p tsconfig.training.json",
     "lint": "eslint . && prettier --check .",

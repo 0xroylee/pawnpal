@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFile, readdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { installedDependencies } from "./installed-dependencies.mjs";
 
 const licenseAllowlist = new Set([
   "0BSD",
@@ -13,42 +14,17 @@ const licenseAllowlist = new Set([
   "GPL-3.0-only",
   "GPL-3.0-or-later",
 ]);
-const { packages } = JSON.parse(await readFile("package-lock.json", "utf8"));
-const shipped = new Set(
-  Object.keys(packages).filter((path) => path && !packages[path].dev),
-);
-const bundled = [
+const shipped = installedDependencies([
   "react",
   "react-dom",
   "react-chessboard",
   "lucide-react",
   "stockfish",
-];
-for (const name of bundled) visit(`node_modules/${name}`);
-
-function visit(path) {
-  if (shipped.has(path)) return;
-  shipped.add(path);
-  const installed = packages[path];
-  if (!installed) throw new Error(`Missing locked dependency ${path}`);
-  for (const dependency of Object.keys(installed.dependencies ?? {})) {
-    let parent = path;
-    while (parent && !packages[`${parent}/node_modules/${dependency}`]) {
-      const nested = parent.lastIndexOf("/node_modules/");
-      parent = nested < 0 ? "" : parent.slice(0, nested);
-    }
-    visit(
-      parent
-        ? `${parent}/node_modules/${dependency}`
-        : `node_modules/${dependency}`,
-    );
-  }
-}
+]);
 
 const licenses = new Map();
-for (const path of [...shipped].sort()) {
-  const { license, version } = packages[path];
-  const name = path.split("node_modules/").at(-1);
+for (const path of [...shipped.keys()].sort()) {
+  const { name, license, version } = shipped.get(path);
   if (!licenseAllowlist.has(license))
     throw new Error(
       `Review ${name}@${version}: ${license ?? "no SPDX license"}`,
@@ -114,7 +90,7 @@ async function checkAssets(folder) {
 }
 await Promise.all([checkAssets("design/assets"), checkAssets("public")]);
 
-const stockfishVersion = packages["node_modules/stockfish"].version;
+const stockfishVersion = shipped.get("node_modules/stockfish").version;
 const notices =
   [
     "Pawnpal third-party notices",

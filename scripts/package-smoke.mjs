@@ -2,21 +2,27 @@ import { execFileSync, fork } from "node:child_process";
 import { once } from "node:events";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
-const npmCli = process.env.npm_execpath;
-if (!npmCli)
-  throw new Error(
-    "Run this check with npm run check:pack or npm run smoke:package.",
-  );
+const npmExecPath = process.env.npm_execpath;
+const npmCli =
+  npmExecPath && basename(npmExecPath) === "npm-cli.js"
+    ? npmExecPath
+    : process.platform === "win32"
+      ? join(dirname(process.execPath), "node_modules/npm/bin/npm-cli.js")
+      : undefined;
 const npm = (args, cwd = root) =>
-  execFileSync(process.execPath, [npmCli, ...args], {
-    cwd,
-    encoding: "utf8",
-    timeout: 180_000,
-  });
+  execFileSync(
+    npmCli ? process.execPath : "npm",
+    npmCli ? [npmCli, ...args] : args,
+    {
+      cwd,
+      encoding: "utf8",
+      timeout: 180_000,
+    },
+  );
 const [pack] = JSON.parse(npm(["pack", "--dry-run", "--json"]));
 const allowed = new Set([
   "LICENSE",

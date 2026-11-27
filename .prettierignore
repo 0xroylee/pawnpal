@@ -4,7 +4,7 @@ coverage/
 public/engine/
 playwright-report/
 test-results/
-package-lock.json
+bun.lock
 design/
 docs/
 training/runs/
