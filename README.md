@@ -18,6 +18,29 @@ npx pawnpal
 
 The first run opens your browser. Choose a parent PIN, create a kid profile, and choose a color and level. You can skip the coach-model step and still get hints and explanations from Pip. Guest play is available on the welcome screen.
 
+## Local development
+
+Install Bun 1.4.4 and keep Node.js available for the local server. [Bun installation](https://bun.sh/docs/installation)
+
+```sh
+git clone https://github.com/0xroylee/pawnpal.git
+cd pawnpal
+bun install --frozen-lockfile
+bun run dev
+```
+
+Open the Vite URL printed in the terminal, usually `http://localhost:5173`. Vite sends API requests to the Pawnpal server on port `4747`. Stop any other instance using that port before starting development.
+
+Run the core checks before submitting changes.
+
+```sh
+bun run typecheck
+bun run lint
+bun run test
+```
+
+The contributing guide covers browser tests, package checks, and how to add chess detectors. [CONTRIBUTING.md](CONTRIBUTING.md)
+
 ## Coach rephrasing
 
 Open **Parent settings → Coach brain** to connect a model. In Ollama, start the local server and download the suggested Qwen3 1.7B model using the command shown in the app, then select it. The 1.7B model produced more valid replies and responded faster than the 4B model in the local benchmark. For LM Studio or another OpenAI-compatible server, choose **Use another server** and enter its API base URL, model, and API key if needed. Use **Test** to see an example and its response time before saving. The built-in coach is always available if the model is slow or its answer fails validation. [Measured models](docs/llm-models.md)
@@ -42,5 +65,3 @@ Pawnpal has no account or telemetry. Stockfish runs in the browser. If you enabl
 Pawnpal uses Stockfish, chess.js and react-chessboard. The project started after reading a parent’s account of building a chess coach. [Stockfish.js](https://github.com/nmrugg/stockfish.js) · [chess.js](https://github.com/jhlywa/chess.js) · [react-chessboard](https://github.com/Clariity/react-chessboard) · [Inspiration](https://www.superlinear.academy/c/share-your-projects/63d613)
 
 Pawnpal’s code is licensed under GPL-3.0. The default horsey pieces by cham and michael1241 use a separate CC BY-NC-SA 4.0 license. For a commercial distribution, switch the default piece set to the included cburnett or Pawnpal set in the board component and remove the horsey assets and copies from the build. [Artwork license](design/assets/pieces/horsey/LICENSE.md) · [Piece sets](design/README.md) · [Third-party notices](THIRD_PARTY_NOTICES)
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for local development and fixtures.

@@ -1,5 +1,5 @@
-import { isCoachedGrade } from "../coach/types.js";
-import { fixedMistake, standingAnalyses } from "./moments.js";
+import { isCoachedGrade } from "../coach/types.ts";
+import { fixedMistake, standingAnalyses } from "./moments.ts";
 import type { GameState } from "./types.js";
 
 export const badgeIds = [

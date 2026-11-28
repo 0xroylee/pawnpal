@@ -25,29 +25,36 @@
   .grid { display: grid; gap: 20px; }
   .g2 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: repeat(3, 1fr); } .g4 { grid-template-columns: repeat(4, 1fr); } .g5 { grid-template-columns: repeat(5, 1fr); }
   .row { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
-  .principle { background: var(--pp-surface); border-radius: var(--pp-radius-lg); padding: 22px; box-shadow: var(--pp-shadow-1); }
+  .principle { background: var(--pp-surface); border-radius: var(--pp-radius-lg); padding: 22px; outline: var(--pp-stroke) solid var(--pp-line); outline-offset: calc(-1 * var(--pp-stroke)); }
   .principle b { display: block; font-size: 19px; font-weight: 900; margin-bottom: 6px; }
   .principle span { font-size: 16px; color: var(--pp-ink-2); line-height: 1.4; }
-  .swatch { border-radius: var(--pp-radius-md); overflow: hidden; background: var(--pp-surface); box-shadow: var(--pp-shadow-1); }
+  .swatch { border-radius: var(--pp-radius-md); overflow: hidden; background: var(--pp-surface); outline: var(--pp-stroke) solid var(--pp-line); outline-offset: calc(-1 * var(--pp-stroke)); }
   .swatch div { height: 76px; }
   .swatch p { margin: 0; padding: 10px 12px 12px; font-size: 14px; line-height: 1.35; }
   .swatch p b { display: block; font-size: 15px; }
   .swatch code { color: var(--pp-ink-2); font-size: 13px; }
+  .family { display: grid; gap: 14px; padding: 18px; border-radius: var(--pp-radius-lg); background: var(--pp-surface); outline: var(--pp-stroke) solid var(--pp-line); outline-offset: calc(-1 * var(--pp-stroke)); }
+  .family__chips { display: flex; gap: 10px; align-items: end; padding-bottom: 6px; }
+  .family__fill { width: 76px; height: 56px; border-radius: 14px; background: var(--fill); box-shadow: 0 6px 0 var(--edge); }
+  .family__soft { width: 48px; height: 48px; border-radius: 12px; background: var(--soft); }
+  .family p { margin: 0; font-size: 14px; line-height: 1.35; }
+  .family p b { display: block; font-size: 16px; }
+  .family code { color: var(--pp-ink-2); font-size: 13px; }
   .type-row { display: grid; grid-template-columns: 180px 1fr; gap: 24px; align-items: baseline; padding: 14px 0; border-bottom: 1px solid var(--pp-line); }
   .type-row code { font-size: 13px; color: var(--pp-ink-2); }
-  .token-box { display: grid; place-items: center; height: 88px; background: var(--pp-surface); box-shadow: var(--pp-shadow-1); font-size: 14px; font-weight: 800; }
-  .specimen { background: var(--pp-surface); border-radius: var(--pp-radius-lg); padding: 24px; box-shadow: var(--pp-shadow-1); }
+  .token-box { display: grid; place-items: center; height: 88px; background: var(--pp-surface); outline: var(--pp-stroke) solid var(--pp-line); outline-offset: calc(-1 * var(--pp-stroke)); font-size: 14px; font-weight: 800; }
+  .specimen { background: var(--pp-surface); border-radius: var(--pp-radius-lg); padding: 24px; outline: var(--pp-stroke) solid var(--pp-line); outline-offset: calc(-1 * var(--pp-stroke)); }
   .specimen > .cap { margin-top: 14px; font-size: 15px; color: var(--pp-ink-2); }
   .specimen > .cap b { color: var(--pp-ink); }
   .pip-card { text-align: center; }
   .pip-card img { width: 120px; height: 140px; }
   .pip-card b { display: block; font-weight: 900; }
   .pip-card span { font-size: 15px; color: var(--pp-ink-2); }
-  .pieces-strip { display: flex; gap: 0; border-radius: 12px; overflow: hidden; width: max-content; box-shadow: var(--pp-shadow-1); }
+  .pieces-strip { display: flex; gap: 0; border-radius: 12px; overflow: hidden; width: max-content; outline: var(--pp-stroke) solid var(--pp-line); outline-offset: calc(-1 * var(--pp-stroke)); }
   .pieces-strip span { width: 64px; height: 64px; display: grid; place-items: center; }
   .pieces-strip span:nth-child(odd) { background: var(--pp-board-light); } .pieces-strip span:nth-child(even) { background: var(--pp-board-dark); }
   .pieces-strip img { width: 58px; }
-  table.kit-table { width: 100%; border-collapse: collapse; background: var(--pp-surface); border-radius: var(--pp-radius-lg); overflow: hidden; box-shadow: var(--pp-shadow-1); font-size: 16px; }
+  table.kit-table { width: 100%; border-collapse: collapse; background: var(--pp-surface); border-radius: var(--pp-radius-lg); overflow: hidden; outline: var(--pp-stroke) solid var(--pp-line); outline-offset: calc(-1 * var(--pp-stroke)); font-size: 16px; }
   .kit-table th, .kit-table td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--pp-line); vertical-align: top; }
   .kit-table th { font-weight: 900; background: var(--pp-surface-sunken); }
   .kit-table tr:last-child td { border-bottom: 0; }
@@ -59,7 +66,7 @@
   .frame-wrap { display: grid; gap: 10px; justify-items: start; }
   .frame-wrap figcaption { font-weight: 900; font-size: 17px; }
   .frame-wrap figcaption span { font-weight: 700; color: var(--pp-ink-2); margin-left: 8px; font-size: 15px; }
-  .frame { position: relative; overflow: hidden; border-radius: 20px; background: var(--pp-paper); box-shadow: 0 0 0 1px var(--pp-line), var(--pp-shadow-2); }
+  .frame { position: relative; overflow: hidden; border-radius: 20px; background: var(--pp-paper); box-shadow: 0 0 0 var(--pp-stroke) var(--pp-line); }
   .frame.desk { width: 1280px; height: 800px; zoom: 0.62; }
   .frame.tab-p { width: 768px; height: 1024px; zoom: 0.62; }
   .frame.small { width: 420px; height: 640px; zoom: 0.62; }
@@ -69,7 +76,7 @@
   /* Screen layouts */
   .topbar { display: flex; align-items: center; gap: 12px; height: 80px; padding: 0 24px; }
   .topbar .title { flex: 1; text-align: center; font-weight: 900; font-size: 20px; }
-  .topbar .who { display: inline-flex; align-items: center; gap: 10px; font-weight: 900; font-size: 20px; padding: 6px 14px 6px 6px; border-radius: 999px; background: var(--pp-surface); box-shadow: var(--pp-shadow-1); }
+  .topbar .who { display: inline-flex; align-items: center; gap: 10px; font-weight: 900; font-size: 20px; padding: 6px 14px 6px 6px; border-radius: 999px; background: var(--pp-surface); box-shadow: inset 0 0 0 var(--pp-stroke) var(--pp-line); }
   .scr-home { display: grid; justify-items: center; gap: 20px; padding: 4px 64px 0; }
   .scr-home .hello { display: flex; align-items: center; gap: 16px; width: 100%; max-width: 980px; }
   .scr-home .hello img { width: 110px; height: 128px; }
@@ -128,7 +135,7 @@
   <img src="assets/pip/pip-cheering.svg" alt="">
   <div>
     <h1>pawnpal design kit</h1>
-    <p>Tokens, components and screens for a calm, modern chess coach for kids 6–12. Open this file in a browser; the app imports <code>tokens.css</code> and <code>components.css</code>.</p>
+    <p>Tokens, components and screens for a bright, playful chess coach for kids 6–12. Open this file in a browser; the app imports <code>tokens.css</code> and <code>components.css</code>.</p>
   </div>
 </header>
 
@@ -146,7 +153,7 @@
     <div class="principle"><b>Board first</b><span>The board is the biggest thing on every game screen. Everything else is smaller and quieter.</span></div>
     <div class="principle"><b>One voice</b><span>Pip's bubble is the only place text appears during play. No toasts, no pop-ups.</span></div>
     <div class="principle"><b>Show, then say</b><span>Highlights and arrows point; the bubble explains in ≤ 2 short sentences, read aloud.</span></div>
-    <div class="principle"><b>Big and pressable</b><span>Kid buttons are 72px (about 2 cm), chunky, with an icon and a word. They visibly press down.</span></div>
+    <div class="principle"><b>An edge means press</b><span>Buttons and tiles sit on a solid edge and sink into it when tapped. Cards and panels have no edge. Kid buttons are 72px (about 2 cm).</span></div>
     <div class="principle"><b>Quiet coach</b><span>Pip speaks on mistakes only. Stars, badges and cheering wait for the end of the game.</span></div>
   </div>
 </section>
@@ -154,13 +161,12 @@
 <!-- ─────────────────────────────────────────────────────────── -->
 <section id="color">
   <h2><small>02</small>Color</h2>
-  <p class="lead">Warm paper background, white surfaces, one ink color. Blue always means "do this" — the main button and the better-move arrow. Orange-coral means "careful". Nothing relies on color alone: grades have an icon and a word, the better-move arrow is solid and the threat arrow is dashed.</p>
+  <p class="lead">A white page, white cards with a light grey line, one ink color, and saturated colors for anything a kid acts on. Blue always means "do this": the main button and the better-move arrow. Coral means "careful". Each of these colors comes in three tones: a fill, a darker edge for the 3D bottom, and a soft tint for backgrounds. Nothing relies on color alone: grades have an icon and a word, the better-move arrow is solid and the threat arrow is dashed.</p>
   <h3 class="kit-sub">Neutrals</h3>
   <div class="grid g5" id="sw-neutral"></div>
-  <h3 class="kit-sub">Brand</h3>
-  <div class="grid g5" id="sw-brand"></div>
-  <h3 class="kit-sub">Move grades</h3>
-  <div class="grid g4" id="sw-grade"></div>
+  <h3 class="kit-sub">Color families: fill, edge, soft</h3>
+  <div class="grid g4" id="sw-family"></div>
+  <p class="note" style="margin-top:16px">White on blue is 4.54:1, the floor for button labels. Every pair the app uses is checked by <code>scripts/check-contrast.mjs</code>. Duolingo's green (#58CC02) and blue (#1CB0F6) fail that check with white text, which is why these are darker.</p>
   <h3 class="kit-sub">Board</h3>
   <div class="grid g5" id="sw-board"></div>
 </section>
@@ -184,18 +190,18 @@
 <!-- ─────────────────────────────────────────────────────────── -->
 <section id="shape">
   <h2><small>04</small>Space, shape, elevation</h2>
-  <p class="lead">A 4px grid. Generous radii keep things soft without looking like a toy. Two shadow levels only; kid buttons and cards get a solid 4px bottom edge instead of a shadow, which makes them look pressable.</p>
+  <p class="lead">A 4px grid. Generous radii keep things soft. There are no blur shadows. Cards get a 2px line. Anything a kid can press also gets a solid 4px edge underneath and sinks into it when tapped, so an edge always means "you can press this". The board sits on its own green edge.</p>
   <div class="grid g5">
     <div class="token-box" style="border-radius:var(--pp-radius-sm)">radius-sm · 10</div>
     <div class="token-box" style="border-radius:var(--pp-radius-md)">radius-md · 16</div>
     <div class="token-box" style="border-radius:var(--pp-radius-lg)">radius-lg · 24</div>
     <div class="token-box" style="border-radius:var(--pp-radius-xl)">radius-xl · 32</div>
-    <div class="token-box" style="border-radius:var(--pp-radius-lg);box-shadow:inset 0 0 0 2px var(--pp-line),0 4px 0 var(--pp-line)">edge · 4px</div>
+    <div class="token-box" style="border-radius:var(--pp-radius-lg);outline:0;box-shadow:inset 0 0 0 2px var(--pp-line),0 4px 0 var(--pp-line)">edge · 4px · pressable</div>
   </div>
   <div class="grid g5" style="margin-top:20px">
-    <div class="token-box" style="border-radius:16px;box-shadow:var(--pp-shadow-1)">shadow-1 · cards</div>
-    <div class="token-box" style="border-radius:16px;box-shadow:var(--pp-shadow-2)">shadow-2 · bubble</div>
-    <div class="token-box" style="border-radius:16px;box-shadow:var(--pp-shadow-board)">shadow-board</div>
+    <div class="token-box" style="border-radius:16px">stroke · 2px · cards</div>
+    <div class="token-box" style="border-radius:16px;outline:0;box-shadow:inset 0 0 0 3px var(--pp-blue),0 4px 0 var(--pp-blue-edge);background:var(--pp-blue-soft)">selected · 3px line</div>
+    <div class="token-box" style="border-radius:16px;outline:0;box-shadow:var(--pp-shadow-board);background:var(--pp-board-light)">shadow-board · 6px edge</div>
     <div class="token-box" style="border-radius:16px;height:auto;padding:14px;text-align:center">tap-kid 72 · tap-kid-2 60<br>tap-min 44 (parent)</div>
     <div class="token-box" style="border-radius:16px;height:auto;padding:14px;text-align:center">board 512 min<br>600 target (75px squares)</div>
   </div>
@@ -260,7 +266,7 @@
     <button class="pp-iconbtn" aria-label="Sound on"><i data-icon="volume"></i></button>
     <button class="pp-iconbtn" aria-label="Grown-ups"><i data-icon="cog"></i></button>
   </div>
-  <p class="note">72px tall by default, 60px with <code>pp-btn--sm</code>, 88px for the hero Play. One primary (blue) button per view. Secondary is white with a gray edge. Reward (yellow) only on the result screen. Ghost for the "quiet" choice. Press = moves down 4px and the edge disappears. The solid edge is deliberate: flat buttons hide what kids can tap.</p>
+  <p class="note">72px tall by default, 60px with <code>pp-btn--sm</code>, 88px for the hero Play. One primary (blue) button per view. Secondary is white with a grey line and edge. Reward (yellow) only on the result screen. Ghost for the "quiet" choice. Press = moves down 4px and the edge disappears. The solid edge is deliberate: flat buttons hide what kids can tap. Disabled buttons turn grey instead of fading, so they look switched off rather than broken. Labels stay in sentence case: young readers recognise words by their shape, and capitals hide it.</p>
 
   <h3 class="kit-sub">Coach bubble — every state</h3>
   <div class="grid g2">
@@ -285,6 +291,22 @@
   </div>
   <p class="note">Order: nudge · reveal · retry · praise (closes after 2.5 s) · hint · thinking. Nudges never close by themselves. The speaker button replays the message.</p>
 
+  <h3 class="kit-sub">Feedback panel</h3>
+  <div style="display:grid;gap:20px;max-width:980px">
+    <div class="pp-feedback pp-feedback--bigoops"><img class="pp-feedback__pip" src="assets/pip/pip-surprised.svg" alt="">
+      <div class="pp-feedback__body"><div><span class="pp-grade pp-grade--bigoops"><span class="pp-grade__icon">!!</span>Big oops</span></div><p class="pp-feedback__text">Uh-oh! Is your knight safe there? Look at who can reach it.</p></div>
+      <div class="pp-feedback__actions"><button class="pp-btn pp-btn--ghost">Keep my move</button><button class="pp-btn pp-btn--secondary"><i data-icon="eye"></i>Show me</button><button class="pp-btn pp-btn--primary"><i data-icon="undo"></i>Try again</button></div></div>
+    <div class="pp-feedback pp-feedback--oops"><img class="pp-feedback__pip" src="assets/pip/pip-encouraging.svg" alt="">
+      <div class="pp-feedback__body"><div><span class="pp-grade pp-grade--oops"><span class="pp-grade__icon">?</span>Oops</span></div><p class="pp-feedback__text">Your bishop could have grabbed a free pawn.</p></div>
+      <div class="pp-feedback__actions"><button class="pp-btn pp-btn--primary">OK</button></div></div>
+    <div class="pp-feedback pp-feedback--great"><img class="pp-feedback__pip" src="assets/pip/pip-cheering.svg" alt="">
+      <div class="pp-feedback__body"><div><span class="pp-grade pp-grade--great"><span class="pp-grade__icon"><i data-icon="star"></i></span>Great!</span></div><p class="pp-feedback__text">That was the only good move. Nice find!</p></div></div>
+    <div class="pp-feedback"><img class="pp-feedback__pip" src="assets/pip/pip-thinking.svg" alt="">
+      <div class="pp-feedback__body"><p class="pp-feedback__text">Take a look at your pawns.</p></div>
+      <div class="pp-feedback__actions"><button class="pp-btn pp-btn--secondary"><i data-icon="bulb"></i>More help</button></div></div>
+  </div>
+  <p class="note">The coach's answer to a move, tinted by grade (<code>pp-feedback--great · good · oops · bigoops</code>; no modifier is the blue hint tint). It sits under or beside the board where the kid is already looking. The main button is always on the right and the quiet choice on the left, so the kid learns where to tap. When the panel is narrow the buttons drop below the message at full width.</p>
+
   <h3 class="kit-sub">Grade chips</h3>
   <div class="row">
     <span class="pp-grade pp-grade--great"><span class="pp-grade__icon"><i data-icon="star"></i></span>Great!</span>
@@ -305,12 +327,18 @@
   <h3 class="kit-sub">Opponent level cards</h3>
   <div class="row" id="levels"></div>
 
-  <h3 class="kit-sub">Color picker</h3>
-  <div class="pp-segment" role="group" aria-label="You play">
+  <h3 class="kit-sub">Tiles and color picker</h3>
+  <div class="row" style="align-items:start;gap:16px">
+    <button class="pp-tile" aria-pressed="false" style="width:168px"><img src="assets/pieces/cburnett/wK.svg" alt="">White</button>
+    <button class="pp-tile" aria-pressed="true" style="width:168px"><img src="assets/pieces/cburnett/bK.svg" alt="">Black</button>
+    <button class="pp-tile" aria-pressed="false" style="width:168px"><i data-icon="shuffle"></i>Surprise me</button>
+  </div>
+  <div class="pp-segment" role="group" aria-label="You play" style="margin-top:24px">
     <button aria-pressed="false"><img src="assets/pieces/cburnett/wK.svg" alt="">White</button>
     <button aria-pressed="false"><img src="assets/pieces/cburnett/bK.svg" alt="">Black</button>
     <button aria-pressed="true"><i data-icon="shuffle"></i>Surprise me</button>
   </div>
+  <p class="note"><code>pp-tile</code> is the shape for any "pick one": colors, levels, profiles, avatars. The selected tile gets a blue tint, a thicker 3px line and a blue edge, so the choice reads by line weight as well as color. <code>pp-segment</code> is the compact row for when space is tight.</p>
 
   <h3 class="kit-sub">Stars and badges</h3>
   <div class="row" style="gap:48px;align-items:start">
@@ -319,6 +347,20 @@
     <div class="pp-badge"><div class="pp-badge__medal">🍴</div><div class="pp-badge__name">Fork finder</div><div class="pp-badge__how">Earned Nov 14</div></div>
     <div class="pp-badge is-locked"><div class="pp-badge__medal"><i data-icon="lock"></i></div><div class="pp-badge__name">Clean game</div><div class="pp-badge__how">Play 20 moves with no oops</div></div>
   </div>
+
+  <h3 class="kit-sub">Stat tiles and progress</h3>
+  <div class="grid g2" style="align-items:start">
+    <div class="pp-stats">
+      <div class="pp-stat pp-stat--great"><div class="pp-stat__label">Great moves</div><div class="pp-stat__value"><i data-icon="star"></i>2</div></div>
+      <div class="pp-stat pp-stat--good"><div class="pp-stat__label">Fixed it</div><div class="pp-stat__value"><i data-icon="check"></i>3</div></div>
+      <div class="pp-stat"><div class="pp-stat__label">Moves</div><div class="pp-stat__value"><i data-icon="play"></i>24</div></div>
+    </div>
+    <div style="display:grid;gap:12px">
+      <div class="pp-progress" role="progressbar" aria-label="Review" aria-valuemin="0" aria-valuemax="4" aria-valuenow="2"><div class="pp-progress__fill" style="--value:50%"></div></div>
+      <span class="note">Moment 2 of 4</span>
+    </div>
+  </div>
+  <p class="note">Stat tiles go on the end-of-game screen and count things the kid did, never things they lost. The progress bar steps through something with an end, like review moments or setup steps. It is never a streak, a score or a timer.</p>
 
   <h3 class="kit-sub">Profile tiles, suggestion, review timeline</h3>
   <div class="row" style="gap:20px;align-items:start">
@@ -347,7 +389,7 @@
 <!-- ─────────────────────────────────────────────────────────── -->
 <section id="screens">
   <h2><small>08</small>Screens</h2>
-  <p class="lead">Built from the components above at real size, shown scaled down. Desktop frames are 1280×800; the tablet frame is 768×1024.</p>
+  <p class="lead">Built from the components above at real size, shown scaled down. Desktop frames are 1280×800; the tablet frame is 768×1024. These frames still use the 0.1 layouts with the new look. The screen redesign replaces them one at a time.</p>
   <div class="frames">
 
     <figure class="frame-wrap"><figcaption>Home <span>one tap to play</span></figcaption>
@@ -488,6 +530,8 @@
     <tr><td>Piece moves (both sides)</td><td>Slide, ease-out</td><td>dur-fast 150ms</td><td>Shows what the opponent did</td></tr>
     <tr><td>Button press</td><td>Moves down 4px, edge disappears</td><td>dur-fast</td><td>Feels physical; confirms the tap</td></tr>
     <tr><td>Bubble appears</td><td>Fade + rise 8px</td><td>dur-base 200ms</td><td>Signals Pip is talking</td></tr>
+    <tr><td>Feedback panel appears</td><td>Fade + rise 16px</td><td>dur-base 200ms</td><td>Pulls the eye down to the answer</td></tr>
+    <tr><td>Progress bar</td><td>Fill grows to the new step</td><td>dur-slow 300ms</td><td>Shows how far through the review the kid is</td></tr>
     <tr><td>Try again undo</td><td>Piece slides back to its square</td><td>dur-slow 300ms</td><td>Makes the take-back visible</td></tr>
     <tr><td>Danger ring</td><td>Two pulses, then still</td><td>0.6s × 2</td><td>Draws the eye without nagging</td></tr>
     <tr><td>Stars</td><td>Pop in one by one, 250ms apart</td><td>ease-pop</td><td>The reward moment, once per game</td></tr>
@@ -524,6 +568,7 @@
       <li><i data-icon="check"></i>Body text contrast ≥ 4.5:1 (checked by <code>scripts/check-contrast.mjs</code>).</li>
       <li><i data-icon="check"></i>Shape before color: solid vs dashed arrows with a white halo, dot vs ring for moves vs captures, a "!" badge for danger.</li>
       <li><i data-icon="check"></i>Every grade has an icon and a word, not just a color.</li>
+      <li><i data-icon="check"></i>Selected tiles change line weight (2px to 3px) as well as color. Disabled buttons turn grey instead of fading.</li>
     </ul>
     <ul class="checks">
       <li><i data-icon="check"></i>Coach messages and opponent moves go to an <code>aria-live</code> region.</li>
@@ -544,7 +589,8 @@
     <tr><td>Kids need touch targets of about 2 × 2 cm, 4× the adult size; tiny buttons defeat 7-year-olds</td><td>72px kid buttons, 75px board squares target</td><td><a href="https://www.nngroup.com/articles/children-ux-physical-development/">NN/g</a>, <a href="https://www.smashingmagazine.com/2024/02/practical-guide-design-children/">Smashing</a></td></tr>
     <tr><td>Young kids need ~14pt text; older kids reject "babyish" UI</td><td>18px floor, 24px coach; an older band for ages 9+</td><td><a href="https://www.nngroup.com/articles/childrens-websites-usability-issues/">NN/g</a></td></tr>
     <tr><td>Dragging is hard for under-9s; offer several input methods</td><td>Tap-tap moves first, drag also works</td><td><a href="https://www.nngroup.com/articles/children-ux-physical-development/">NN/g</a></td></tr>
-    <tr><td>Flat design hides what's tappable</td><td>Solid 4px edge on kid buttons and cards</td><td><a href="https://www.smashingmagazine.com/2016/01/designing-apps-for-kids-is-not-childs-play/">Smashing</a></td></tr>
+    <tr><td>Flat design hides what's tappable</td><td>Solid 4px edge on everything pressable, and only there; cards get a line instead</td><td><a href="https://www.smashingmagazine.com/2016/01/designing-apps-for-kids-is-not-childs-play/">Smashing</a></td></tr>
+    <tr><td>Duolingo's app (measured Nov 2026): white page, 12px-radius buttons on a hard 4px edge (<code>0 4px 0</code>, no blur), white secondary buttons with a 2px #E5E5E5 line, a big mascot, uppercase labels</td><td>Took the page, the edges, the lines, the big mascot and a tinted feedback panel. Kept sentence case, our own colors (theirs fail contrast with white text), Nunito instead of their custom fonts, and Pip</td><td><a href="https://www.duolingo.com/">duolingo.com</a>, <a href="https://styles.refero.design/style/7088d695-362b-4e09-b325-fa8136d4f350">Refero</a></td></tr>
     <tr><td>Kids want feedback with a way forward: retry, answer, or explanation</td><td>Try again · Show me · Keep my move</td><td><a href="https://www.smashingmagazine.com/2016/01/designing-apps-for-kids-is-not-childs-play/">Smashing</a></td></tr>
     <tr><td>A chatty mascot gets muted; reviews should cover key moments only</td><td>Pip silent on ordinary moves; 3–5 review moments</td><td><a href="https://davidwilliamrosales.com/2025/08/18/duolingo-chess-review/">Duolingo Chess review</a>, <a href="https://blog.duolingo.com/engineering-game-review/">Duolingo eng.</a></td></tr>
     <tr><td>Kid apps simplify move labels (ChessKid merges categories; Duolingo uses 3)</td><td>Four kid words: Great · Good · Oops · Big oops</td><td><a href="https://www.chesskid.com/learn/articles/turn-every-game-into-a-learning-adventure-with-game-review">ChessKid</a>, <a href="https://blog.duolingo.com/chess-game-review/">Duolingo</a></td></tr>
@@ -601,17 +647,22 @@ const css = getComputedStyle(document.documentElement);
 const swatch = (token, name, use) => `<div class="swatch"><div style="background:var(${token})"></div><p><b>${name}</b><code>${token} · ${css.getPropertyValue(token).trim()}</code><br>${use}</p></div>`;
 const put = (id, items) => { document.getElementById(id).innerHTML = items.map((s) => swatch(...s)).join(''); };
 put('sw-neutral', [
-  ['--pp-paper', 'Paper', 'App background'], ['--pp-surface', 'Surface', 'Cards, bubble'], ['--pp-line', 'Line', 'Borders, edges'],
+  ['--pp-paper', 'Paper', 'App background'], ['--pp-surface-sunken', 'Sunken', 'Wells, tracks, disabled'], ['--pp-line', 'Line', 'Borders, white-button edges'],
   ['--pp-ink', 'Ink', 'Text, outlines'], ['--pp-ink-2', 'Ink 2', 'Secondary text'],
 ]);
-put('sw-brand', [
-  ['--pp-blue', 'Blue', 'Primary action, better move'], ['--pp-blue-soft', 'Blue soft', 'Selected cards'], ['--pp-coral', 'Coral', 'Pip, danger ring'],
-  ['--pp-sun', 'Sun', 'Stars, rewards'], ['--pp-sun-soft', 'Sun soft', 'Suggestions, badges'],
-]);
-put('sw-grade', [
-  ['--pp-great', 'Great!', 'Star icon · only-move, forks'], ['--pp-good', 'Good', 'Check icon · best and good'],
-  ['--pp-oops-fill', 'Oops', '"?" icon · mistake'], ['--pp-bigoops', 'Big oops', '"!!" icon · blunder'],
-]);
+const value = (token) => css.getPropertyValue(token).trim();
+const family = ([key, fill, name, use]) => `<div class="family" style="--fill:var(--pp-${fill});--edge:var(--pp-${key}-edge);--soft:var(--pp-${key}-soft)">
+  <div class="family__chips"><div class="family__fill"></div><div class="family__soft"></div></div>
+  <p><b>${name}</b>${use}<br><code>${value(`--pp-${fill}`)} · edge ${value(`--pp-${key}-edge`)} · soft ${value(`--pp-${key}-soft`)}</code></p></div>`;
+document.getElementById('sw-family').innerHTML = [
+  ['blue', 'blue', 'Blue', 'Main button, better move, selected tiles, hints'],
+  ['coral', 'coral', 'Coral', 'Pip, danger ring, careful'],
+  ['sun', 'sun', 'Sun', 'Stars, rewards, suggestions'],
+  ['great', 'great', 'Great!', 'Star icon · only move, forks'],
+  ['good', 'good', 'Good', 'Check icon · best and good'],
+  ['oops', 'oops-fill', 'Oops', '"?" icon · mistake'],
+  ['bigoops', 'bigoops', 'Big oops', '"!!" icon · blunder'],
+].map(family).join('');
 put('sw-board', [
   ['--pp-board-light', 'Board light', 'Meadow theme'], ['--pp-board-dark', 'Board dark', 'Meadow theme'],
   ['--pp-hl-last', 'Last move', 'Yellow tint'], ['--pp-arrow-better', 'Better arrow', 'Reveal, review'], ['--pp-arrow-threat', 'Threat arrow', 'Threat, your move in review'],

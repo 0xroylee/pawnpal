@@ -1,4 +1,4 @@
-import { isCoachedGrade, type MoveAnalysis } from "../coach/types.js";
+import { isCoachedGrade, type MoveAnalysis } from "../coach/types.ts";
 import type { GameState } from "./types.js";
 
 export function standingAnalyses({ analyses, history, kidColor }: GameState) {

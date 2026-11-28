@@ -1,6 +1,9 @@
 /*
  * pawnpal component styles. Uses tokens.css.
  * Class names follow pp-<component>, pp-<component>__<part>, pp-<component>--<variant>, is-<state>.
+ *
+ * Flat surfaces: cards get a 2px line. Anything a kid can press also gets a solid
+ * edge underneath and sinks into it when pressed. No blur shadows on kid screens.
  */
 
 /* ── Base ──────────────────────────────────────────────────────── */
@@ -22,34 +25,73 @@
   min-height: var(--pp-tap-kid); padding: 0 var(--pp-space-8);
   font: var(--pp-weight-bold) var(--pp-text-btn)/1 var(--pp-font);
   border: 0; border-radius: var(--pp-radius-md); cursor: pointer;
-  transition: transform var(--pp-dur-fast) var(--pp-ease-out), box-shadow var(--pp-dur-fast) var(--pp-ease-out);
+  transition: transform var(--pp-dur-fast) var(--pp-ease-out), box-shadow var(--pp-dur-fast) var(--pp-ease-out), background-color var(--pp-dur-fast);
   -webkit-tap-highlight-color: transparent;
 }
 .pp-btn svg, .pp-btn img { width: 24px; height: 24px; flex: none; }
 .pp-btn:active { transform: translateY(var(--pp-edge)); }
-.pp-btn--primary { background: var(--pp-blue); color: #fff; box-shadow: 0 var(--pp-edge) 0 var(--pp-blue-edge); }
-.pp-btn--primary:active { box-shadow: 0 0 0 var(--pp-blue-edge); }
-.pp-btn--secondary { background: var(--pp-surface); color: var(--pp-ink); box-shadow: inset 0 0 0 2px var(--pp-line), 0 var(--pp-edge) 0 var(--pp-line); }
-.pp-btn--secondary:active { box-shadow: inset 0 0 0 2px var(--pp-line), 0 0 0 var(--pp-line); }
-.pp-btn--reward { background: var(--pp-sun); color: var(--pp-ink); box-shadow: 0 var(--pp-edge) 0 var(--pp-sun-edge); }
-.pp-btn--reward:active { box-shadow: 0 0 0 var(--pp-sun-edge); }
+.pp-btn--primary { --fill: var(--pp-blue); --edge: var(--pp-blue-edge); color: #fff; }
+.pp-btn--reward { --fill: var(--pp-sun); --edge: var(--pp-sun-edge); color: var(--pp-ink); }
+.pp-btn--primary, .pp-btn--reward { background: var(--fill); box-shadow: 0 var(--pp-edge) 0 var(--edge); }
+.pp-btn--primary:active, .pp-btn--reward:active { box-shadow: 0 0 0 var(--edge); }
+.pp-btn--secondary { background: var(--pp-surface); color: var(--pp-ink); box-shadow: inset 0 0 0 var(--pp-stroke) var(--pp-line), 0 var(--pp-edge) 0 var(--pp-line); }
+.pp-btn--secondary:active { box-shadow: inset 0 0 0 var(--pp-stroke) var(--pp-line), 0 0 0 var(--pp-line); }
 .pp-btn--ghost { background: transparent; color: var(--pp-ink-2); min-height: var(--pp-tap-kid-2); padding: 0 var(--pp-space-4); font-size: var(--pp-text-md); }
 .pp-btn--sm { min-height: var(--pp-tap-kid-2); padding: 0 var(--pp-space-5); font-size: var(--pp-text-md); }
 .pp-btn--ghost:active { transform: none; background: var(--pp-surface-sunken); }
 .pp-btn--hero { min-height: 88px; padding: 0 var(--pp-space-12); font-size: 32px; font-weight: var(--pp-weight-black); border-radius: var(--pp-radius-lg); }
 .pp-btn--hero svg { width: 32px; height: 32px; }
 .pp-btn--block { width: 100%; }
-.pp-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+/* Disabled looks switched off, not faded: grey fill, grey edge, no press. */
+.pp-btn:disabled, .pp-btn:disabled:active {
+  background: var(--pp-surface-sunken); color: var(--pp-ink-3); cursor: not-allowed; transform: none;
+  box-shadow: inset 0 0 0 var(--pp-stroke) var(--pp-line), 0 var(--pp-edge) 0 var(--pp-line);
+}
+.pp-btn--ghost:disabled { background: transparent; box-shadow: none; }
+@media (hover: hover) {
+  .pp-btn--secondary:not(:disabled):hover, .pp-btn--ghost:not(:disabled):hover { background: var(--pp-surface-sunken); }
+}
 
 .pp-iconbtn {
   display: inline-grid; place-items: center; width: var(--pp-tap-kid-2); height: var(--pp-tap-kid-2);
-  border: 0; border-radius: var(--pp-radius-pill); background: var(--pp-surface); color: var(--pp-ink-2);
-  box-shadow: var(--pp-shadow-1); cursor: pointer;
+  border: 0; border-radius: var(--pp-radius-pill); background: var(--pp-surface); color: var(--pp-ink-2); cursor: pointer;
+  box-shadow: inset 0 0 0 var(--pp-stroke) var(--pp-line), 0 var(--pp-edge) 0 var(--pp-line);
+  transition: transform var(--pp-dur-fast) var(--pp-ease-out), box-shadow var(--pp-dur-fast) var(--pp-ease-out);
+  -webkit-tap-highlight-color: transparent;
 }
 .pp-iconbtn svg { width: 26px; height: 26px; }
+.pp-iconbtn:active { transform: translateY(var(--pp-edge)); box-shadow: inset 0 0 0 var(--pp-stroke) var(--pp-line); }
 
 /* ── Cards ─────────────────────────────────────────────────────── */
-.pp-card { background: var(--pp-surface); border-radius: var(--pp-radius-lg); box-shadow: var(--pp-shadow-1); padding: var(--pp-space-6); }
+.pp-card { background: var(--pp-surface); border-radius: var(--pp-radius-lg); box-shadow: inset 0 0 0 var(--pp-stroke) var(--pp-line); padding: var(--pp-space-6); }
+
+/* ── Tiles: big pressable choices ──────────────────────────────── */
+/* Color picker, level cards, profile tiles and any other "pick one" share one look.
+   Selected: blue tint, a 3px blue line and a blue edge, so it reads without color too. */
+.pp-tile, .pp-segment button, .pp-level, .pp-profile {
+  background: var(--pp-surface); color: var(--pp-ink); border: 0; cursor: pointer; font-family: var(--pp-font);
+  box-shadow: inset 0 0 0 var(--pp-stroke) var(--pp-line), 0 var(--pp-edge) 0 var(--pp-line);
+  transition: transform var(--pp-dur-fast) var(--pp-ease-out), box-shadow var(--pp-dur-fast) var(--pp-ease-out), background-color var(--pp-dur-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+:is(.pp-tile, .pp-segment button, .pp-level, .pp-profile):active {
+  transform: translateY(var(--pp-edge)); box-shadow: inset 0 0 0 var(--pp-stroke) var(--pp-line);
+}
+:is(.pp-tile, .pp-segment button, .pp-level, .pp-profile):is([aria-pressed='true'], .is-selected) {
+  background: var(--pp-blue-soft); box-shadow: inset 0 0 0 3px var(--pp-blue), 0 var(--pp-edge) 0 var(--pp-blue-edge);
+}
+:is(.pp-tile, .pp-segment button, .pp-level, .pp-profile):is([aria-pressed='true'], .is-selected):active {
+  box-shadow: inset 0 0 0 3px var(--pp-blue);
+}
+@media (hover: hover) {
+  :is(.pp-tile, .pp-segment button, .pp-level, .pp-profile):not([aria-pressed='true'], .is-selected):hover { background: var(--pp-surface-sunken); }
+}
+.pp-tile {
+  display: grid; justify-items: center; align-content: center; gap: var(--pp-space-2);
+  min-height: var(--pp-tap-kid); padding: var(--pp-space-4); border-radius: var(--pp-radius-lg);
+  font-size: var(--pp-text-md); font-weight: var(--pp-weight-bold); text-align: center;
+}
+.pp-tile img, .pp-tile svg { width: 48px; height: 48px; }
 
 /* ── Avatars ───────────────────────────────────────────────────── */
 .pp-avatar {
@@ -64,13 +106,14 @@
 .pp-coach__pip { width: 80px; height: 94px; }
 .pp-bubble {
   position: relative; background: var(--pp-surface); border-radius: var(--pp-radius-lg);
-  padding: var(--pp-space-5) var(--pp-space-6); box-shadow: var(--pp-shadow-2);
+  padding: var(--pp-space-5) var(--pp-space-6); box-shadow: inset 0 0 0 var(--pp-stroke) var(--pp-line);
   font-size: var(--pp-text-lg); font-weight: 700; line-height: 1.35;
   animation: pp-bubble-in var(--pp-dur-base) var(--pp-ease-out);
 }
-.pp-bubble::before { /* tail pointing at Pip */
+.pp-bubble::before { /* tail pointing at Pip; its left and bottom sides carry the outline */
   content: ''; position: absolute; left: -9px; top: 26px; width: 20px; height: 20px;
   background: inherit; transform: rotate(45deg); border-radius: 4px;
+  box-shadow: inset var(--pp-stroke) calc(-1 * var(--pp-stroke)) 0 var(--pp-line);
 }
 .pp-bubble__label { display: flex; margin-bottom: var(--pp-space-2); }
 .pp-bubble__text { position: relative; margin: 0; }
@@ -80,6 +123,7 @@
 .pp-bubble { container-type: inline-size; }
 @container (max-width: 380px) { .pp-bubble__actions { flex-direction: column; align-items: stretch; } }
 .pp-bubble__voice { position: absolute; top: 10px; right: 10px; width: 48px; height: 48px; box-shadow: none; background: var(--pp-surface-sunken); }
+.pp-bubble__voice:active { transform: none; box-shadow: none; }
 .pp-bubble__voice svg { width: 20px; height: 20px; }
 .pp-bubble--compact { font-size: var(--pp-text-md); padding: var(--pp-space-3) var(--pp-space-5); }
 .pp-bubble--compact::before { top: 16px; }
@@ -90,6 +134,27 @@
 .pp-typing i:nth-child(2) { animation-delay: 0.15s; }
 .pp-typing i:nth-child(3) { animation-delay: 0.3s; }
 @keyframes pp-typing { 0%, 60%, 100% { opacity: 0.3; transform: none; } 30% { opacity: 1; transform: translateY(-4px); } }
+
+/* ── Feedback panel ────────────────────────────────────────────── */
+/* The coach's answer to a move, tinted by grade. It sits under or beside the board, in the
+   kid's line of sight, and its buttons stay in the same place every time. */
+.pp-feedback {
+  --soft: var(--pp-blue-soft);
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--pp-space-4) var(--pp-space-5);
+  padding: var(--pp-space-5) var(--pp-space-6); border-radius: var(--pp-radius-lg); background: var(--soft);
+  animation: pp-feedback-in var(--pp-dur-base) var(--pp-ease-out);
+}
+.pp-feedback--great { --soft: var(--pp-great-soft); }
+.pp-feedback--good { --soft: var(--pp-good-soft); }
+.pp-feedback--oops { --soft: var(--pp-oops-soft); }
+.pp-feedback--bigoops { --soft: var(--pp-bigoops-soft); }
+.pp-feedback__pip { width: 72px; height: 84px; flex: none; }
+.pp-feedback__body { display: grid; gap: var(--pp-space-2); flex: 1 1 280px; min-width: 0; }
+.pp-feedback__text { margin: 0; font-size: var(--pp-text-lg); font-weight: 700; line-height: 1.35; }
+/* Actions share a row with the message when there is room and drop below it, full width, when there isn't. */
+.pp-feedback__actions { display: flex; flex-wrap: wrap; gap: var(--pp-space-3); flex: 1 1 auto; justify-content: flex-end; padding-bottom: var(--pp-edge); }
+.pp-feedback__actions .pp-btn { flex: 1 0 auto; }
+@keyframes pp-feedback-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 
 /* ── Grade chips ───────────────────────────────────────────────── */
 .pp-grade {
@@ -104,6 +169,8 @@
 .pp-grade--oops { --soft: var(--pp-oops-soft); --fill: var(--pp-oops-fill); }
 .pp-grade--oops .pp-grade__icon { color: var(--pp-ink); }
 .pp-grade--bigoops { --soft: var(--pp-bigoops-soft); --fill: var(--pp-bigoops); }
+/* On a feedback panel the chip sits on its own tint, so it gets a white backing. */
+.pp-feedback .pp-grade { background: var(--pp-surface); }
 
 /* ── Board ─────────────────────────────────────────────────────── */
 .pp-board {
@@ -149,12 +216,9 @@
 /* ── Opponent level card ───────────────────────────────────────── */
 .pp-level {
   position: relative; display: grid; justify-items: center; gap: var(--pp-space-2); padding: var(--pp-space-4) var(--pp-space-3);
-  background: var(--pp-surface); border-radius: var(--pp-radius-lg); cursor: pointer; border: 0;
-  box-shadow: inset 0 0 0 2px var(--pp-line), 0 var(--pp-edge) 0 var(--pp-line);
-  font-family: var(--pp-font); color: var(--pp-ink); min-width: 128px;
+  border-radius: var(--pp-radius-lg); min-width: 128px;
 }
 .pp-level__name { font-weight: var(--pp-weight-bold); font-size: var(--pp-text-sm); }
-.pp-level.is-selected { box-shadow: inset 0 0 0 3px var(--pp-blue), 0 var(--pp-edge) 0 var(--pp-blue-edge); background: var(--pp-blue-soft); }
 .pp-level__beaten {
   position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; border-radius: 50%;
   display: grid; place-items: center; background: var(--pp-good); color: #fff;
@@ -165,15 +229,25 @@
 .pp-meter i { width: 9px; height: 14px; border-radius: 3px; background: var(--pp-surface-sunken); box-shadow: inset 0 0 0 1px var(--pp-line); }
 .pp-meter i.on { background: var(--pp-coral); box-shadow: none; }
 
-/* ── Segmented control (color picker) ──────────────────────────── */
-.pp-segment { display: inline-flex; gap: 4px; padding: 5px; background: var(--pp-surface-sunken); border-radius: var(--pp-radius-md); }
+/* ── Segmented choice (color picker) ───────────────────────────── */
+.pp-segment { display: inline-flex; flex-wrap: wrap; justify-content: center; gap: var(--pp-space-3); padding-bottom: var(--pp-edge); }
 .pp-segment button {
   display: inline-flex; align-items: center; gap: 8px; min-height: var(--pp-tap-kid-2); padding: 0 var(--pp-space-5);
-  border: 0; background: transparent; border-radius: 12px; cursor: pointer; white-space: nowrap;
-  font: var(--pp-weight-bold) var(--pp-text-md)/1 var(--pp-font); color: var(--pp-ink-2);
+  border-radius: var(--pp-radius-md); white-space: nowrap;
+  font: var(--pp-weight-bold) var(--pp-text-md)/1 var(--pp-font);
 }
 .pp-segment button img { width: 30px; height: 30px; }
-.pp-segment button[aria-pressed='true'] { background: var(--pp-surface); color: var(--pp-ink); box-shadow: var(--pp-shadow-1); }
+
+/* ── Progress bar ──────────────────────────────────────────────── */
+/* Steps through something finite: review moments, setup steps. Never a streak or a score. */
+.pp-progress { --fill: var(--pp-blue); height: 16px; border-radius: var(--pp-radius-pill); background: var(--pp-surface-sunken); overflow: hidden; }
+.pp-progress__fill {
+  position: relative; height: 100%; width: var(--value, 0%); min-width: 16px; border-radius: inherit; background: var(--fill);
+  transition: width var(--pp-dur-slow) var(--pp-ease-out);
+}
+.pp-progress__fill::after { /* the highlight stripe that makes it look like a toy */
+  content: ''; position: absolute; left: 8px; right: 8px; top: 3px; height: 4px; border-radius: 2px; background: rgb(255 255 255 / 0.35);
+}
 
 /* ── Stars and badges ──────────────────────────────────────────── */
 .pp-stars { display: inline-flex; gap: var(--pp-space-2); }
@@ -188,24 +262,40 @@
 .pp-badge { display: grid; justify-items: center; gap: var(--pp-space-2); width: 132px; text-align: center; }
 .pp-badge__medal {
   display: grid; place-items: center; width: 88px; height: 88px; border-radius: 50%; font-size: 40px;
-  background: radial-gradient(circle at 35% 30%, #fff8e1, var(--pp-sun) 75%);
-  box-shadow: inset 0 0 0 4px rgb(255 255 255 / 0.7), 0 var(--pp-edge) 0 var(--pp-sun-edge);
+  background: var(--pp-sun);
+  box-shadow: inset 0 0 0 5px rgb(255 255 255 / 0.55), 0 var(--pp-edge) 0 var(--pp-sun-edge);
 }
 .pp-badge__name { font-weight: var(--pp-weight-bold); font-size: var(--pp-text-sm); line-height: 1.2; }
 .pp-badge__how { font-size: 16px; color: var(--pp-ink-2); line-height: 1.25; }
 .pp-badge.is-locked .pp-badge__medal { background: var(--pp-surface-sunken); box-shadow: inset 0 0 0 3px var(--pp-line); filter: grayscale(1); opacity: 0.6; }
 
+/* ── Stat tiles (end of game) ──────────────────────────────────── */
+/* A colored label band over a white body. White label text sits on the darker edge color. */
+.pp-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--pp-space-4); }
+.pp-stat {
+  --fill: var(--pp-blue); --edge: var(--pp-blue-edge);
+  display: grid; padding: var(--pp-stroke); border-radius: var(--pp-radius-lg); background: var(--edge); text-align: center;
+}
+.pp-stat--great { --fill: var(--pp-great); --edge: var(--pp-great-edge); }
+.pp-stat--good { --fill: var(--pp-good); --edge: var(--pp-good-edge); }
+.pp-stat__label { padding: var(--pp-space-1) var(--pp-space-3) 6px; color: #fff; font-size: var(--pp-text-sm); font-weight: var(--pp-weight-black); }
+.pp-stat__value {
+  display: flex; align-items: center; justify-content: center; gap: var(--pp-space-2); padding: var(--pp-space-3);
+  border-radius: calc(var(--pp-radius-lg) - var(--pp-stroke)); background: var(--pp-surface);
+  font-size: var(--pp-text-xl); font-weight: var(--pp-weight-black); line-height: 1;
+}
+.pp-stat__value svg { width: 28px; height: 28px; color: var(--fill); }
+
 /* ── Profile tile ──────────────────────────────────────────────── */
 .pp-profile {
   display: grid; justify-items: center; gap: var(--pp-space-3); width: 176px; padding: var(--pp-space-6) var(--pp-space-4);
-  background: var(--pp-surface); border: 0; border-radius: var(--pp-radius-xl); cursor: pointer;
-  box-shadow: inset 0 0 0 2px var(--pp-line), 0 var(--pp-edge) 0 var(--pp-line); font: var(--pp-weight-bold) 22px/1.1 var(--pp-font); color: var(--pp-ink);
+  border-radius: var(--pp-radius-xl); font: var(--pp-weight-bold) 22px/1.1 var(--pp-font);
 }
 
 /* ── Suggestion banner ─────────────────────────────────────────── */
 .pp-suggest {
   display: flex; align-items: center; gap: var(--pp-space-4); padding: var(--pp-space-3) var(--pp-space-4);
-  background: var(--pp-sun-soft); border-radius: var(--pp-radius-lg); box-shadow: inset 0 0 0 2px #ffe3a3;
+  background: var(--pp-sun-soft); border-radius: var(--pp-radius-lg); box-shadow: inset 0 0 0 var(--pp-stroke) var(--pp-sun);
 }
 .pp-suggest img { width: 44px; height: 52px; }
 .pp-suggest p { margin: 0; font-weight: var(--pp-weight-bold); flex: 1; }
@@ -244,5 +334,6 @@
 .pp-tabs button[aria-selected='true'] { color: #1f2328; border-bottom-color: var(--pp-blue); }
 
 @media (prefers-reduced-motion: reduce) {
-  .pp-bubble, .pp-stars.is-animated .on, .pp-sq.is-danger::after, .pp-typing i { animation: none; }
+  .pp-bubble, .pp-feedback, .pp-stars.is-animated .on, .pp-sq.is-danger::after, .pp-typing i { animation: none; }
+  .pp-btn, .pp-iconbtn, .pp-tile, .pp-segment button, .pp-level, .pp-profile, .pp-progress__fill { transition: none; }
 }

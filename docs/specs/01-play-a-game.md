@@ -11,7 +11,7 @@ A parent runs `npx pawnpal`, the browser opens, and a kid plays a complete legal
 **Project scaffold**
 - Single npm package, TypeScript strict mode, Vite + React, Hono server, Vitest, Playwright, ESLint, Prettier.
 - `LICENSE` (GPL-3.0) from the first commit.
-- Scripts: `npm run dev` (Vite + server with proxy), `npm run build`, `npm test`, `npm run e2e`.
+- Scripts: `bun run dev` (Vite + server with proxy), `bun run build`, `bun run test`, `bun run e2e`.
 
 **CLI (`bin/pawnpal.js`)**
 - Written in syntax that old Node versions can parse, so the version check can run. Exits with code 1 and names the required version if Node is older than 22.13.
@@ -66,7 +66,7 @@ Profiles, saved games, difficulty levels, coaching, LLM, network mode.
 
 ## Acceptance criteria
 
-1. From a clean checkout, `npm ci && npm run build && node bin/pawnpal.js` opens the browser to the home screen.
+1. From a clean checkout, `bun install --frozen-lockfile && bun run build && node bin/pawnpal.js` opens the browser to the home screen.
 2. `node bin/pawnpal.js --no-open --port 0` prints a URL, and `GET /api/health` on it returns 200 with `{ ok: true }`.
 3. Under Node 20, the CLI exits with code 1 and a message naming Node 22.13.
 4. When port 4747 is taken, the server starts on 4748 and prints that URL.
