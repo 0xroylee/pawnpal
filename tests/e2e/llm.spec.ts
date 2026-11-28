@@ -76,7 +76,7 @@ test("connects a mock Ollama model, rewords a nudge, and falls back on an invali
     );
     await page.locator('[data-square="a2"]').click();
     await page.locator('[data-square="a3"]').click();
-    const bubble = page.locator(".pp-bubble__text");
+    const bubble = page.locator('[data-testid="coach-text"]');
     await expect(bubble).toHaveAttribute("data-source", "llm");
     await expect(bubble).toHaveText("Take another look.");
     await page.getByRole("button", { name: "Keep my move" }).click();

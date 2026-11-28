@@ -300,12 +300,12 @@ describe("GameScreen", () => {
     await waitFor(() =>
       expect(
         container.querySelector(
-          '.pp-bubble__text[data-fact-kind="hanging-piece"][data-mode="explain"]',
+          '[data-testid="coach-text"][data-fact-kind="hanging-piece"][data-mode="explain"]',
         ),
       ).not.toBeNull(),
     );
     const message =
-      container.querySelector(".pp-bubble__text")?.textContent ?? "";
+      container.querySelector('[data-testid="coach-text"]')?.textContent ?? "";
     expect(container.querySelector(".pp-grade--oops")).not.toBeNull();
     expect(
       container.querySelector(
@@ -362,7 +362,9 @@ describe("GameScreen", () => {
 
     await waitFor(() =>
       expect(
-        container.querySelector('.pp-bubble__text[data-mode="nudge"]'),
+        container.querySelector(
+          '[data-testid="coach-text"][data-mode="nudge"]',
+        ),
       ).not.toBeNull(),
     );
     expect(
@@ -391,7 +393,9 @@ describe("GameScreen", () => {
       />,
     );
     expect(
-      container.querySelector('.pp-bubble__text[data-mode="explain"]'),
+      container.querySelector(
+        '[data-testid="coach-text"][data-mode="explain"]',
+      ),
     ).not.toBeNull();
   });
 
@@ -450,7 +454,9 @@ describe("GameScreen", () => {
 
     await waitFor(() =>
       expect(
-        container.querySelector('.pp-bubble__text[data-mode="explain"]'),
+        container.querySelector(
+          '[data-testid="coach-text"][data-mode="explain"]',
+        ),
       ).not.toBeNull(),
     );
     expect(container.querySelector(".pp-board .pp-sq.is-danger")).toBeNull();

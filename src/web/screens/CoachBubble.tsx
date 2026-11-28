@@ -1,14 +1,9 @@
-import { Check, Star, Volume2, VolumeX } from "lucide-react";
+import { Volume2, VolumeX } from "lucide-react";
 import type { CoachMessage } from "../coach/coachState.js";
-import { t, type MessageKey } from "../i18n/t.js";
+import { t } from "../i18n/t.js";
 import { Pip } from "./Pip.js";
 
-const gradeKeys = {
-  great: "grade.great",
-  good: "grade.good",
-  oops: "grade.oops",
-  bigoops: "grade.bigoops",
-} as const satisfies Record<NonNullable<CoachMessage["grade"]>, MessageKey>;
+import { GradeChip } from "./GradeChip.js";
 
 export function CoachBubble({
   message,
@@ -52,24 +47,12 @@ export function CoachBubble({
         )}
         {message.grade && (
           <div className="pp-bubble__label">
-            <span className={`pp-grade pp-grade--${message.grade}`}>
-              <span className="pp-grade__icon">
-                {message.grade === "great" ? (
-                  <Star aria-hidden="true" focusable="false" />
-                ) : message.grade === "good" ? (
-                  <Check aria-hidden="true" focusable="false" />
-                ) : message.grade === "oops" ? (
-                  "?"
-                ) : (
-                  "!!"
-                )}
-              </span>
-              {t(gradeKeys[message.grade])}
-            </span>
+            <GradeChip grade={message.grade} />
           </div>
         )}
         <p
           className="pp-bubble__text"
+          data-testid="coach-text"
           data-fact-kind={message.kind}
           data-mode={message.mode}
           data-source={message.source ?? (isThinking ? undefined : "template")}

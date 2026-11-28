@@ -41,9 +41,10 @@ test("resumes the saved board after a server crash and exports the finished game
       .getByRole("button", { name: "Skip, use the built-in coach" })
       .click();
     await page.getByRole("button", { name: "Mina", exact: true }).click();
-    const level = page.getByRole("combobox", { name: "Opponent level" });
-    await expect(level).toHaveValue("3");
-    await level.selectOption({ label: "Mighty Lion" });
+    await expect(
+      page.getByRole("button", { name: "Busy Beaver" }),
+    ).toHaveAttribute("aria-pressed", "true");
+    await page.getByRole("button", { name: "Mighty Lion" }).click();
     await page.getByRole("button", { name: "Play!", exact: true }).click();
 
     const board = page.locator(".pp-board");

@@ -14,10 +14,16 @@ const pipImages: Record<CoachPip, string> = {
   encouraging: pipEncouraging,
 };
 
-export function Pip({ mood }: { mood: CoachPip }) {
+export function Pip({
+  mood,
+  className = "pp-coach__pip",
+}: {
+  mood: CoachPip;
+  className?: string;
+}) {
   return (
     <img
-      className="pp-coach__pip"
+      className={className}
       data-pip-mood={mood}
       src={pipImages[mood]}
       alt={t("coach.pipAlt")}

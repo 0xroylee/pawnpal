@@ -46,10 +46,16 @@ function mediaStyleRule(
       candidate instanceof CSSMediaRule &&
       candidate.conditionText.includes(media),
   ) as CSSMediaRule | undefined;
-  const rule = Array.from(mediaRule?.cssRules ?? []).find(
-    (candidate) =>
-      "selectorText" in candidate && candidate.selectorText === selector,
-  );
+  const rule = Array.from(mediaRule?.cssRules ?? [])
+    .reverse()
+    .find(
+      (candidate) =>
+        "selectorText" in candidate &&
+        String(candidate.selectorText)
+          .split(",")
+          .map((part) => part.trim())
+          .includes(selector),
+    );
   return rule as CSSStyleRule | undefined;
 }
 
@@ -84,10 +90,8 @@ describe("app styles", () => {
     expect(styleRule(".pp-sq.has-capture::after")?.style.zIndex).toBe("3");
   });
 
-  it("places the coach bubble in the side column and sizes badges from the board", () => {
-    expect(styleRule(".pp-game__side-column > .pp-coach")?.style.width).toBe(
-      "100%",
-    );
+  it("sizes the coach region and badges from the board", () => {
+    expect(styleRule(".pp-game__coach")?.style.minHeight).toBe("240px");
     expect(styleRule(".pp-board")?.style.containerType).toBe("inline-size");
     expect(
       styleRule(".pp-board .pp-sq")?.style.getPropertyValue("--board"),

@@ -31,7 +31,7 @@ After each game, Pip walks the kid through up to five key moments in under a min
 **Summary card:** result; counts of great, good, mistakes and blunders; hints used. Stars appear once spec 10 lands.
 
 **Entry points:**
-- The end-of-game banner, "Let's look at your game with Pip", which can be skipped.
+- The end-of-game screen, "Let's look at your game with Pip"; Play again and Home skip it.
 - The game history list in the profile.
 
 ## Out of scope
@@ -46,7 +46,7 @@ After each game, Pip walks the kid through up to five key moments in under a min
 2. A 60-move game from history opens its review within 500 ms. No engine run is needed because the analysis is stored.
 3. Plies with no stored analysis (late grades) are skipped without errors.
 4. Arrows and highlights match each moment's facts and use the kit's arrow styles (dashed orange for the kid's move, solid blue for the better move).
-5. Skip and Done return to the home screen.
+5. Home and Done return to the home screen.
 6. Opening a past game from history shows the same review as right after the game.
 
 ## Test plan

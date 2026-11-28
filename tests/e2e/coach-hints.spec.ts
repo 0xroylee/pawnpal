@@ -16,14 +16,14 @@ test("hints reveal a square, a nudge, then the best-move arrow", async ({
   await expect(board.locator(".pp-sq.is-hint")).toHaveCount(1);
 
   await page.locator(".pp-player__hint").click();
-  await expect(page.locator('.pp-bubble__text[data-mode="hint2"]')).toBeVisible(
-    { timeout: 8_000 },
-  );
+  await expect(
+    page.locator('[data-testid="coach-text"][data-mode="hint2"]'),
+  ).toBeVisible({ timeout: 8_000 });
   await expect(board.locator(".pp-sq.is-hint")).toHaveCount(1);
 
   await page.locator(".pp-player__hint").click();
   await expect(
-    page.locator('.pp-bubble__text[data-mode="hint3"]'),
+    page.locator('[data-testid="coach-text"][data-mode="hint3"]'),
   ).toBeVisible();
   await expect(board.locator('[data-arrow-kind="better"]')).toBeVisible();
   await expect(page.locator(".pp-player__hint")).toBeDisabled();

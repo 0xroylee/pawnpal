@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
-import { Settings } from "lucide-react";
+import { LockKeyhole, Settings, UserRound } from "lucide-react";
+import { Pip } from "./Pip.js";
 import {
   avatars,
   type Avatar,
@@ -126,46 +127,49 @@ export function ProfilePicker({
   onAbout: () => void;
 }) {
   return (
-    <ProfileCard>
+    <main className="pp-app pp-hero pp-picker">
+      <button
+        className="pp-iconbtn pp-hero__corner"
+        type="button"
+        aria-label={t("parent.title")}
+        onClick={onParent}
+      >
+        <Settings aria-hidden="true" focusable="false" />
+      </button>
+      <Pip mood="happy" className="pp-hero__pip" />
       <h1>{t("library.who")}</h1>
       {networkOn && <p className="pp-network__banner">{t("network.banner")}</p>}
-      {profiles.length > 0 && (
-        <div className="pp-profile-grid">
-          {profiles.map((profile) => (
-            <button
-              className="pp-btn pp-btn--secondary pp-profile-choice"
-              type="button"
-              key={profile.id}
-              onClick={() => onSelect(profile)}
-            >
-              <ProfileAvatar avatar={profile.avatar} />
-              <span>{profile.name}</span>
-            </button>
-          ))}
-        </div>
-      )}
-      <div className="pp-library__actions">
+      <div className="pp-picker__tiles">
+        {profiles.map((profile) => (
+          <button
+            className="pp-profile"
+            type="button"
+            key={profile.id}
+            onClick={() => onSelect(profile)}
+          >
+            <ProfileAvatar avatar={profile.avatar} />
+            <span>{profile.name}</span>
+          </button>
+        ))}
         <button
-          className="pp-btn pp-btn--primary"
-          type="button"
-          onClick={onCreate}
-        >
-          {t("library.addProfile")}
-        </button>
-        <button
-          className="pp-btn pp-btn--ghost"
+          className="pp-profile pp-profile--guest"
           type="button"
           onClick={onGuest}
         >
-          {t("library.guest")}
+          <span className="pp-avatar" aria-hidden="true">
+            <UserRound />
+          </span>
+          <span>{t("library.guest")}</span>
         </button>
+      </div>
+      <div className="pp-library__actions">
         <button
           className="pp-btn pp-btn--ghost"
           type="button"
-          onClick={onParent}
+          onClick={onCreate}
         >
-          <Settings aria-hidden="true" />
-          {t("parent.title")}
+          <LockKeyhole aria-hidden="true" />
+          {t("library.addProfile")}
         </button>
         <button
           className="pp-btn pp-btn--ghost"
@@ -175,7 +179,7 @@ export function ProfilePicker({
           {t("about.title")}
         </button>
       </div>
-    </ProfileCard>
+    </main>
   );
 }
 

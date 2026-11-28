@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
+import { Chess } from "chess.js";
 import type { BoardArrow } from "../../src/web/coach/annotations.js";
 import type { ReplayRecording } from "../../src/web/engine/replayTransport.js";
 import { expectReplyWithinFiveSeconds, openDevFen } from "./helpers.js";
@@ -48,7 +49,7 @@ for (const position of positions) {
       ).toBeVisible({ timeout: 8_000 });
       await expect(page.locator(".pp-grade--great")).toBeVisible();
       await expect(
-        page.locator('.pp-bubble__text[data-mode="praise"]'),
+        page.locator('[data-testid="coach-text"][data-mode="praise"]'),
       ).toBeVisible();
       await expectAnnotations(page, position);
       await expectReplyWithinFiveSeconds(page, 0);
@@ -57,7 +58,7 @@ for (const position of positions) {
     }
 
     const message = page.locator(
-      `.pp-bubble__text[data-fact-kind="${position.kind}"]`,
+      `[data-testid="coach-text"][data-fact-kind="${position.kind}"]`,
     );
     await expect(message).toBeVisible({ timeout: 8_000 });
     await expect(message).toHaveAttribute("data-mode", "nudge");
@@ -71,7 +72,19 @@ for (const position of positions) {
       expect(text.toLowerCase()).toContain(word);
     }
     expect(text).not.toMatch(/\b[a-h][1-8]\b/);
-    await expect(page.getByTestId("move")).toHaveCount(2, { timeout: 5_000 });
+    await expect
+      .poll(
+        async () => {
+          const record = JSON.parse(
+            (await page.getByTestId("debug-game-record").textContent()) ?? "{}",
+          );
+          const chess = new Chess();
+          chess.loadPgn(record.pgn);
+          return chess.history().length;
+        },
+        { timeout: 5_000 },
+      )
+      .toBe(2);
     await expectNoAnnotations(page);
   });
 }
