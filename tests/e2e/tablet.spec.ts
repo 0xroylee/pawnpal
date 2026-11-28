@@ -1,6 +1,39 @@
 import { expect, test, type Page } from "@playwright/test";
 import { expectReplyWithinFiveSeconds, startAs } from "./helpers.js";
 
+// Keeps the screenshot from depending on when the images arrive: every image
+// on the screen, the 32 pieces and Pip, is loaded and decoded first.
+async function waitForImages(page: Page) {
+  await expect(page.locator(".pp-board [data-piece] img")).toHaveCount(32);
+  const images = page.locator("main img");
+  await images.evaluateAll((elements) =>
+    Promise.all(
+      elements.map((element) => (element as HTMLImageElement).decode()),
+    ),
+  );
+  expect(
+    await images.evaluateAll((elements) =>
+      elements.map((element) => {
+        const image = element as HTMLImageElement;
+        return image.complete && image.naturalWidth > 0;
+      }),
+    ),
+    "every image is loaded",
+  ).not.toContain(false);
+  // The snapshot's pixel tolerance can hide a few missing pieces.
+  const pieceRatios = await page
+    .locator(".pp-board [data-piece] img")
+    .evaluateAll((elements) =>
+      elements.map((element) => {
+        const square = element.closest(".pp-sq")!.getBoundingClientRect();
+        const { width, height } = element.getBoundingClientRect();
+        return Math.min(width / square.width, height / square.height);
+      }),
+    );
+  for (const ratio of pieceRatios)
+    expect(ratio, "every piece fills 92% of its square").toBeCloseTo(0.92, 2);
+}
+
 for (const viewport of [
   { width: 768, height: 1024 },
   { width: 1024, height: 768 },
@@ -17,8 +50,15 @@ for (const viewport of [
     if (viewport.width < viewport.height)
       expect(panelBox!.y).toBeGreaterThan(boardBox!.y + boardBox!.height);
     else expect(panelBox!.x).toBeGreaterThan(boardBox!.x + boardBox!.width);
-    await expect(page).toHaveScreenshot(`tablet-${viewport.width}.png`, {
+    await waitForImages(page);
+    // toHaveScreenshot's own capture leaves some SVG pieces unpainted in
+    // WebKit, so compare a regular screenshot instead.
+    const shot = await page.screenshot({
       animations: "disabled",
+      caret: "hide",
+      scale: "css",
+    });
+    expect(shot).toMatchSnapshot(`tablet-${viewport.width}.png`, {
       maxDiffPixelRatio: 0.025,
     });
   });

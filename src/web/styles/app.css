@@ -13,6 +13,7 @@ body {
 }
 
 .pp-setup {
+  box-sizing: border-box;
   display: grid;
   min-height: 100vh;
   place-items: center;
@@ -42,6 +43,7 @@ body {
 
 .pp-hero {
   position: relative;
+  box-sizing: border-box;
   min-height: 100vh;
   display: grid;
   justify-items: center;
@@ -169,9 +171,13 @@ body {
   background: var(--pp-sun-soft);
 }
 
-.pp-review__timeline .pp-grade svg {
-  width: 1rem;
-  height: 1rem;
+.pp-grade--ungraded {
+  --soft: var(--pp-surface-sunken);
+  --fill: var(--pp-line);
+}
+
+.pp-grade--ungraded .pp-grade__icon {
+  color: var(--pp-ink);
 }
 
 .pp-parent__menu,
@@ -246,6 +252,10 @@ body {
 .pp-library__save {
   justify-content: start;
   color: var(--pp-ink-2);
+}
+
+.pp-game--over .pp-library__save {
+  justify-content: center;
 }
 
 .pp-profile-grid,
@@ -444,6 +454,14 @@ body {
 .pp-sq--dark {
   background: var(--pp-board-dark);
   color: var(--pp-board-coord-on-dark);
+}
+
+/* react-chessboard wraps each piece in a draggable div. Unsized, it shrinks
+   to the image, so piece sizes depended on image load timing and WebKit drew
+   some pieces at 0×0. */
+.pp-sq > [role="button"] {
+  width: 100%;
+  height: 100%;
 }
 
 .pp-sq [data-piece] {
@@ -694,6 +712,46 @@ body {
   .pp-game .pp-feedback {
     row-gap: var(--pp-space-2);
     padding-block: var(--pp-space-2);
+  }
+}
+
+.pp-game__opponent--top {
+  display: none;
+}
+
+@media (orientation: portrait) and (min-width: 768px) {
+  .pp-game__title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .pp-game__opponent--top {
+    display: flex;
+    position: relative;
+    justify-self: center;
+  }
+
+  .pp-game__opponent--top .pp-player__status {
+    position: absolute;
+    left: 100%;
+    margin-left: var(--pp-space-3);
+  }
+
+  .pp-game__opponent--board {
+    display: none;
+  }
+
+  /* The text takes the free width, so actions beside it shrink to their
+     content. Actions that wrap onto their own row still fill it. */
+  .pp-game .pp-feedback__body {
+    flex-grow: 999;
   }
 }
 

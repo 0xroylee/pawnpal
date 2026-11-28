@@ -1,4 +1,6 @@
+import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { randomUUID } from "node:crypto";
+import { once } from "node:events";
 import { expect, type Locator, type Page } from "@playwright/test";
 import type { Color } from "chess.js";
 import type { Difficulty } from "../../src/shared/game/difficulty.js";
@@ -209,4 +211,61 @@ export async function openMissedFork(page: Page) {
   await openDevFen(page, miss.fen, miss.kidColor, { replay: true });
   await expect(page.locator(".pp-board")).toBeVisible();
   return { miss: miss.move, fork: fork.move };
+}
+
+// Starts a server of its own on a free port, or on `port` when a restarted
+// server must keep its address.
+export async function startServer(home: string, port = "0") {
+  const child = spawn(
+    process.execPath,
+    ["bin/pawnpal.js", "--no-open", "--port", port],
+    {
+      env: { ...process.env, PAWNPAL_HOME: home, PAWNPAL_DEV: "1" },
+    },
+  );
+  let diagnostics = "";
+  child.stderr.setEncoding("utf8").on("data", (data: string) => {
+    diagnostics += data;
+  });
+  try {
+    const url = await new Promise<string>((resolve, reject) => {
+      let stdout = "";
+      const timeout = setTimeout(
+        () => reject(new Error(`Pawnpal did not start. ${diagnostics}`)),
+        10_000,
+      );
+      child.once("error", (error) => {
+        clearTimeout(timeout);
+        reject(error);
+      });
+      child.once("exit", (code) => {
+        clearTimeout(timeout);
+        reject(new Error(`Pawnpal exited with ${code}. ${diagnostics}`));
+      });
+      child.stdout.setEncoding("utf8").on("data", (data: string) => {
+        stdout += data;
+        const announced =
+          /pawnpal is running at (http:\/\/127\.0\.0\.1:\d+)/.exec(stdout)?.[1];
+        if (announced) {
+          clearTimeout(timeout);
+          resolve(announced);
+        }
+      });
+    });
+    return { child, url };
+  } catch (error) {
+    await stopServer(child, "SIGKILL");
+    throw error;
+  }
+}
+
+export async function stopServer(
+  child: ChildProcessWithoutNullStreams,
+  signal: NodeJS.Signals,
+) {
+  if (child.exitCode !== null || child.signalCode !== null || !child.pid)
+    return;
+  const exited = once(child, "exit");
+  child.kill(signal);
+  await exited;
 }

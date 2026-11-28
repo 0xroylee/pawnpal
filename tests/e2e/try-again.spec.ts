@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 import { Chess } from "chess.js";
 import type { ReplayRecording } from "../../src/web/engine/replayTransport.js";
 import { openDevFen } from "./helpers.js";
@@ -126,9 +126,21 @@ test("keeps the move, explains it, and lets the computer reply", async ({
     ),
   ).toBeVisible();
   await page.getByRole("button", { name: "See whole game" }).click();
-  await expect(
-    page.getByRole("button", { name: "1. a3 Big oops" }),
-  ).toBeVisible();
+  // The icon stays out of the accessible name, so the move reads as words.
+  const move = page.getByRole("button", {
+    name: "1. a3 Big oops",
+    exact: true,
+  });
+  await expect(move).toBeVisible();
+  // The whole-game list draws the same chip Pip's bubble shows for the move.
+  expect(await chipLook(move.locator(".pp-grade"))).toEqual(
+    await chipLook(page.locator(".pp-bubble .pp-grade")),
+  );
+  expect(await chipLook(move.locator(".pp-grade"))).toMatchObject({
+    text: "!!Big oops",
+    height: 36,
+    icon: { text: "!!", width: 26, height: 26 },
+  });
   await page.getByRole("button", { name: "Done", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Play as guest" }),
@@ -207,4 +219,24 @@ async function expectReveal(page: Page) {
     arrow.locator('line[stroke="var(--pp-arrow-halo)"]'),
   ).toBeVisible();
   await expect(page.getByTestId("move")).toHaveCount(0);
+}
+
+function chipLook(chip: Locator) {
+  return chip.evaluate((element) => {
+    const look = (node: Element) => {
+      const box = node.getBoundingClientRect();
+      const style = getComputedStyle(node);
+      return {
+        text: node.textContent,
+        width: Math.round(box.width),
+        height: Math.round(box.height),
+        background: style.backgroundColor,
+        color: style.color,
+        fontSize: style.fontSize,
+        fontWeight: style.fontWeight,
+      };
+    };
+    const icon = element.querySelector(".pp-grade__icon");
+    return { ...look(element), icon: icon && look(icon) };
+  });
 }

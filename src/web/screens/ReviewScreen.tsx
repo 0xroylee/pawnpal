@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import { Chess } from "chess.js";
-import { Check, Star } from "lucide-react";
 import {
   fixedMistake,
   isGreatMove,
@@ -18,6 +17,7 @@ import { useRephrasedMessage } from "../game/useRephrasedMessage.js";
 import type { BrainStatus } from "../parent/client.js";
 import { useReadAloud } from "../sound/readAloud.js";
 import { CoachBubble } from "./CoachBubble.js";
+import { GradeChip } from "./GradeChip.js";
 import { Pip } from "./Pip.js";
 import { resultMessageKey } from "./resultMessage.js";
 import { RewardStars } from "./Rewards.js";
@@ -246,26 +246,7 @@ export function ReviewScreen({
                           move: move.san,
                         })}
                       </span>
-                      {grade && (
-                        <span className={`pp-grade pp-grade--${grade}`}>
-                          <span aria-hidden="true">
-                            {grade === "great" ? (
-                              <Star />
-                            ) : grade === "good" ? (
-                              <Check />
-                            ) : grade === "ungraded" ? (
-                              "–"
-                            ) : grade === "oops" ? (
-                              "?"
-                            ) : (
-                              "!!"
-                            )}
-                          </span>
-                          {grade === "ungraded"
-                            ? t("review.ungraded")
-                            : t(`grade.${grade}`)}
-                        </span>
-                      )}
+                      {grade && <GradeChip grade={grade} />}
                     </button>
                   </li>
                 );

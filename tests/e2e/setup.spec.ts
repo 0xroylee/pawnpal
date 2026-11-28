@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 import type { Profile, SavedGame } from "../../src/shared/game/library.js";
 import {
   createProfile,
@@ -31,12 +31,45 @@ function setupParts(page: Page) {
   };
 }
 
-// Other tests fill the shared server with profiles, so reaching a tile can
-// scroll the picker, and the setup screen opens with that offset. Check the
-// screen a kid sees when it opens at the top.
-async function expectPlayOnFirstScreen(page: Page) {
+// Adds profiles until a new one lands below the fold, so a kid has to scroll
+// the picker to reach it. The guest tile comes after it.
+async function profileBelowTheFold(page: Page) {
+  for (;;) {
+    const profile = await createProfile(page, uniqueName("Scroll kid"));
+    await page.goto("/");
+    const tile = await page
+      .getByRole("button", { name: profile.name, exact: true })
+      .boundingBox();
+    if (tile!.y >= page.viewportSize()!.height) return profile;
+    for (let filler = 0; filler < 4; filler++)
+      await createProfile(page, uniqueName("Filler kid"));
+  }
+}
+
+const scrollY = (page: Page) => page.evaluate(() => window.scrollY);
+
+async function scrollToAndClick(page: Page, target: Locator) {
+  await target.scrollIntoViewIfNeeded();
+  expect(await scrollY(page), "scrolled before the click").toBeGreaterThan(0);
+  await target.click();
+}
+
+async function pickFromScrolledPicker(page: Page, name: string) {
+  await page.goto("/");
+  await scrollToAndClick(page, page.getByRole("button", { name, exact: true }));
+}
+
+async function expectSetupOnOneScreen(page: Page) {
   await expect(setupParts(page).play).toBeVisible();
-  await page.evaluate(() => window.scrollTo(0, 0));
+  const { top, scrollHeight, innerHeight } = await page.evaluate(() => ({
+    top: window.scrollY,
+    scrollHeight: document.documentElement.scrollHeight,
+    innerHeight: window.innerHeight,
+  }));
+  expect(top, "setup opens at the top").toBe(0);
+  expect(scrollHeight, "the page doesn't scroll").toBeLessThanOrEqual(
+    innerHeight,
+  );
   await expectOnFirstScreen(page, [setupParts(page).play]);
 }
 
@@ -84,23 +117,56 @@ for (const viewport of [
   { width: 1280, height: 800 },
   { width: 768, height: 1024 },
 ]) {
-  test(`shows Play! without scrolling at ${viewport.width}×${viewport.height}`, async ({
+  test(`opens setup at the top and fits it on one screen at ${viewport.width}×${viewport.height}`, async ({
     page,
   }) => {
     await page.setViewportSize(viewport);
-    const profile = await createProfile(page, uniqueName("Fit kid"));
-    await page.goto("/");
-    await page.getByRole("button", { name: "Play as guest" }).click();
-    await expectPlayOnFirstScreen(page);
+    const profile = await profileBelowTheFold(page);
 
-    await page.getByRole("button", { name: "Back", exact: true }).click();
-    await page.getByRole("button", { name: profile.name, exact: true }).click();
+    await pickFromScrolledPicker(page, "Play as guest");
+    await expectSetupOnOneScreen(page);
+
+    await pickFromScrolledPicker(page, profile.name);
     await expect(
       page.getByRole("button", { name: "Game history" }),
     ).toBeVisible();
-    await expectPlayOnFirstScreen(page);
+    await expectSetupOnOneScreen(page);
   });
 }
+
+test("starts the game at the top after scrolling down to Play!", async ({
+  page,
+}) => {
+  // A short laptop window, where the setup screen is taller than the window.
+  await page.setViewportSize({ width: 1280, height: 600 });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Play as guest" }).click();
+  await scrollToAndClick(page, setupParts(page).play);
+  await expect(page.locator(".pp-board")).toBeVisible();
+  expect(await scrollY(page), "the game opens at the top").toBe(0);
+});
+
+test("opens the parent's profile form at the top of the page", async ({
+  page,
+}) => {
+  const viewport = { width: 1280, height: 800 };
+  await page.setViewportSize(viewport);
+  await createProfile(page, uniqueName("Parent kid"));
+  const add = page.getByRole("button", { name: "Add profile", exact: true });
+  for (;;) {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Parent settings" }).click();
+    await page.getByRole("button", { name: "Profiles", exact: true }).click();
+    if ((await add.boundingBox())!.y >= viewport.height) break;
+    for (let filler = 0; filler < 6; filler++)
+      await createProfile(page, uniqueName("Filler kid"));
+  }
+  await scrollToAndClick(page, add);
+  await expect(
+    page.getByRole("heading", { name: "Add profile", exact: true }),
+  ).toBeVisible();
+  expect(await scrollY(page), "the form opens at the top").toBe(0);
+});
 
 test("starts the game at the chosen level and side", async ({ page }) => {
   const profile = await createProfile(page, uniqueName("Owl kid"));

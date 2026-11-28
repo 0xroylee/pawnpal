@@ -9,6 +9,7 @@ import {
 import type { LevelSuggestion } from "../../shared/game/library.js";
 import { horseyPieces } from "../board/pieces.js";
 import { t, type MessageKey } from "../i18n/t.js";
+import { levelSuggestionText } from "./levelSuggestion.js";
 import { Pip } from "./Pip.js";
 
 export type StartGameOptions = {
@@ -62,12 +63,7 @@ export function SetupScreen({
           <h1 className="pp-hello__title">{t("setup.heading")}</h1>
           <p aria-live="polite">
             {suggestion
-              ? t(
-                  suggestion.direction === "up"
-                    ? "library.levelUp"
-                    : "library.levelDown",
-                  { level: suggestion.level },
-                )
+              ? levelSuggestionText(suggestion)
               : t(`setup.level.${level}.description`)}
           </p>
           {suggestion && (
