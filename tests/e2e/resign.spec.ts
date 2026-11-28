@@ -23,20 +23,19 @@ test("keeps the guest opponent choice for another game and after reload", async 
 }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "Play as guest" }).click();
-  const level = page.getByRole("combobox", { name: "Opponent level" });
-  await expect(level.getByRole("option")).toHaveCount(8);
-  await level.selectOption({ label: "Dragon" });
-  await expect(
-    page.getByRole("img", { name: "8 out of 8 difficulty stars" }),
-  ).toBeVisible();
+  const level = page.getByRole("button", { name: "Dragon" });
+  await expect(page.locator("button.pp-level")).toHaveCount(8);
+  await expect(level.getByRole("img", { name: "Level 8 of 8" })).toBeVisible();
+  await level.click();
+  await expect(level).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Black", exact: true }).click();
   await page.getByRole("button", { name: "Play!", exact: true }).click();
   await expect(page.getByTestId("move")).toHaveCount(1);
   await page.getByRole("button", { name: "Give up", exact: true }).click();
   await page.getByRole("button", { name: "Yes, give up" }).click();
   await page.getByRole("button", { name: "Play again" }).click();
-  await expect(level).toHaveValue("8");
+  await expect(level).toHaveAttribute("aria-pressed", "true");
   await page.reload();
   await page.getByRole("button", { name: "Play as guest" }).click();
-  await expect(level).toHaveValue("8");
+  await expect(level).toHaveAttribute("aria-pressed", "true");
 });

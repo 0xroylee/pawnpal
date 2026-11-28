@@ -20,14 +20,14 @@ Each feature a kid or parent can see, with the spec that defines it and the code
 
 ## Start the app and play a game
 
-The parent runs `npx pawnpal` and the browser opens. The kid picks a color and plays a full legal game with move sounds, a move list, promotion, resign and a result banner.
+The parent runs `npx pawnpal` and the browser opens. The kid picks a color and plays a full legal game with move sounds, a move list, promotion, resign and a celebration screen.
 
 - CLI: `bin/pawnpal.js` (Node version check), `src/server/cli.ts` (flags `--port`, `--no-open`, `--lan`, and the `reset-pin` command), `src/server/main.ts`
 - Server: `src/server/app.ts` (static files, COOP and COEP headers, `/api/health`)
 - Game: `src/web/game/reducer.ts`, `src/web/game/rules.ts`, `src/web/game/useOpponent.ts`
 - Board: `src/web/board/` (`Board`, `PromotionPicker`, `selection.ts`, `pieces.tsx`)
 - Engine: `src/web/engine/` (`EngineClient`, `uci.ts`, `chooseBuild.ts`, `engines.ts`, transports)
-- Screens: `src/web/screens/SetupScreen.tsx`, `GameScreen.tsx`, `MoveList.tsx`, `ResultBanner.tsx`, `resultMessage.ts`
+- Screens: `src/web/screens/SetupScreen.tsx`, `GameScreen.tsx`, `MoveList.tsx`, `ResultScreen.tsx`, `resultMessage.ts`
 - Sound: `src/web/sound/sounds.ts`
 - Dev hook: `src/web/dev/startParams.ts` (`?fen=` and `?color=` with `PAWNPAL_DEV=1`)
 - Tests: `tests/e2e/play.spec.ts`, `black.spec.ts`, `checkmate.spec.ts`, `illegal-move.spec.ts`, `promotion.spec.ts`, `resign.spec.ts`, `health.spec.ts`, `coi-fallback.spec.ts`, `tests/integration/engine-node.test.ts`, `tests/fixtures/site/`
@@ -40,6 +40,7 @@ Eight named levels, Sleepy Snail to Dragon. The app suggests a change after a st
 - Names and descriptions: `setup.level.*` keys in `src/web/i18n/en.json`
 - Picker and suggestion: `src/web/screens/SetupScreen.tsx`, `src/web/screens/ProfileScreens.tsx`, `/api/profiles/:id/suggestion` in `src/server/db/routes.ts`
 - Calibration: `tools/calibrate/` and its reports in `tools/calibrate/results/`, `.github/workflows/calibrate.yml`
+- Tests: `tests/e2e/setup.spec.ts`, `level-progress.spec.ts`, `resign.spec.ts`
 
 ## Move grading
 
@@ -60,7 +61,7 @@ After a mistake or blunder Pip says what went wrong in one or two sentences and 
 - Board marks: `src/web/coach/annotations.ts`, `src/web/board/BoardOverlay.tsx`, `overlayGeometry.ts`
 - Bubble: `src/web/screens/CoachBubble.tsx`, `src/web/coach/coachState.ts`, `src/web/game/useCoach.ts`
 - Types: `src/shared/coach/types.ts` (`CoachFact`, `COACH_FACT_SCHEMA_VERSION`)
-- Tests: `tests/fixtures/coach/detectors.json`, `src/web/coach/detectors/detectors.fixtures.test.ts`, `tests/integration/coach-fixtures.test.ts`, `tests/unit/coach-wording.test.ts`, `tests/unit/coach/`, `tests/e2e/coach-detectors.spec.ts`, `coach-hints.spec.ts`, `coach-praise.spec.ts`
+- Tests: `tests/fixtures/coach/detectors.json`, `src/web/coach/detectors/detectors.fixtures.test.ts`, `tests/integration/coach-fixtures.test.ts`, `tests/unit/coach-wording.test.ts`, `tests/unit/coach/`, `tests/e2e/coach-detectors.spec.ts`, `coach-hints.spec.ts`, `coach-praise.spec.ts`, `game-feedback.spec.ts`
 
 ## Try again and Show me
 
@@ -78,7 +79,7 @@ Each kid has a profile with their level, settings, stats and games. Games save a
 - Shared records: `src/shared/game/library.ts`, `record.ts`, `types.ts`
 - Client: `src/web/game/libraryClient.ts`, `src/web/game/autosave.ts`
 - Screens: `src/web/screens/ProfileScreens.tsx`
-- Tests: `src/server/library.test.ts`, `tests/e2e/saved-game.spec.ts`
+- Tests: `src/server/library.test.ts`, `tests/e2e/saved-game.spec.ts`, `picker.spec.ts`
 
 ## Post-game review
 
@@ -114,7 +115,7 @@ Pip has five moods. Each game ends with 0 to 3 stars and sometimes a badge. Coac
 - Pip: `src/web/screens/Pip.tsx`, art in `design/assets/pip/`
 - Rewards: `src/shared/game/rewards.ts` (`starsForGame`, `gameBadges`), `src/web/screens/Rewards.tsx`
 - Voice: `src/web/sound/readAloud.ts`
-- Tests: `src/shared/game/rewards.test.ts`, `src/web/sound/readAloud.test.tsx`
+- Tests: `src/shared/game/rewards.test.ts`, `src/web/sound/readAloud.test.tsx`, `tests/e2e/result.spec.ts`
 
 ## Play on a tablet
 

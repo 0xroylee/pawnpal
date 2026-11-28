@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { SetupScreen } from "./SetupScreen.js";
 
@@ -14,12 +14,10 @@ describe("SetupScreen", () => {
         .getByRole("button", { name: "Surprise me" })
         .getAttribute("aria-pressed"),
     ).toBe("true");
-    const picker = screen.getByRole("combobox", { name: "Opponent level" });
-    expect(screen.getAllByRole("option")).toHaveLength(8);
-    fireEvent.change(picker, { target: { value: "8" } });
-    expect(
-      screen.getByRole("img", { name: "8 out of 8 difficulty stars" }),
-    ).toBeTruthy();
+    const picker = screen.getByRole("group", { name: "Pick your opponent" });
+    expect(within(picker).getAllByRole("button")).toHaveLength(8);
+    fireEvent.click(within(picker).getByRole("button", { name: /Dragon/ }));
+    expect(screen.getByRole("img", { name: "Level 8 of 8" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Play!" }));
     expect(onStart).toHaveBeenCalledWith({ kidColor: "random", level: 8 });
   });
