@@ -26,7 +26,7 @@
     "dev": "node scripts/dev.mjs",
     "start": "node bin/pawnpal.js",
     "build": "node scripts/copy-engine.mjs && vite build && node scripts/clean-server-dist.mjs && tsc -p tsconfig.server.json && node scripts/copy-migrations.mjs",
-    "typecheck": "tsc -p tsconfig.web.json --noEmit && tsc -p tsconfig.server.json --noEmit && tsc -p tsconfig.training.json",
+    "typecheck": "tsc -p tsconfig.web.json --noEmit && tsc -p tsconfig.server.json --noEmit && tsc -p tsconfig.training.json && tsc -p tsconfig.e2e.json",
     "lint": "eslint . && prettier --check .",
     "test": "vitest run",
     "e2e": "playwright test",

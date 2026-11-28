@@ -6,7 +6,7 @@ async function play(board: Locator, from: string, to: string) {
   await board.locator(`[data-square="${to}"]`).click();
 }
 
-type CoachWatch = Window & { __coachSeen: string | null };
+type CoachWatch = Window & { __coachSeen?: string | null };
 
 // Records the first coach line that ever appears, so praise that shows and
 // expires on its own between two checks still fails the test.
