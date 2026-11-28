@@ -3360,9 +3360,9 @@
     "move": "h1g1",
     "kidColor": "w",
     "expect": {
-      "grade": "inaccuracy"
+      "grade": "blunder"
     },
-    "tags": ["winning-cap", "inaccuracy"],
+    "tags": ["material-floor", "blunder"],
     "recorded": {
       "white": {
         "linesBefore": [
@@ -3717,10 +3717,9 @@
     "move": "h1g1",
     "kidColor": "w",
     "expect": {
-      "grade": "inaccuracy",
-      "cappedByWinning": true
+      "grade": "blunder"
     },
-    "tags": ["winning-cap", "inaccuracy"],
+    "tags": ["material-floor", "blunder"],
     "recorded": {
       "white": {
         "linesBefore": [
@@ -4983,6 +4982,530 @@
               "f5c5",
               "g2g4",
               "a1c1"
+            ],
+            "depth": 12
+          }
+        ],
+        "depths": {
+          "before": [14, 14, 14],
+          "after": [12, 12]
+        }
+      }
+    }
+  },
+  {
+    "id": "floor-losing-rook-hang-a7",
+    "fen": "r2qk3/8/8/8/8/8/1PPPP3/R3K3 w - - 0 1",
+    "move": "a1a7",
+    "kidColor": "w",
+    "expect": {
+      "grade": "blunder"
+    },
+    "tags": ["material-floor", "blunder"],
+    "recorded": {
+      "white": {
+        "linesBefore": [
+          {
+            "uci": "a1a8",
+            "san": "Rxa8",
+            "cp": -696,
+            "pv": [
+              "a1a8",
+              "d8a8",
+              "e2e3",
+              "e8e7",
+              "e1e2",
+              "a8g2",
+              "e2e1",
+              "g2g1"
+            ],
+            "depth": 14
+          },
+          {
+            "uci": "a1a3",
+            "san": "Ra3",
+            "cp": -740,
+            "pv": [
+              "a1a3",
+              "a8a3",
+              "b2a3",
+              "d8h4",
+              "e1f1",
+              "h4f6",
+              "f1g2",
+              "f6g6"
+            ],
+            "depth": 14
+          },
+          {
+            "uci": "a1a5",
+            "san": "Ra5",
+            "cp": -961,
+            "pv": [
+              "a1a5",
+              "a8a5",
+              "e2e4",
+              "d8h4",
+              "e1f1",
+              "h4f4",
+              "f1g2",
+              "f4e4"
+            ],
+            "depth": 14
+          }
+        ],
+        "linesAfter": [
+          {
+            "uci": "d8h4",
+            "san": "Qh4+",
+            "cp": 1233,
+            "pv": [
+              "d8h4",
+              "e1f1",
+              "a8a7",
+              "f1g2",
+              "h4g5",
+              "g2f3",
+              "a7f7",
+              "f3e4"
+            ],
+            "depth": 12
+          },
+          {
+            "uci": "a8a7",
+            "san": "Rxa7",
+            "cp": 1065,
+            "pv": ["a8a7", "e2e3", "d8h4", "e1e2", "h4h2", "e2e1"],
+            "depth": 12
+          }
+        ],
+        "depths": {
+          "before": [14, 14, 14],
+          "after": [12, 12]
+        }
+      },
+      "mirrored": {
+        "linesBefore": [
+          {
+            "uci": "a8a1",
+            "san": "Rxa1",
+            "cp": -685,
+            "pv": [
+              "a8a1",
+              "d1a1",
+              "d7d6",
+              "a1h8",
+              "e8d7",
+              "h8a8",
+              "c7c6",
+              "a8b7"
+            ],
+            "depth": 14
+          },
+          {
+            "uci": "a8a6",
+            "san": "Ra6",
+            "cp": -769,
+            "pv": [
+              "a8a6",
+              "a1a6",
+              "b7a6",
+              "d1h5",
+              "e8f8",
+              "h5f3",
+              "f8e8",
+              "f3a8"
+            ],
+            "depth": 14
+          },
+          {
+            "uci": "a8b8",
+            "san": "Rb8",
+            "cp": -1032,
+            "pv": [
+              "a8b8",
+              "d1h5",
+              "e8f8",
+              "h5h8",
+              "f8f7",
+              "h8b8",
+              "c7c5",
+              "b8b7"
+            ],
+            "depth": 14
+          }
+        ],
+        "linesAfter": [
+          {
+            "uci": "d1h5",
+            "san": "Qh5+",
+            "cp": 1258,
+            "pv": [
+              "d1h5",
+              "e8f8",
+              "a1a2",
+              "f8g7",
+              "h5g5",
+              "g7f7",
+              "a2f2",
+              "f7e6"
+            ],
+            "depth": 12
+          },
+          {
+            "uci": "a1a2",
+            "san": "Rxa2",
+            "cp": 1034,
+            "pv": [
+              "a1a2",
+              "e7e5",
+              "d1h5",
+              "e8e7",
+              "h5h7",
+              "e7e6",
+              "a2e2",
+              "e6f6"
+            ],
+            "depth": 12
+          }
+        ],
+        "depths": {
+          "before": [14, 14, 14],
+          "after": [12, 12]
+        }
+      }
+    }
+  },
+  {
+    "id": "cap-missed-mate-knight-c8-e1d1",
+    "fen": "2n1k2q/ppppppp1/8/8/5Q2/8/1PPPPPP1/R3KB1R w - - 0 1",
+    "move": "e1d1",
+    "kidColor": "w",
+    "expect": {
+      "grade": "inaccuracy",
+      "cappedByWinning": true
+    },
+    "tags": ["winning-cap", "inaccuracy"],
+    "recorded": {
+      "white": {
+        "linesBefore": [
+          {
+            "uci": "h1h8",
+            "san": "Rxh8#",
+            "mate": 1,
+            "pv": ["h1h8"],
+            "depth": 14
+          },
+          {
+            "uci": "h1h3",
+            "san": "Rh3",
+            "cp": 2005,
+            "pv": [
+              "h1h3",
+              "h8f8",
+              "f4c7",
+              "f7f5",
+              "c7c8",
+              "e8f7",
+              "c8b7",
+              "e7e6"
+            ],
+            "depth": 14
+          },
+          {
+            "uci": "f4f7",
+            "san": "Qxf7+",
+            "cp": 1238,
+            "pv": [
+              "f4f7",
+              "e8f7",
+              "h1h8",
+              "c8d6",
+              "e2e3",
+              "a7a6",
+              "a1a5",
+              "b7b6"
+            ],
+            "depth": 14
+          }
+        ],
+        "linesAfter": [
+          {
+            "uci": "h8h1",
+            "san": "Qxh1",
+            "cp": -493,
+            "pv": [
+              "h8h1",
+              "d1e1",
+              "c8d6",
+              "f4g4",
+              "e8d8",
+              "g4g7",
+              "d6e8",
+              "g7e5"
+            ],
+            "depth": 12
+          },
+          {
+            "uci": "h8f8",
+            "san": "Qf8",
+            "cp": -1623,
+            "pv": [
+              "h8f8",
+              "f4c7",
+              "f7f6",
+              "c7c8",
+              "e8f7",
+              "c8f8",
+              "f7f8",
+              "a1a7"
+            ],
+            "depth": 12
+          }
+        ],
+        "depths": {
+          "before": [14, 14, 14],
+          "after": [12, 12]
+        }
+      },
+      "mirrored": {
+        "linesBefore": [
+          {
+            "uci": "h8h1",
+            "san": "Rxh1#",
+            "mate": 1,
+            "pv": ["h8h1"],
+            "depth": 14
+          },
+          {
+            "uci": "h8h6",
+            "san": "Rh6",
+            "cp": 1940,
+            "pv": [
+              "h8h6",
+              "h1f1",
+              "f5c2",
+              "f2f3",
+              "c2c1",
+              "e1f2",
+              "c1f1",
+              "f2f1"
+            ],
+            "depth": 14
+          },
+          {
+            "uci": "f5f2",
+            "san": "Qxf2+",
+            "cp": 1302,
+            "pv": [
+              "f5f2",
+              "e1f2",
+              "h8h1",
+              "c1d3",
+              "a8a2",
+              "e2e4",
+              "h1h5",
+              "e4e5"
+            ],
+            "depth": 14
+          }
+        ],
+        "linesAfter": [
+          {
+            "uci": "h1h8",
+            "san": "Qxh8",
+            "cp": -556,
+            "pv": ["h1h8", "d8e8", "c1d3", "e7e6", "b2b3", "b7b5", "h8g8"],
+            "depth": 12
+          },
+          {
+            "uci": "h1f1",
+            "san": "Qf1",
+            "cp": -1544,
+            "pv": [
+              "h1f1",
+              "f5c2",
+              "e2e3",
+              "c2c1",
+              "e1e2",
+              "c1f1",
+              "e2f1",
+              "a8a2"
+            ],
+            "depth": 12
+          }
+        ],
+        "depths": {
+          "before": [14, 14, 14],
+          "after": [12, 12]
+        }
+      }
+    }
+  },
+  {
+    "id": "cap-missed-mate-knight-f1-e1d1",
+    "fen": "2b1k2q/ppppppp1/8/8/5Q2/8/1PPPPPP1/R3KN1R w - - 0 1",
+    "move": "e1d1",
+    "kidColor": "w",
+    "expect": {
+      "grade": "inaccuracy",
+      "cappedByWinning": true
+    },
+    "tags": ["winning-cap", "inaccuracy"],
+    "recorded": {
+      "white": {
+        "linesBefore": [
+          {
+            "uci": "h1h8",
+            "san": "Rxh8#",
+            "mate": 1,
+            "pv": ["h1h8"],
+            "depth": 14
+          },
+          {
+            "uci": "h1h4",
+            "san": "Rh4",
+            "cp": 2024,
+            "pv": [
+              "h1h4",
+              "h8f8",
+              "f4c7",
+              "f7f6",
+              "c7c8",
+              "e8f7",
+              "c8f8",
+              "f7f8"
+            ],
+            "depth": 14
+          },
+          {
+            "uci": "h1h3",
+            "san": "Rh3",
+            "cp": 2011,
+            "pv": [
+              "h1h3",
+              "h8f8",
+              "f4c7",
+              "f7f5",
+              "c7c8",
+              "e8f7",
+              "c8f8",
+              "f7f8"
+            ],
+            "depth": 14
+          }
+        ],
+        "linesAfter": [
+          {
+            "uci": "h8h1",
+            "san": "Qxh1",
+            "cp": -527,
+            "pv": [
+              "h8h1",
+              "d1e1",
+              "d7d6",
+              "f4a4",
+              "c8d7",
+              "a4a3",
+              "d7b5",
+              "a3h3"
+            ],
+            "depth": 12
+          },
+          {
+            "uci": "h8g8",
+            "san": "Qg8",
+            "cp": -1230,
+            "pv": [
+              "h8g8",
+              "a1a7",
+              "e8d8",
+              "h1h5",
+              "g7g5",
+              "h5g5",
+              "g8e8",
+              "g5h5"
+            ],
+            "depth": 12
+          }
+        ],
+        "depths": {
+          "before": [14, 14, 14],
+          "after": [12, 12]
+        }
+      },
+      "mirrored": {
+        "linesBefore": [
+          {
+            "uci": "h8h1",
+            "san": "Rxh1#",
+            "mate": 1,
+            "pv": ["h8h1"],
+            "depth": 14
+          },
+          {
+            "uci": "h8h5",
+            "san": "Rh5",
+            "cp": 1941,
+            "pv": [
+              "h8h5",
+              "h1g1",
+              "f5c2",
+              "f2f4",
+              "c2c1",
+              "e1f2",
+              "c1d2",
+              "f2f3"
+            ],
+            "depth": 14
+          },
+          {
+            "uci": "h8h6",
+            "san": "Rh6",
+            "cp": 1923,
+            "pv": [
+              "h8h6",
+              "h1h6",
+              "g7h6",
+              "d2d3",
+              "a8a6",
+              "c2c4",
+              "f5g6",
+              "a2a3"
+            ],
+            "depth": 14
+          }
+        ],
+        "linesAfter": [
+          {
+            "uci": "h1h8",
+            "san": "Qxh8",
+            "cp": -505,
+            "pv": [
+              "h1h8",
+              "d8e8",
+              "d2d3",
+              "f5f6",
+              "b2b4",
+              "a8a2",
+              "e1d1",
+              "f6f2"
+            ],
+            "depth": 12
+          },
+          {
+            "uci": "h1f1",
+            "san": "Qf1",
+            "cp": -1202,
+            "pv": [
+              "h1f1",
+              "a8a2",
+              "e1d1",
+              "a2a1",
+              "c2c3",
+              "b7b6",
+              "g2g4",
+              "f5g4"
             ],
             "depth": 12
           }

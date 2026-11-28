@@ -24,9 +24,12 @@ bun run node design/scripts/check-contrast.mjs     # all pairs must pass
 
 ## Direction
 
-Calm, modern and simple: a warm paper background, white cards, one ink color and a large board. Kid buttons are chunky with a solid 4px edge so they look pressable. Pip speaks only when it matters, and rewards come at the end of a game.
+Bright, playful and flat, in the spirit of Duolingo's app: a white page, white cards with a 2px grey line, one ink color, saturated colors for anything a kid acts on, and a large board on a solid green edge. Pip speaks only when it matters, and rewards come at the end of a game.
 
 Key rules:
+- **An edge means press:** buttons and tiles sit on a solid 4px edge and sink into it when tapped. Cards and panels get a line and no edge. There are no blur shadows on kid screens.
+- **Three tones per color:** every color a kid can press has a fill, a darker edge and a soft tint (`--pp-blue`, `--pp-blue-edge`, `--pp-blue-soft`, and the same for coral, sun and each grade).
+- **Pick one with tiles:** colors, levels, profiles and avatars use `pp-tile`. The selected tile gets a blue tint, a 3px blue line and a blue edge.
 - **Blue means "do this":** the main button and the better-move arrow.
 - **Coral/orange means "careful":** the danger ring and the threat arrow.
 - **Shape before color:** solid vs dashed arrows, dot vs ring, a "!" badge, and an icon plus a word on every grade.
@@ -34,6 +37,15 @@ Key rules:
 - **Two age bands:** the default is 6–8. Profiles aged 9+ get `data-band="older"`, with one step smaller text and buttons, coordinates on, and read-aloud off by default.
 - **Parent area looks different:** system font, grey, dense, behind a PIN.
 - **Pieces:** horsey by default. Our Pip-style Friendly set and classic cburnett are options. Open `kit.html?pieces=pawnpal` or `?pieces=cburnett` to see the kit with them.
+
+## Changes in the Duolingo-style refresh (November 2026)
+
+- **White page instead of warm paper, and lines instead of soft shadows.** Cards read as separate shapes without a blur, and the only 3D effect left is the edge on things you can press.
+- **Brighter blue: #0C75DF instead of #2563EB.** White text on it is 4.54:1, just over the 4.5:1 the contrast check requires for button labels. Duolingo's own blue (#1CB0F6, 2.4:1) and green (#58CC02, 2.1:1) fail with white text, so we didn't copy them.
+- **Brighter grades:** Great #8A4DF0, Good #3B8F00, Big oops #E5483B. Each still has an icon and a word.
+- **Disabled buttons turn grey instead of fading,** so a paused Hint button looks switched off rather than broken.
+- **New components:** `pp-tile`, the `pp-feedback` panel (the coach's answer tinted by grade, under or beside the board), `pp-progress` and `pp-stat` tiles for the end of a game.
+- **Not taken from Duolingo:** uppercase button labels (young readers recognise words by their shape), their fonts and mascot, and streaks, hearts, gems or leagues.
 
 ## Changes from the earlier UI proposal
 

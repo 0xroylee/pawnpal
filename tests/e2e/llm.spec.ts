@@ -76,7 +76,7 @@ test("connects a mock Ollama model, rewords a nudge, and falls back on an invali
     );
     await page.locator('[data-square="a2"]').click();
     await page.locator('[data-square="a3"]').click();
-    const bubble = page.locator(".pp-bubble__text");
+    const bubble = page.locator('[data-testid="coach-text"]');
     await expect(bubble).toHaveAttribute("data-source", "llm");
     await expect(bubble).toHaveText("Take another look.");
     await page.getByRole("button", { name: "Keep my move" }).click();
@@ -86,8 +86,12 @@ test("connects a mock Ollama model, rewords a nudge, and falls back on an invali
       mock.requests.every(({ body }) => !body.includes("Private kid name")),
     ).toBe(true);
   } finally {
-    await page.context().close();
-    await new Promise<void>((resolve) => server.close(() => resolve()));
+    await new Promise<void>((resolve) => {
+      server.close(() => resolve());
+      // The page is still open and may hold a preconnected socket, which
+      // close() would wait for until the test times out.
+      if ("closeAllConnections" in server) server.closeAllConnections();
+    });
     library.close();
     await rm(home, { recursive: true, force: true });
   }

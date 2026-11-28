@@ -13,39 +13,46 @@
 }
 
 :root {
-  /* ── Neutrals (warm) ─────────────────────────────────────────── */
-  --pp-paper: #faf7f2;          /* app background */
-  --pp-surface: #ffffff;        /* cards, panels, bubble */
-  --pp-surface-sunken: #f3efe7; /* wells, tracks, inactive chips */
-  --pp-line: #e7e1d6;           /* borders, dividers */
+  /* ── Neutrals ────────────────────────────────────────────────── */
+  --pp-paper: #ffffff;          /* app background */
+  --pp-surface: #ffffff;        /* cards, panels, bubble; a 2px line separates them from the page */
+  --pp-surface-sunken: #f2f3f7; /* wells, tracks, inactive chips */
+  --pp-line: #e3e4eb;           /* 2px borders, and the edge under white buttons */
   --pp-ink: #2e2a40;            /* primary text, outlines (13.8:1 on white) */
   --pp-ink-2: #5e5a70;          /* secondary text (6.6:1 on white) */
   --pp-ink-3: #8c889c;          /* disabled and placeholder only (3.4:1) */
 
   /* ── Brand ───────────────────────────────────────────────────── */
-  --pp-blue: #2563eb;           /* primary action AND "better move" — blue means "do this" */
-  --pp-blue-edge: #1a49b8;      /* 3D button edge */
-  --pp-blue-soft: #e8efff;
+  /* Every color a kid can press comes as fill, edge (the 3D bottom) and soft (tinted background). */
+  --pp-blue: #0c75df;           /* primary action AND "better move": blue means "do this" (white text 4.5:1) */
+  --pp-blue-edge: #0958a8;      /* 3D button edge */
+  --pp-blue-soft: #ddeeff;      /* selected tiles, hint feedback */
   --pp-coral: #ff6b4a;          /* Pip's scarf, attention, piece in danger */
+  --pp-coral-edge: #d94e2f;
   --pp-coral-soft: #ffe9e3;
   --pp-sun: #ffc233;            /* stars and rewards only */
   --pp-sun-edge: #e0a100;
   --pp-sun-soft: #fff4d6;
 
   /* ── Move grades (always paired with an icon and a word) ─────── */
-  --pp-great: #6b4ef0;          /* violet, star icon */
-  --pp-great-soft: #efebff;
-  --pp-good: #13855a;           /* green, check icon */
-  --pp-good-soft: #e3f5ec;
+  --pp-great: #8a4df0;          /* violet, star icon */
+  --pp-great-edge: #6b34c9;
+  --pp-great-soft: #f1eaff;
+  --pp-good: #3b8f00;           /* green, check icon */
+  --pp-good-edge: #2d6e00;
+  --pp-good-soft: #e3f6d3;
   --pp-oops: #a35800;           /* amber text (4.6:1 on sun-soft) */
   --pp-oops-fill: #f59e0b;
+  --pp-oops-edge: #c97f00;
   --pp-oops-soft: #fff1d9;
-  --pp-bigoops: #d23c41;        /* red, "!!" icon */
-  --pp-bigoops-soft: #ffe5e5;
+  --pp-bigoops: #e5483b;        /* red, "!!" icon */
+  --pp-bigoops-edge: #b8342a;
+  --pp-bigoops-soft: #ffe4e1;
 
   /* ── Board: "Meadow" ─────────────────────────────────────────── */
   --pp-board-light: #edefd6;
   --pp-board-dark: #74985a;
+  --pp-board-edge: #557a3c;             /* solid edge under the board */
   --pp-board-coord-on-light: #557a3c;   /* 4.0:1 */
   --pp-board-coord-on-dark: #ffffff;    /* 3.3:1, bold */
   --pp-board-radius: 14px;
@@ -56,10 +63,10 @@
   --pp-hl-last: rgb(255 214 79 / 0.6);        /* last move: tint on both squares */
   --pp-hl-selected: rgb(255 214 79 / 0.85);   /* selected: stronger tint */
   --pp-hl-dot: rgb(46 42 64 / 0.22);          /* legal move: dot; capture: ring */
-  --pp-hl-hint: rgb(37 99 235 / 0.25);        /* hint tier 1: tint + blue outline */
+  --pp-hl-hint: rgb(12 117 223 / 0.25);       /* hint tier 1: tint + blue outline */
   --pp-hl-danger: #ff5a36;                    /* danger: white + coral double ring and "!" badge */
   --pp-hl-check: radial-gradient(ellipse at center, rgb(255 60 60 / 0.95) 0%, rgb(231 0 0 / 0.55) 30%, rgb(169 0 0 / 0) 85%);
-  --pp-arrow-better: #2563eb;                 /* better move: solid arrow */
+  --pp-arrow-better: #0c75df;                 /* better move: solid arrow */
   --pp-arrow-threat: #f97316;                 /* threat / kid's move in review: dashed arrow */
   --pp-arrow-halo: #ffffff;                   /* white halo so arrows read on both square colors */
   --pp-arrow-opacity: 0.9;
@@ -68,7 +75,7 @@
   --pp-font: 'Nunito Variable', 'Nunito', ui-rounded, system-ui, sans-serif;
   --pp-font-parent: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
-  --pp-text-sm: 18px;   /* captions, labels — kid UI floor (NN/g: 14pt for young kids) */
+  --pp-text-sm: 18px;   /* captions, labels: kid UI floor (NN/g: 14pt for young kids) */
   --pp-text-md: 20px;   /* body */
   --pp-text-lg: 24px;   /* coach bubble */
   --pp-text-xl: 30px;   /* screen titles */
@@ -82,6 +89,7 @@
 
   --pp-leading-tight: 1.15;
   --pp-leading-body: 1.4;
+  --pp-tracking-display: -0.02em;  /* titles 30px and up */
 
   /* ── Space (4px grid) ────────────────────────────────────────── */
   --pp-space-1: 4px;
@@ -103,10 +111,11 @@
   --pp-radius-pill: 999px;
 
   /* ── Elevation ───────────────────────────────────────────────── */
-  --pp-shadow-1: 0 1px 2px rgb(46 42 64 / 0.06), 0 2px 8px rgb(46 42 64 / 0.06);
-  --pp-shadow-2: 0 2px 4px rgb(46 42 64 / 0.06), 0 10px 28px rgb(46 42 64 / 0.1);
-  --pp-shadow-board: 0 12px 32px rgb(46 42 64 / 0.16);
-  --pp-edge: 4px;  /* depth of 3D buttons and cards */
+  /* Flat. Cards get a 2px line. Anything a kid can press also gets a solid edge underneath,
+     so an edge always means "you can press this". No blur shadows on kid screens. */
+  --pp-stroke: 2px;     /* border on cards, tiles and white buttons */
+  --pp-edge: 4px;       /* depth of 3D buttons and tiles; pressing removes it */
+  --pp-shadow-board: 0 6px 0 var(--pp-board-edge);
 
   /* ── Touch ───────────────────────────────────────────────────── */
   --pp-tap-kid: 72px;   /* main kid actions (≈ 2 cm, NN/g) */

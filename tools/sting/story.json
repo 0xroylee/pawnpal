@@ -1,0 +1,53 @@
+{
+  "engine": "kokoro",
+  "voice": "af_heart",
+  "speed": 1.05,
+  "lang": "a",
+  "lines": [
+    {
+      "start": 0.3,
+      "text": "This is the story of Sam, and a little pawn named Pip.",
+      "dur": 2.857
+    },
+    {
+      "start": 3.5,
+      "text": "Sam was playing the computer. Its rook moved, and Pip spotted danger.",
+      "dur": 4.023
+    },
+    {
+      "start": 7.8,
+      "text": "But Sam jumped the knight forward. Oh no! A pawn could take it.",
+      "dur": 3.404
+    },
+    {
+      "start": 12.35,
+      "text": "Pip asked Stockfish to check the move.",
+      "dur": 1.872
+    },
+    {
+      "start": 14.4,
+      "text": "Then Pip's small AI turned the facts into kind words.",
+      "dur": 2.908
+    },
+    {
+      "start": 18.5,
+      "text": "Sam tried again, and Pip gave hints.",
+      "dur": 2.029
+    },
+    {
+      "start": 20.9,
+      "text": "Rook to e1! The pawn was safe.",
+      "dur": 1.83
+    },
+    {
+      "start": 23.95,
+      "text": "After the game, they looked back together.",
+      "dur": 2.008
+    },
+    {
+      "start": 27.4,
+      "text": "And every game, Sam got a little better.",
+      "dur": 2.148
+    }
+  ]
+}

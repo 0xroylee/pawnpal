@@ -15,10 +15,8 @@ jobs:
         with:
           node-version: 22
       - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.4.4
       - run: bun install --frozen-lockfile
-      - run: bun run node tools/calibrate/run.mjs
+      - run: node tools/calibrate/run.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

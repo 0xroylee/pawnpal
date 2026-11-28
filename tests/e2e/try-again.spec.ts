@@ -103,7 +103,7 @@ test("keeps the move, explains it, and lets the computer reply", async ({
   await expectNudge(page);
   await page.getByRole("button", { name: "Keep my move" }).click();
   await expect(
-    page.locator('.pp-bubble__text[data-mode="explain"]'),
+    page.locator('[data-testid="coach-text"][data-mode="explain"]'),
   ).toBeVisible();
   await expect(page.getByTestId("move")).toHaveCount(2);
   await expect(page.getByTestId("move").first()).toContainText("a3");
@@ -160,7 +160,7 @@ test("explains a blunder and continues when Try Again is off", async ({
   await openPosition(page, false);
   await playMove(page, firstMiss.move);
   await expect(
-    page.locator('.pp-bubble__text[data-mode="explain"]'),
+    page.locator('[data-testid="coach-text"][data-mode="explain"]'),
   ).toBeVisible();
   await expect(page.getByRole("button", { name: "Try again" })).toHaveCount(0);
   await expect(page.getByTestId("move")).toHaveCount(2);
@@ -184,7 +184,7 @@ async function playMove(page: Page, uci: string) {
 }
 
 async function expectNudge(page: Page) {
-  const message = page.locator('.pp-bubble__text[data-mode="nudge"]');
+  const message = page.locator('[data-testid="coach-text"][data-mode="nudge"]');
   await expect(message).toBeVisible();
   await expect(message).not.toContainText(/Ng7|g7/);
   await expect(page.locator(".pp-board [data-arrow-kind]")).toHaveCount(0);
@@ -193,7 +193,7 @@ async function expectNudge(page: Page) {
 
 async function expectReveal(page: Page) {
   await expect(
-    page.locator('.pp-bubble__text[data-mode="reveal"]'),
+    page.locator('[data-testid="coach-text"][data-mode="reveal"]'),
   ).toBeVisible();
   const arrow = page.locator(
     '[data-arrow-kind="better"][data-arrow-from="f5"][data-arrow-to="g7"]',

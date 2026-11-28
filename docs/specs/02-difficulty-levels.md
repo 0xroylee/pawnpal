@@ -13,7 +13,7 @@ Stockfish's `UCI_LimitStrength` / `UCI_Elo` can't go below 1320, and `Skill Leve
 ## Scope
 
 - `src/web/engine/levels.ts`: the level table and `chooseMove(fen, level, rng) → uci`.
-- Level picker on the game setup screen: name, one-line description, and 1–8 difficulty stars. No rating numbers in the UI. After spec 06, the profile's current level is preselected.
+- Level picker on the game setup screen: eight named tiles with a 1 to 8 meter, the selected level's description in Pip's bubble, and a beaten mark on levels the kid has already won at. No rating numbers in the UI.
 - Calibration tool in `tools/calibrate/`: headless matches in Node using Stockfish WASM, which write a Markdown report.
 
 ## Out of scope
@@ -53,7 +53,7 @@ Stockfish's `UCI_LimitStrength` / `UCI_Elo` can't go below 1320, and `Skill Leve
 - Adjacent levels: level n+1 vs level n, 200 games. Pass when n+1 scores at least 60%.
 - Anchor: level 8 vs Stockfish `UCI_Elo=1320`, 200 games. Pass when the score is 40–60%.
 - Writes `tools/calibrate/results/<date>.md` with scores and the table values used.
-- Absolute ratings below 1320 can't be anchored precisely. The report says so, and the UI shows only names and stars.
+- Absolute ratings below 1320 can't be anchored precisely. The report says so, and the UI shows names and a 1 to 8 meter, without rating numbers.
 
 ## Acceptance criteria
 

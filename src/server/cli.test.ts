@@ -77,7 +77,39 @@ describe("run", () => {
     );
     expect(openBrowser).not.toHaveBeenCalled();
   });
+
+  // Browsers open spare connections before they send a request (preconnect).
+  // server.close() waits for those, so Ctrl+C could leave pawnpal running.
+  it("stops while a browser holds a connection with no request", async () => {
+    const home = mkdtempSync(join(tmpdir(), "pawnpal-cli-"));
+    let socket: Socket | undefined;
+    try {
+      const server = await run(["--no-open", "--port", "0"], {
+        log: () => {},
+        env: { PAWNPAL_HOME: home },
+        installSignals: false,
+      });
+      if (!server) throw new Error("The server did not start");
+      socket = connect(server.port, "127.0.0.1");
+      await once(socket, "connect");
+      // let the server accept it, as a real preconnect sits open for a while
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      const stopped = await Promise.race([
+        Promise.resolve(server.close()).then(() => true),
+        new Promise<false>((resolve) =>
+          setTimeout(() => resolve(false), 3_000),
+        ),
+      ]);
+      expect(stopped).toBe(true);
+    } finally {
+      socket?.destroy();
+      rmSync(home, { recursive: true, force: true });
+    }
+  });
 });
+import { once } from "node:events";
 import { mkdtempSync, rmSync } from "node:fs";
+import { connect, type Socket } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";

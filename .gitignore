@@ -12,6 +12,8 @@ public/engine/
 .eslintcache
 *.tsbuildinfo
 training/runs/
+tools/sting/out/
+tools/sting/.venv/
 training/dist/
 training/py/.venv/
 training/py/**/__pycache__/

@@ -20,17 +20,19 @@ bun run build
 bun run e2e
 ```
 
+New behavior is proven with an e2e spec against the production build, not with a unit test. [Testing](AGENTS.md#testing) has the rule.
+
 The package smoke test uses npm to install and run the tarball as a player would.
 
 ```sh
-bun run smoke:package
+npm run smoke:package
 ```
 
 On macOS, install the Playwright WebKit browser and run the `tablet` project with `PAWNPAL_E2E_WEBKIT=1`. For a release, also run the full difficulty calibration. [Calibration instructions](tools/calibrate/README.md)
 
 ## Add a chess detector
 
-Start with a replay fixture in `tests/fixtures/coach/detectors.json` that records the position, the player’s move, and Stockfish’s fixed-depth lines. Include a position where the detector should stay quiet. Follow the public detector contract in `src/web/coach/detectors/`, register the detector in `index.ts`, and add the templates it uses to `src/web/i18n/en.json`. Run the fixture and wording suites before exercising it in the browser.
+Start with a replay fixture in `tests/fixtures/coach/detectors.json` that records the position, the player’s move, and Stockfish’s fixed-depth lines. Include a position where the detector should stay quiet. Follow the public detector contract in `src/web/coach/detectors/`, register the detector in `index.ts`, and add the templates it uses to `src/web/i18n/en.json`. Run the fixture and wording suites, then replay one of the fixtures in an e2e spec.
 
 ## Add a translation
 

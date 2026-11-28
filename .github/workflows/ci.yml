@@ -22,8 +22,6 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.4.4
       - run: bun install --frozen-lockfile
       - run: bun run check:native
       - run: bun run check:licenses
@@ -42,8 +40,6 @@ jobs:
         with:
           node-version: 22
       - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.4.4
       - run: bun install --frozen-lockfile
       - run: bun run playwright install --with-deps chromium
       - run: bun run build
@@ -72,11 +68,9 @@ jobs:
         with:
           node-version: 22
       - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.4.4
       - run: bun install --frozen-lockfile
       - run: bun run build
-      - run: bun run smoke:package
+      - run: npm run smoke:package
   publish:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: [verify, browser, package]
@@ -91,13 +85,11 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
       - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.4.4
       - name: Check tag version
         run: node -e 'if (process.env.GITHUB_REF_NAME !== "v" + require("./package.json").version) process.exit(1)'
       - run: bun install --frozen-lockfile
       - run: bun run build
-      - run: bun run check:pack
+      - run: npm run check:pack
       - run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -34,6 +34,9 @@ export type CliDeps = {
 const usage =
   "Usage: pawnpal [--port <port>] [--no-open] [--lan] [--help]\n       pawnpal reset-pin";
 const packageRoot = fileURLToPath(new URL("../..", import.meta.url));
+// How long a stopping server waits for requests in flight before it drops
+// the remaining connections.
+const CLOSE_GRACE_MS = 500;
 const version = (
   JSON.parse(readFileSync(resolve(packageRoot, "package.json"), "utf8")) as {
     version: string;
@@ -132,7 +135,17 @@ async function serveApp(
     port: address.port,
     close: () =>
       new Promise<void>((closeResolve, closeReject) => {
-        server.close((error) => (error ? closeReject(error) : closeResolve()));
+        // Browsers open spare connections before they send a request, and
+        // close() waits for them, so Ctrl+C could leave pawnpal running. Let
+        // requests in flight finish, then drop whatever is still open.
+        const force = setTimeout(() => {
+          if ("closeAllConnections" in server) server.closeAllConnections();
+        }, CLOSE_GRACE_MS);
+        server.close((error) => {
+          clearTimeout(force);
+          if (error) closeReject(error);
+          else closeResolve();
+        });
       }),
   };
 }

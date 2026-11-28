@@ -14,6 +14,8 @@ export default tseslint.config(
       "playwright-report/**",
       "public/engine/**",
       "test-results/**",
+      "tools/sting/.venv/**",
+      "tools/sting/out/**",
     ],
   },
   js.configs.recommended,

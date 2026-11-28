@@ -17,7 +17,7 @@ Fine-tuning remains eligible under spec 13.
 
 ## Reproduce the run
 
-Start Ollama on loopback, pull both exact tags above, install the locked dependencies with `bun install --frozen-lockfile`, and run `bun run node training/run-baseline.mjs` from the repository root.
+Start Ollama on loopback, pull both exact tags above, install the locked dependencies with `bun install --frozen-lockfile`, and run `node training/run-baseline.mjs` from the repository root.
 The local output in `training/runs/baseline-2026-11-25T06-48-16-896Z` contains the case list, per-case outcomes, fixture hashes, and full model digests. The case list SHA-256 is `34f24a112c144ac13fdec325aff41efc47784fe832ff12aaca0b8b97a7d05f80`.
 
 ## Ollama reasoning disabled
@@ -37,7 +37,7 @@ Fine-tuning remains eligible under spec 13.
 
 ### Reproduce the run
 
-Start Ollama on loopback, pull both exact tags above, install the locked dependencies with `bun install --frozen-lockfile`, and run `bun run node training/run-baseline.mjs --ollama-no-thinking` from the repository root.
+Start Ollama on loopback, pull both exact tags above, install the locked dependencies with `bun install --frozen-lockfile`, and run `node training/run-baseline.mjs --ollama-no-thinking` from the repository root.
 The local output in `training/runs/ollama-reasoning-off-2026-11-25T15-24-07-153Z` contains the case list, per-case outcomes, fixture hashes, and full model digests. The case list SHA-256 is `34f24a112c144ac13fdec325aff41efc47784fe832ff12aaca0b8b97a7d05f80`.
 
 ## Local Pip fine-tuning pilot

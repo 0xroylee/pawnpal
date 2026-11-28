@@ -8,6 +8,7 @@ import {
   ProfileAvatar,
   ProfileCard,
 } from "../screens/ProfileScreens.js";
+import { Pip } from "../screens/Pip.js";
 import { CoachSettings } from "./CoachSettings.js";
 import { NetworkSettings } from "./NetworkSettings.js";
 import { parent } from "./client.js";
@@ -250,7 +251,8 @@ export function ParentScreen({
 
   if (step === "welcome")
     return (
-      <ProfileCard>
+      <main className="pp-app pp-hero">
+        <Pip mood="cheering" className="pp-hero__pip" />
         <h1>{t("parent.welcome")}</h1>
         <p>{t("parent.welcomeDescription")}</p>
         <p>{t("parent.privacy")}</p>
@@ -272,7 +274,7 @@ export function ParentScreen({
           </button>
         </div>
         {failed && <p role="alert">{t("library.error")}</p>}
-      </ProfileCard>
+      </main>
     );
   if (step === "create-pin" || step === "unlock" || step === "change-pin")
     return (

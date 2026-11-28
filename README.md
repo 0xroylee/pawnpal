@@ -24,7 +24,26 @@ The first run opens your browser. Choose a parent PIN, create a kid profile, and
 
 ## Local development
 
-Run `bun run dev` and open the Vite URL printed in the terminal. Bun installs dependencies and runs the project scripts. The app server runs on Node.js. [Development checks](CONTRIBUTING.md)
+Install Bun 1.4.4 and keep Node.js available for the local server. [Bun installation](https://bun.sh/docs/installation)
+
+```sh
+git clone https://github.com/0xroylee/pawnpal.git
+cd pawnpal
+bun install --frozen-lockfile
+bun run dev
+```
+
+Open the Vite URL printed in the terminal, usually `http://localhost:5173`. Vite sends API requests to the Pawnpal server on port `4747`. Stop any other instance using that port before starting development.
+
+Run the core checks before submitting changes.
+
+```sh
+bun run typecheck
+bun run lint
+bun run test
+```
+
+The contributing guide covers browser tests, package checks, and how to add chess detectors. [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Coach rephrasing
 
@@ -77,5 +96,3 @@ Pawnpal has no account or telemetry. Stockfish runs in the browser. If you enabl
 Pawnpal uses Stockfish, chess.js and react-chessboard. The project started after reading a parent’s account of building a chess coach. [Stockfish.js](https://github.com/nmrugg/stockfish.js) · [chess.js](https://github.com/jhlywa/chess.js) · [react-chessboard](https://github.com/Clariity/react-chessboard) · [Inspiration](https://www.superlinear.academy/c/share-your-projects/63d613)
 
 Pawnpal’s code is licensed under GPL-3.0. The default horsey pieces by cham and michael1241 use a separate CC BY-NC-SA 4.0 license. For a commercial distribution, switch the default piece set to the included cburnett or Pawnpal set in the board component and remove the horsey assets and copies from the build. [Artwork license](design/assets/pieces/horsey/LICENSE.md) · [Piece sets](design/README.md) · [Third-party notices](THIRD_PARTY_NOTICES)
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for local development and fixtures.

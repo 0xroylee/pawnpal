@@ -12,11 +12,7 @@ import {
   isDifficulty,
   type Difficulty,
 } from "../shared/game/difficulty.js";
-import type {
-  LevelSuggestion,
-  Profile,
-  SavedGame,
-} from "../shared/game/library.js";
+import type { Profile, SavedGame } from "../shared/game/library.js";
 import { EngineProvider } from "./engine/EngineProvider.js";
 import { useEngine } from "./engine/useEngine.js";
 import { useGrading } from "./game/useGrading.js";
@@ -42,6 +38,8 @@ import {
   ProfileHistory,
   ProfilePicker,
 } from "./screens/ProfileScreens.js";
+import { useSetupInfo } from "./screens/useSetupInfo.js";
+import { Pip } from "./screens/Pip.js";
 import { SetupScreen } from "./screens/SetupScreen.js";
 import { t } from "./i18n/t.js";
 import { ParentScreen } from "./parent/ParentScreen.js";
@@ -98,7 +96,6 @@ function AppContent() {
   const [guestVoice, setGuestVoice] = useState(
     () => storedSetting(guestVoiceKey) === "true",
   );
-  const [suggestion, setSuggestion] = useState<LevelSuggestion | null>(null);
   const [failed, setFailed] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>();
   const saver = useRef<ReturnType<typeof createGameSaver> | null>(null);
@@ -273,19 +270,10 @@ function AppContent() {
   }, [startGame]);
 
   const selectedId = state.phase === "setup" ? profile?.id : undefined;
-  useEffect(() => {
-    if (!selectedId) return;
-    let active = true;
-    void library
-      .suggestion(selectedId)
-      .then((result) => {
-        if (active) setSuggestion(result);
-      })
-      .catch(() => undefined);
-    return () => {
-      active = false;
-    };
-  }, [selectedId]);
+  const { suggestion, beatenLevels, suggestionAnswered } = useSetupInfo(
+    selectedId,
+    library,
+  );
 
   useOpponent(state, dispatch, {
     engine,
@@ -297,7 +285,6 @@ function AppContent() {
     setProfile(chosen);
     sounds.setMuted(!chosen.soundOn, { persist: false });
     setFailed(false);
-    setSuggestion(null);
     setMenu(chosen.activeGameId ? "continue" : "setup");
   };
   const selectGuest = () => {
@@ -327,6 +314,18 @@ function AppContent() {
     void localNetwork()
       .then(({ showBanner }) => setNetworkOn(showBanner))
       .catch(() => undefined);
+  };
+  const answerSuggestion = (response: "accepted" | "declined") => {
+    if (!profile || !suggestion) return;
+    void perform(async () => {
+      const updated = await library.respond(
+        profile.id,
+        suggestion.id,
+        response,
+      );
+      setProfile(updated);
+      suggestionAnswered();
+    });
   };
   const resume = () => {
     if (!profile?.activeGameId) return;
@@ -442,7 +441,8 @@ function AppContent() {
       </div>
     );
     const levelPrompt = profile && suggestion && (
-      <div className="pp-library__suggestion">
+      <div className="pp-suggest">
+        <Pip mood="cheering" />
         <p>
           {t(
             suggestion.direction === "up"
@@ -458,17 +458,7 @@ function AppContent() {
               className="pp-btn pp-btn--secondary pp-btn--sm"
               type="button"
               disabled={startingGame}
-              onClick={() =>
-                void perform(async () => {
-                  const updated = await library.respond(
-                    profile.id,
-                    suggestion.id,
-                    response,
-                  );
-                  setProfile(updated);
-                  setSuggestion(null);
-                })
-              }
+              onClick={() => answerSuggestion(response)}
             >
               {t(
                 response === "accepted" ? "library.accept" : "library.decline",
@@ -528,7 +518,8 @@ function AppContent() {
     }
     if (menu === "continue" && profile) {
       return (
-        <ProfileCard>
+        <main className="pp-app pp-hero">
+          <Pip mood="happy" className="pp-hero__pip" />
           <h1>{t("library.continueTitle")}</h1>
           {levelPrompt}
           <div className="pp-library__actions">
@@ -551,7 +542,7 @@ function AppContent() {
           </div>
           {error}
           {navigation}
-        </ProfileCard>
+        </main>
       );
     }
     if (menu === "setup") {
@@ -569,8 +560,10 @@ function AppContent() {
             void startGame({ ...options, player: profile });
           }}
           disabled={startingGame}
+          beatenLevels={beatenLevels}
+          suggestion={suggestion}
+          onSuggestion={answerSuggestion}
         >
-          {levelPrompt}
           {error}
           {navigation}
         </SetupScreen>
