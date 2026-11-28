@@ -64,7 +64,7 @@ The house style, taken from the code as it stands. When this file and the code d
 
 [Testing](../../AGENTS.md#testing) comes first: new behavior gets an e2e spec, not a unit test.
 
-- E2E specs live in `tests/e2e/` and run the production build against the real server. They locate elements by role and accessible name, use helpers from `tests/e2e/helpers.ts` such as `startAs` and `openDevFen`, and start mid-game through the dev-only `?fen=` parameter (`PAWNPAL_DEV=1`).
+- E2E specs live in `tests/e2e/` and run the production build against the real server. `bun run typecheck` checks them and `playwright.config.ts` through `tsconfig.e2e.json`. They locate elements by role and accessible name, use helpers from `tests/e2e/helpers.ts` such as `startAs` and `openDevFen`, and start mid-game through the dev-only `?fen=` parameter (`PAWNPAL_DEV=1`).
 - Seed profiles and saved games through the HTTP API, as `saved-game.spec.ts` does. Build game states with `gameReducer` instead of writing state JSON by hand.
 - Check layout with element boxes measured in the browser at 1280x800 and 768x1024.
 - Coach fixtures in `tests/fixtures/coach/*.json` record a FEN, the kid move and fixed-depth Stockfish lines. Each detector has at least one fixture where it stays quiet. Specs replay them through the replay analyst.

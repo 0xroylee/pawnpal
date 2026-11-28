@@ -30,9 +30,9 @@ test("connects a mock Ollama model, rewords a nudge, and falls back on an invali
     staticDir: resolve("dist/web"),
     library,
     apiDependencies: {
-      fetch: (input, init) =>
+      fetch: async (input, init) =>
         String(input).endsWith("/api/version")
-          ? Promise.resolve(new Response(null, { status: 200 }))
+          ? new Response(null, { status: 200 })
           : mock.app.request(String(input), init),
     },
   });

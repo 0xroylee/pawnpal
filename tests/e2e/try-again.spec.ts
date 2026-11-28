@@ -48,6 +48,7 @@ test("reveals a better move after a second miss", async ({ page }) => {
   await board.evaluate((element) => {
     element.addEventListener("transitionrun", (event) => {
       if (
+        event instanceof TransitionEvent &&
         event.propertyName === "transform" &&
         event.target instanceof Element &&
         event.target.matches('[data-square="a3"] [data-piece="wP"]')
