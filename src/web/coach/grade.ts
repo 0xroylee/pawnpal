@@ -64,6 +64,20 @@ export function gradeMove(
     grade = "inaccuracy";
   }
 
+  // Win chance barely moves in a lopsided game, so also look at the material
+  // the move gives away. Skip the engine's own candidate lines (depth noise)
+  // and mate scores (win chance already handles those).
+  const listed = input.linesBefore.some((l) => l.uci === input.move.uci);
+  const loss =
+    afterLine && !input.ending && !listed
+      ? centipawnLoss(bestLine, afterLine, input.kidColor)
+      : undefined;
+  if (loss !== undefined) {
+    if (loss >= config.materialFloor.blunder) grade = "blunder";
+    else if (loss >= config.materialFloor.mistake && grade !== "blunder")
+      grade = "mistake";
+  }
+
   const secondLine = input.linesBefore[1];
   const isOnlyMove =
     playedBest &&
@@ -86,6 +100,17 @@ export function gradeMove(
     isOnlyMove,
     facts: [],
   };
+}
+
+function centipawnLoss(
+  before: EngineLine,
+  after: EngineLine,
+  kidColor: Color,
+): number | undefined {
+  const scoreBefore = toKidScore(before, kidColor, kidColor);
+  const scoreAfter = toKidScore(after, opposite(kidColor), kidColor);
+  if ("mate" in scoreBefore || "mate" in scoreAfter) return undefined;
+  return scoreBefore.cp - scoreAfter.cp;
 }
 
 function opposite(color: Color): Color {

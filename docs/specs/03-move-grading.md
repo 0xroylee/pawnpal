@@ -51,12 +51,13 @@ These match Lichess's cutoffs (0.1 / 0.2 / 0.3 in winning chances). They'll be t
 
 **Adjustments**
 - **Still clearly winning:** if `winAfter` ≥ 85, the grade is capped at inaccuracy, so the coach doesn't nag a kid who is far ahead.
+- **Material floor:** win chance barely moves when a game is lopsided (it flattens near 0 and 100, and `cp` is clamped at ±1000), so a kid who is far behind or far ahead could give away a rook and hear nothing. After the rules above, look at the centipawn loss in the kid's view: the best line's score before the move minus the score after it, unclamped. A loss of 300 or more makes the move a blunder, and 200 or more makes it at least a mistake. The floor overrides the "still clearly winning" cap, which now spares only small slips such as a missed mate while still far ahead. It is skipped when the kid played any of the pre-move MultiPV lines (those differ only by search depth), when either score is a mate (win chance already handles mates), and when the move ends the game. Both values live in the grade config as `materialFloor`.
 - **Great move:** set `isOnlyMove` when the kid played the top move and the second-best line's win chance is at least 15 lower.
 
 ## Acceptance criteria
 
 1. `winChance` matches reference values: cp 0 → 50.0; cp +100 → 59.1 (±0.1); cp −300 → 24.9 (±0.1); mate for the kid → 100; mate against → 0.
-2. A fixture suite of at least 30 positions (FEN + kid move + expected grade) passes. It covers a hanging queen → blunder, a normal opening move → best or good, a missed mate-in-1 → blunder, an only move found → `isOnlyMove`, and the "still clearly winning" cap. Every fixture is checked from both White's and Black's side.
+2. A fixture suite of at least 30 positions (FEN + kid move + expected grade) passes. It covers a hanging queen → blunder, a normal opening move → best or good, a missed mate-in-1 → blunder, an only move found → `isOnlyMove`, the "still clearly winning" cap, and the material floor (a rook given away while far ahead or far behind → blunder). Every fixture is checked from both White's and Black's side.
 3. In a scripted 40-move game on the single-threaded build on a 2020-era laptop, 95% of grades are ready within 1 s of the kid's move.
 4. If the kid moves before the pre-move analysis finishes, the pipeline uses its best result so far if that reached depth 8. Otherwise it re-runs to depth 8.
 5. The opponent never moves before the grade arrives, unless the 1.5 s cap is hit.
@@ -64,7 +65,7 @@ These match Lichess's cutoffs (0.1 / 0.2 / 0.3 in winning chances). They'll be t
 
 ## Test plan
 
-- **Unit:** `winChance`; threshold table with made-up engine lines; perspective flip for Black; the winning cap; the `isOnlyMove` rule.
+- **Unit:** `winChance`; threshold table with made-up engine lines; perspective flip for Black; the winning cap; the material floor (losing, winning, small slips, top-line moves, mate scores); the `isOnlyMove` rule.
 - **Fixture tests:** real Stockfish WASM, single thread, fixed depth (deterministic).
 - **End-to-end:** start from a `?fen=` position, hang the queen, and check that the debug panel shows "blunder".
 

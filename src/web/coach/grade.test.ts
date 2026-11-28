@@ -124,3 +124,65 @@ describe("gradeMove", () => {
     ).toThrowError(expect.objectContaining({ code: "no-lines" }));
   });
 });
+
+// Win chance flattens near 0% and 100% (and the score is clamped at ±1000 cp),
+// so in a lopsided game a big material loss barely moves it. The material
+// floor makes sure Pip still speaks when the kid gives material away.
+describe("material floor", () => {
+  // Engine scores are from the side to move: the kid before the move, the
+  // opponent after it.
+  function lopsided(before: number, after: number, kidColor: "w" | "b" = "w") {
+    return {
+      ply: 1,
+      fenBefore: fen,
+      move: { uci: "a2a3", san: "a3" },
+      kidColor,
+      linesBefore: [line("d2d4", before), line("g1f3", before - 20)],
+      linesAfter: [line("d7d5", -after)],
+    };
+  }
+
+  it("calls a lost rook a blunder when the kid is already losing", () => {
+    const analysis = gradeMove(lopsided(-1463, -2646));
+    expect(analysis.drop).toBeLessThan(1);
+    expect(analysis.grade).toBe("blunder");
+  });
+
+  it("calls a two-pawn loss a mistake when the kid is already losing", () => {
+    expect(gradeMove(lopsided(-603, -831)).grade).toBe("mistake");
+  });
+
+  it("flags a big material loss even while the kid is clearly winning", () => {
+    const analysis = gradeMove(lopsided(1126, 575));
+    expect(analysis.winAfter).toBeGreaterThanOrEqual(85);
+    expect(analysis.grade).toBe("blunder");
+  });
+
+  it("still spares a small slip while the kid is clearly winning", () => {
+    expect(gradeMove(lopsided(1126, 1000)).grade).not.toMatch(
+      /mistake|blunder/,
+    );
+  });
+
+  it("grades the same loss the same way for a Black kid", () => {
+    expect(gradeMove(lopsided(-1463, -2646, "b")).grade).toBe("blunder");
+  });
+
+  it("leaves a move the engine listed among its top lines alone", () => {
+    const input = lopsided(-1086, -1425);
+    input.move = { uci: "g1f3", san: "Nf3" };
+    expect(gradeMove(input).grade).toBe("best");
+  });
+
+  it("leaves mate scores to the win-chance rules", () => {
+    const input = lopsided(0, 600);
+    input.linesBefore[0] = {
+      uci: "d2d4",
+      san: "d4",
+      mate: 2,
+      pv: ["d2d4"],
+      depth: 12,
+    };
+    expect(gradeMove(input).grade).toBe("inaccuracy");
+  });
+});

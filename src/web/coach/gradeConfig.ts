@@ -15,6 +15,8 @@ export type GradeConfig = {
     mistake: number;
   };
   winningCap: number;
+  /** Centipawn losses that make a move at least a mistake or a blunder. */
+  materialFloor: { mistake: number; blunder: number };
   onlyMoveGap: number;
   analysis: AnalysisConfig;
 };
@@ -27,6 +29,7 @@ export const defaultGradeConfig: GradeConfig = {
     mistake: 15,
   },
   winningCap: 85,
+  materialFloor: { mistake: 200, blunder: 300 },
   onlyMoveGap: 15,
   analysis: {
     preAnalyze: { depth: 14, movetimeMs: 1500, multiPv: 3 },
