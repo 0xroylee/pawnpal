@@ -62,13 +62,14 @@ The house style, taken from the code as it stands. When this file and the code d
 
 ## Tests
 
-- Vitest. Every test file imports what it uses (`describe`, `expect`, `it`, `vi`) from `"vitest"`, even though globals are on.
-- Unit tests sit next to their source as `name.test.ts` or `name.test.tsx`. Component tests start with `// @vitest-environment jsdom` and use Testing Library.
-- `tests/unit/` holds suites that span modules, like the i18n scan and coach wording. `tests/integration/` runs real Stockfish WASM in Node. `tests/e2e/` holds Playwright flows against the built server.
-- Build inputs with small helpers at the top of the test file, like `line(uci, cp)` in `grade.test.ts`, instead of shared mocks.
-- Coach fixtures in `tests/fixtures/coach/*.json` record a FEN, the kid move and fixed-depth Stockfish lines. Each detector has at least one fixture where it stays quiet.
-- E2E tests locate elements by role and accessible name, use helpers from `tests/e2e/helpers.ts` such as `startAs` and `openDevFen`, and start mid-game through the dev-only `?fen=` parameter (`PAWNPAL_DEV=1`).
-- Name tests after the behavior: `it("renders a graded coach message with Pip, fact metadata, and dismiss action")`.
+[Testing](../../AGENTS.md#testing) comes first: new behavior gets an e2e spec, not a unit test.
+
+- E2E specs live in `tests/e2e/` and run the production build against the real server. They locate elements by role and accessible name, use helpers from `tests/e2e/helpers.ts` such as `startAs` and `openDevFen`, and start mid-game through the dev-only `?fen=` parameter (`PAWNPAL_DEV=1`).
+- Seed profiles and saved games through the HTTP API, as `saved-game.spec.ts` does. Build game states with `gameReducer` instead of writing state JSON by hand.
+- Check layout with element boxes measured in the browser at 1280x800 and 768x1024.
+- Coach fixtures in `tests/fixtures/coach/*.json` record a FEN, the kid move and fixed-depth Stockfish lines. Each detector has at least one fixture where it stays quiet. Specs replay them through the replay analyst.
+- Name specs after the behavior: `test("praises the only move")`.
+- The existing Vitest suites stay: colocated `name.test.ts` and `name.test.tsx` files, `tests/unit/` (the i18n scan and coach wording) and `tests/integration/` (real Stockfish WASM in Node). Keep them passing. Don't add to them.
 
 ## Comments
 
