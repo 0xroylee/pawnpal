@@ -34,9 +34,17 @@ describe("GameScreen", () => {
     });
     const sound = screen.getByRole("button", { name: "Mute sounds" });
 
-    expect(screen.getByText("Computer")).toBeTruthy();
+    for (const place of ["top", "board"]) {
+      const opponent = container.querySelector(
+        `.pp-game__opponent--${place}`,
+      ) as HTMLElement;
+      expect(within(opponent).getByText("Computer")).toBeTruthy();
+      expect(
+        opponent.querySelector(".pp-avatar svg.lucide-bot"),
+      ).not.toBeNull();
+    }
     expect(
-      container.querySelector(".pp-player .pp-avatar svg.lucide-bot"),
+      container.querySelector(".pp-game__topbar .pp-game__opponent--top"),
     ).not.toBeNull();
     expect(home.className).toContain("pp-btn--secondary");
     expect(home.className).toContain("pp-btn--sm");
@@ -209,7 +217,9 @@ describe("GameScreen", () => {
         onToggleSound={vi.fn()}
       />,
     );
-    const kidRow = container.querySelectorAll(".pp-player")[1] as HTMLElement;
+    const kidRow = container.querySelector(
+      ".pp-player:not(.pp-game__opponent)",
+    ) as HTMLElement;
     const hint = within(kidRow).getByRole("button", { name: "Hint" });
 
     expect((hint as HTMLButtonElement).disabled).toBe(false);
@@ -231,7 +241,9 @@ describe("GameScreen", () => {
         onToggleSound={vi.fn()}
       />,
     );
-    const kidRow = container.querySelectorAll(".pp-player")[1] as HTMLElement;
+    const kidRow = container.querySelector(
+      ".pp-player:not(.pp-game__opponent)",
+    ) as HTMLElement;
     const moreHelp = within(kidRow).getByRole("button", { name: "More help" });
     fireEvent.click(moreHelp);
     expect(dispatch).toHaveBeenCalledWith({ type: "HINT", tier: 2 });
@@ -255,7 +267,9 @@ describe("GameScreen", () => {
         onToggleSound={vi.fn()}
       />,
     );
-    const kidRow = container.querySelectorAll(".pp-player")[1] as HTMLElement;
+    const kidRow = container.querySelector(
+      ".pp-player:not(.pp-game__opponent)",
+    ) as HTMLElement;
     const hintButton = within(kidRow).getByRole("button", {
       name: hintTier === 0 ? "Hint" : "More help",
     }) as HTMLButtonElement;

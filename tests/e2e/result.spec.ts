@@ -1,4 +1,11 @@
 import { expect, test, type Page } from "@playwright/test";
+import type { Profile } from "../../src/shared/game/library.js";
+import { gradeMove } from "../../src/web/coach/grade.js";
+import {
+  buildContext,
+  runDetectors,
+} from "../../src/web/coach/detectors/index.js";
+import { gameReducer, type GameState } from "../../src/web/game/reducer.js";
 import {
   createProfile,
   expectOnFirstScreen,
@@ -6,9 +13,11 @@ import {
   openMissedFork,
   pickProfile,
   playMove,
+  seedGame,
   uniqueName,
   winByCheckmate,
 } from "./helpers.js";
+import { loadDetectorFixture } from "./replay.js";
 
 const threeBadges = [
   "New badge! First game",
@@ -59,6 +68,133 @@ for (const viewport of [
     );
     expect(new Set(tops).size, "the badges share one row").toBe(1);
     await expectOnFirstScreen(page, [
+      result.main,
+      result.playAgain,
+      result.home,
+      result.saved,
+    ]);
+
+    const card = (await page.locator(".pp-result__card").boundingBox())!;
+    const saved = (await result.saved.boundingBox())!;
+    expect(saved.y, "Game saved sits under the card").toBeGreaterThanOrEqual(
+      card.y + card.height,
+    );
+    expect(
+      Math.abs(saved.x + saved.width / 2 - (card.x + card.width / 2)),
+      "Game saved is centered under the card",
+    ).toBeLessThanOrEqual(2);
+  });
+}
+
+// Badges a single game can earn on a new profile. Level up needs an earlier
+// win, try again hero needs five fixed mistakes, a clean game needs 20 graded
+// moves and a comeback needs a losing move, so a short seeded game reaches
+// four: the first three plus Fork finder.
+const fourBadges = [...threeBadges, "New badge! Fork finder"];
+
+// Seeds a game that opens with the recorded knight fork from played-fork-1,
+// takes the queen and promotes the a-pawn, so the kid has Qg7# to play.
+async function seedForkThenMateInOne(page: Page, profile: Profile) {
+  const fork = loadDetectorFixture("played-fork-1");
+  const game = await seedGame(page, profile.id, { fen: fork.fen });
+  let state = gameReducer(game.state, {
+    type: "KID_MOVE",
+    from: fork.move.slice(0, 2),
+    to: fork.move.slice(2, 4),
+  });
+  const analysis = gradeMove({
+    ply: 1,
+    fenBefore: fork.fen,
+    kidColor: fork.kidColor,
+    move: { uci: fork.move, san: state.history[0]!.san },
+    linesBefore: fork.recorded!.white.linesBefore,
+    linesAfter: fork.recorded!.white.linesAfter,
+  });
+  state = gameReducer(state, {
+    type: "GRADE_READY",
+    ply: 1,
+    turnToken: state.turnToken,
+    analysis: {
+      ...analysis,
+      facts: runDetectors(buildContext({ analysis, kidColor: fork.kidColor })),
+    },
+  });
+  expect(state.analyses[1]?.facts.map(({ kind }) => kind)).toContain(
+    "played-fork",
+  );
+  const reply = (uci: string, current: GameState) =>
+    gameReducer(current, {
+      type: "OPPONENT_MOVE",
+      uci,
+      turnToken: current.turnToken,
+    });
+  state = reply("e8f7", state);
+  for (const [kidMove, opponentMove] of [
+    ["g7e6", "f7g8"],
+    ["a2a4", "g8h8"],
+    ["a4a5", "h8g8"],
+    ["a5a6", "g8h8"],
+    ["a6a7", "h8g8"],
+    ["a7a8q", "g8h7"],
+    ["a8a7", "h7h8"],
+  ] as const) {
+    state = gameReducer(state, {
+      type: "KID_MOVE",
+      from: kidMove.slice(0, 2),
+      to: kidMove.slice(2, 4),
+      ...(kidMove[4] ? { promotion: kidMove[4] } : {}),
+    });
+    state = gameReducer(state, {
+      type: "GRADE_TIMEOUT",
+      ply: state.history.length,
+      turnToken: state.turnToken,
+    });
+    state = reply(opponentMove, state);
+  }
+  expect(state.phase).toBe("kidToMove");
+  expect(state.fen).toBe("7k/Q7/4N3/8/8/8/8/K7 w - - 3 9");
+  const saved = await page.request.put(`/api/games/${game.id}`, {
+    data: { revision: game.revision, state },
+  });
+  expect(saved.ok()).toBe(true);
+}
+
+for (const viewport of [
+  { width: 1280, height: 800 },
+  { width: 768, height: 1024 },
+]) {
+  test(`fits four badges from a fork and a checkmate on one screen at ${viewport.width}×${viewport.height}`, async ({
+    page,
+  }) => {
+    await page.setViewportSize(viewport);
+    const profile = await createProfile(page, uniqueName("Fork kid"));
+    await seedForkThenMateInOne(page, profile);
+    await pickProfile(page, profile.name);
+    await page.getByRole("button", { name: "Continue game" }).click();
+    await expect(page.getByTestId("move")).toHaveCount(16);
+    await playMove(page, "a7g7");
+    await expect(
+      page.getByRole("heading", { name: "You win by checkmate!" }),
+    ).toBeVisible();
+
+    const result = resultParts(page);
+    await expect(
+      page.getByRole("img", { name: "3 out of 3 stars" }),
+    ).toBeVisible();
+    // Qg7# is graded after the game ends and can add a second great move.
+    await expect(result.stats).toHaveText(
+      [/^Great moves\s*[12]$/, /^Moves\s*9$/],
+      { timeout: 10_000 },
+    );
+    await expect(result.badges).toHaveText(fourBadges);
+    await expect(result.saved).toBeVisible();
+
+    const tops = await result.badges.evaluateAll((items) =>
+      items.map((item) => Math.round(item.getBoundingClientRect().top)),
+    );
+    expect(new Set(tops).size, "the badges share one row").toBe(1);
+    await expectOnFirstScreen(page, [
+      ...(await result.badges.all()),
       result.main,
       result.playAgain,
       result.home,

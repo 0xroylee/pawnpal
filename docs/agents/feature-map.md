@@ -30,7 +30,7 @@ The parent runs `npx pawnpal` and the browser opens. The kid picks a color and p
 - Screens: `src/web/screens/SetupScreen.tsx`, `GameScreen.tsx`, `MoveList.tsx`, `ResultScreen.tsx`, `resultMessage.ts`
 - Sound: `src/web/sound/sounds.ts`
 - Dev hook: `src/web/dev/startParams.ts` (`?fen=` and `?color=` with `PAWNPAL_DEV=1`)
-- Tests: `tests/e2e/play.spec.ts`, `black.spec.ts`, `checkmate.spec.ts`, `illegal-move.spec.ts`, `promotion.spec.ts`, `resign.spec.ts`, `health.spec.ts`, `coi-fallback.spec.ts`, `tests/integration/engine-node.test.ts`, `tests/fixtures/site/`
+- Tests: `tests/e2e/play.spec.ts`, `black.spec.ts`, `checkmate.spec.ts`, `illegal-move.spec.ts`, `promotion.spec.ts`, `resign.spec.ts`, `health.spec.ts`, `coi-fallback.spec.ts`, `layout.spec.ts`, `tests/integration/engine-node.test.ts`, `tests/fixtures/site/`
 
 ## Pick an opponent level
 
@@ -79,7 +79,7 @@ Each kid has a profile with their level, settings, stats and games. Games save a
 - Shared records: `src/shared/game/library.ts`, `record.ts`, `types.ts`
 - Client: `src/web/game/libraryClient.ts`, `src/web/game/autosave.ts`
 - Screens: `src/web/screens/ProfileScreens.tsx`
-- Tests: `src/server/library.test.ts`, `tests/e2e/saved-game.spec.ts`, `picker.spec.ts`
+- Tests: `src/server/library.test.ts`, `tests/e2e/saved-game.spec.ts`, `save-error.spec.ts`, `picker.spec.ts`
 
 ## Post-game review
 
@@ -124,7 +124,7 @@ The parent turns on Wi-Fi access and the tablet scans a QR code. The tablet runs
 - Server: `src/server/network.ts` (`requestAllowed`, `lanUrls`), network routes in `src/server/parent/routes.ts`
 - Screen: `src/web/parent/NetworkSettings.tsx`
 - Home screen install: `public/pawnpal.webmanifest`, `public/icons/`
-- Tests: `src/server/network.test.ts`, `tests/e2e/tablet.spec.ts` and its snapshots
+- Tests: `src/server/network.test.ts`, `tests/e2e/tablet.spec.ts` and its snapshots, `layout.spec.ts`
 
 ## Install from npm
 

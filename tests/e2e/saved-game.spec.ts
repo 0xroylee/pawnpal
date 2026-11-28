@@ -1,5 +1,3 @@
-import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
-import { once } from "node:events";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -10,7 +8,15 @@ import {
   runDetectors,
 } from "../../src/web/coach/detectors/index.js";
 import { gameReducer, initialGame } from "../../src/web/game/reducer.js";
-import { expectReplyWithinFiveSeconds } from "./helpers.js";
+import {
+  createProfile,
+  expectReplyWithinFiveSeconds,
+  pickProfile,
+  seedGame,
+  startServer,
+  stopServer,
+  uniqueName,
+} from "./helpers.js";
 import { loadDetectorFixture } from "./replay.js";
 
 test("resumes the saved board after a server crash and exports the finished game", async ({
@@ -219,9 +225,10 @@ test("resumes a waiting nudge and saves its taken-back move", async ({
       (await page.request.post("/api/parent/unlock", { data: password })).ok(),
     ).toBe(true);
   else expect(bootstrap.ok()).toBe(true);
+  const name = uniqueName("Retry player");
   const profile = await (
     await page.request.post("/api/profiles", {
-      data: { name: "Retry player", avatar: "owl" },
+      data: { name, avatar: "owl" },
     })
   ).json();
   const game = await (
@@ -235,7 +242,7 @@ test("resumes a waiting nudge and saves its taken-back move", async ({
   expect(savedNudge.ok()).toBe(true);
 
   await page.goto("/");
-  await page.getByRole("button", { name: "Retry player", exact: true }).click();
+  await page.getByRole("button", { name, exact: true }).click();
   await page.getByRole("button", { name: "Continue game" }).click();
   await expect(page.getByTestId("move")).toHaveCount(1);
   await page.getByRole("button", { name: "Mute Pip's voice" }).click();
@@ -260,7 +267,7 @@ test("resumes a waiting nudge and saves its taken-back move", async ({
   ]);
 
   await page.reload();
-  await page.getByRole("button", { name: "Retry player", exact: true }).click();
+  await page.getByRole("button", { name, exact: true }).click();
   await page.getByRole("button", { name: "Continue game" }).click();
   await expect(page.getByTestId("move")).toHaveCount(2);
   await page.getByRole("button", { name: "Hint", exact: true }).click();
@@ -274,57 +281,56 @@ test("resumes a waiting nudge and saves its taken-back move", async ({
     .toEqual(record);
 });
 
-async function startServer(home: string, port = "0") {
-  const child = spawn(
-    process.execPath,
-    ["bin/pawnpal.js", "--no-open", "--port", port],
-    {
-      env: { ...process.env, PAWNPAL_HOME: home, PAWNPAL_DEV: "1" },
-    },
-  );
-  let diagnostics = "";
-  child.stderr.setEncoding("utf8").on("data", (data: string) => {
-    diagnostics += data;
+test("marks a move that was never graded with the No grade chip in the review", async ({
+  page,
+}) => {
+  const profile = await createProfile(page, uniqueName("Ungraded kid"));
+  const game = await seedGame(page, profile.id);
+  // The kid gives up while e4 is still being graded, so it has no grade.
+  const moved = gameReducer(game.state, {
+    type: "KID_MOVE",
+    from: "e2",
+    to: "e4",
   });
-  try {
-    const url = await new Promise<string>((resolve, reject) => {
-      let stdout = "";
-      const timeout = setTimeout(
-        () => reject(new Error(`Pawnpal did not start. ${diagnostics}`)),
-        10_000,
-      );
-      child.once("error", (error) => {
-        clearTimeout(timeout);
-        reject(error);
-      });
-      child.once("exit", (code) => {
-        clearTimeout(timeout);
-        reject(new Error(`Pawnpal exited with ${code}. ${diagnostics}`));
-      });
-      child.stdout.setEncoding("utf8").on("data", (data: string) => {
-        stdout += data;
-        const announced =
-          /pawnpal is running at (http:\/\/127\.0\.0\.1:\d+)/.exec(stdout)?.[1];
-        if (announced) {
-          clearTimeout(timeout);
-          resolve(announced);
-        }
-      });
-    });
-    return { child, url };
-  } catch (error) {
-    await stopServer(child, "SIGKILL");
-    throw error;
-  }
-}
+  const finished = await page.request.post(`/api/games/${game.id}/finish`, {
+    data: {
+      revision: game.revision,
+      state: gameReducer(moved, { type: "RESIGN" }),
+    },
+  });
+  expect(finished.ok()).toBe(true);
 
-async function stopServer(
-  child: ChildProcessWithoutNullStreams,
-  signal: NodeJS.Signals,
-) {
-  if (child.exitCode !== null || child.signalCode !== null || !child.pid)
-    return;
-  const exited = once(child, "exit");
-  child.kill(signal);
-  await exited;
-}
+  await pickProfile(page, profile.name);
+  await page.getByRole("button", { name: "Game history" }).click();
+  await page.getByRole("button", { name: "Review game" }).click();
+  await page.getByRole("button", { name: "See whole game" }).click();
+  const move = page.getByRole("button", {
+    name: "1. e4 No grade",
+    exact: true,
+  });
+  await expect(move).toBeVisible();
+  const chip = await move.locator(".pp-grade").evaluate((element) => {
+    const icon = element.querySelector(".pp-grade__icon")!;
+    const box = element.getBoundingClientRect();
+    const iconBox = icon.getBoundingClientRect();
+    return {
+      height: box.height,
+      background: getComputedStyle(element).backgroundColor,
+      icon: {
+        text: icon.textContent,
+        size: [iconBox.width, iconBox.height],
+        fill: getComputedStyle(icon).backgroundColor,
+        color: getComputedStyle(icon).color,
+      },
+    };
+  });
+  expect(chip).toMatchObject({
+    height: 36,
+    icon: { text: "–", size: [26, 26] },
+  });
+  expect(chip.background, "the chip has a fill").not.toBe("rgba(0, 0, 0, 0)");
+  expect(chip.icon.fill, "the icon has a fill").not.toBe("rgba(0, 0, 0, 0)");
+  expect(chip.icon.color, "the dash shows on its fill").not.toBe(
+    chip.icon.fill,
+  );
+});

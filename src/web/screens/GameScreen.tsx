@@ -150,6 +150,29 @@ export function GameScreen({
     if (onLeave) onLeave(destination);
     else dispatch({ type: "PLAY_AGAIN" });
   };
+  const opponent = (place: "top" | "board") => (
+    <div className={`pp-player pp-game__opponent pp-game__opponent--${place}`}>
+      <span className="pp-avatar" aria-hidden="true">
+        <Bot aria-hidden="true" focusable="false" />
+      </span>
+      <span className="pp-player__name">{t("game.opponent")}</span>
+      {place === "board" ? (
+        <span className="pp-player__status">
+          {opponentThinking ? t("game.thinking") : ""}
+        </span>
+      ) : (
+        opponentThinking && (
+          <span className="pp-player__status" aria-hidden="true">
+            <span className="pp-typing">
+              <i />
+              <i />
+              <i />
+            </span>
+          </span>
+        )
+      )}
+    </div>
+  );
 
   return (
     <main
@@ -176,7 +199,8 @@ export function GameScreen({
               <House aria-hidden="true" focusable="false" />
               {t("game.home")}
             </button>
-            <h1>{t("game.title")}</h1>
+            <h1 className="pp-game__title">{t("game.title")}</h1>
+            {opponent("top")}
             <div className="pp-game__actions">
               <button
                 className="pp-iconbtn"
@@ -229,15 +253,7 @@ export function GameScreen({
 
           <div className="pp-game__layout">
             <section className="pp-game__board-column">
-              <div className="pp-player">
-                <span className="pp-avatar" aria-hidden="true">
-                  <Bot aria-hidden="true" focusable="false" />
-                </span>
-                <span className="pp-player__name">{t("game.opponent")}</span>
-                <span className="pp-player__status">
-                  {opponentThinking ? t("game.thinking") : ""}
-                </span>
-              </div>
+              {opponent("board")}
               <Board
                 fen={state.fen}
                 orientation={state.kidColor === "w" ? "white" : "black"}

@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useLayoutEffect, useState, type FormEvent } from "react";
 import type { Profile, ProfileSettings } from "../../shared/game/library.js";
 import type { Difficulty } from "../../shared/game/difficulty.js";
 import { ApiError, library } from "../game/libraryClient.js";
@@ -178,6 +178,10 @@ export function ParentScreen({
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, [step]);
 
   useEffect(() => {
     if (wizard) return;

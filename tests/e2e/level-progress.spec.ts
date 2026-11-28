@@ -3,9 +3,16 @@ import type {
   LevelSuggestion,
   Profile,
 } from "../../src/shared/game/library.js";
-import { createProfile, uniqueName, winByCheckmate } from "./helpers.js";
+import {
+  createProfile,
+  seedGame,
+  uniqueName,
+  winByCheckmate,
+} from "./helpers.js";
 
 const snailBeaten = "Sleepy Snail, Level 1 of 8, Beaten";
+// Pip names the next opponent, not just its number.
+const levelUp = "Ready to play Curious Kitten at level 2?";
 const kittenBeaten = "Curious Kitten, Level 2 of 8, Beaten";
 
 type BeatenWatch = Window & { __beatenSeen?: string[] };
@@ -143,14 +150,14 @@ async function earnLevelUp(page: Page, profile: Profile) {
     }
   }
   await page.getByRole("button", { name: "Play again" }).click();
-  await expect(
-    page.getByText("Ready to try level 2?", { exact: true }),
-  ).toBeVisible();
+  await expect(page.locator('.pp-hello p[aria-live="polite"]')).toHaveText(
+    levelUp,
+  );
   await expect.poll(() => beatenOnScreen(page)).toEqual([snailBeaten]);
 }
 
 async function expectAnswered(page: Page, profile: Profile, level: number) {
-  await expect(page.getByText("Ready to try level 2?")).toHaveCount(0);
+  await expect(page.getByText(levelUp)).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Try it" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Stay here" })).toHaveCount(0);
   await expect(
@@ -196,4 +203,18 @@ test("suggests the next level after three wins, and Stay here keeps the level", 
   await page.goto("/");
   await openSetup(page, profile);
   await expectAnswered(page, profile, 1);
+});
+
+test("names the suggested level on the Continue screen too", async ({
+  page,
+}) => {
+  const profile = await createProfile(page, uniqueName("Returner"));
+  await earnLevelUp(page, profile);
+  await seedGame(page, profile.id);
+  await page.goto("/");
+  await page.getByRole("button", { name: profile.name, exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Continue your game?" }),
+  ).toBeVisible();
+  await expect(page.getByText(levelUp, { exact: true })).toBeVisible();
 });

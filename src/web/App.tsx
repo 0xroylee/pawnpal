@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useReducer,
   useRef,
@@ -41,6 +42,7 @@ import {
 import { useSetupInfo } from "./screens/useSetupInfo.js";
 import { Pip } from "./screens/Pip.js";
 import { SetupScreen } from "./screens/SetupScreen.js";
+import { levelSuggestionText } from "./screens/levelSuggestion.js";
 import { t } from "./i18n/t.js";
 import { ParentScreen } from "./parent/ParentScreen.js";
 import {
@@ -269,6 +271,19 @@ function AppContent() {
     };
   }, [startGame]);
 
+  const screen = review
+    ? "review"
+    : state.phase !== "setup"
+      ? state.result
+        ? "result"
+        : "game"
+      : menu === "picker" && needsSetup
+        ? "wizard"
+        : menu;
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, [screen]);
+
   const selectedId = state.phase === "setup" ? profile?.id : undefined;
   const { suggestion, beatenLevels, suggestionAnswered } = useSetupInfo(
     selectedId,
@@ -443,14 +458,7 @@ function AppContent() {
     const levelPrompt = profile && suggestion && (
       <div className="pp-suggest">
         <Pip mood="cheering" />
-        <p>
-          {t(
-            suggestion.direction === "up"
-              ? "library.levelUp"
-              : "library.levelDown",
-            { level: suggestion.level },
-          )}
-        </p>
+        <p>{levelSuggestionText(suggestion)}</p>
         <div className="pp-library__actions">
           {(["accepted", "declined"] as const).map((response) => (
             <button
