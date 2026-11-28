@@ -9,6 +9,7 @@ import {
 } from "../../../tests/unit/coach/mirror.js";
 import { gradeMove } from "./grade.js";
 import { defaultGradeConfig } from "./gradeConfig.js";
+import { toKidScore } from "./winChance.js";
 
 type RecordedAnalysis = {
   linesBefore: EngineLine[];
@@ -38,7 +39,7 @@ describe("recorded grading fixtures", () => {
         fixture.tags.includes(tag),
       ).length;
 
-    expect(fixtures).toHaveLength(30);
+    expect(fixtures).toHaveLength(33);
     expect(fixturesByTag("opening")).toBeGreaterThanOrEqual(6);
     expect(fixturesByTag("hanging-queen")).toBeGreaterThanOrEqual(5);
     expect(fixturesByTag("missed-mate-in-1")).toBeGreaterThanOrEqual(4);
@@ -46,6 +47,7 @@ describe("recorded grading fixtures", () => {
     expect(fixturesByTag("winning-cap")).toBeGreaterThanOrEqual(4);
     expect(fixturesByTag("inaccuracy")).toBeGreaterThanOrEqual(4);
     expect(fixturesByTag("mistake")).toBeGreaterThanOrEqual(3);
+    expect(fixturesByTag("material-floor")).toBeGreaterThanOrEqual(3);
   });
 
   it.each(fixtures.map((fixture) => [fixture.id, fixture] as const))(
@@ -107,6 +109,20 @@ describe("recorded grading fixtures", () => {
           mirroredAnalysis.grade,
         );
       }
+      if (fixture.tags.includes("material-floor")) {
+        const { materialFloor, thresholds, winningCap } = defaultGradeConfig;
+        for (const analysis of [whiteAnalysis, mirroredAnalysis]) {
+          // the move gives real material away, clear of the floor threshold
+          expect(centipawnLoss(analysis)).toBeGreaterThanOrEqual(
+            materialFloor.blunder + 50,
+          );
+          // and win chance alone (or the winning cap) would have kept Pip quiet
+          expect(
+            analysis.drop < thresholds.inaccuracy ||
+              analysis.winAfter >= winningCap,
+          ).toBe(true);
+        }
+      }
       if (fixture.expect.cappedByWinning) {
         expect(whiteAnalysis.drop).toBeGreaterThanOrEqual(10);
         expect(whiteAnalysis.winAfter).toBeGreaterThanOrEqual(85);
@@ -124,6 +140,8 @@ function gradeThresholds(
   analysis: ReturnType<typeof gradeMove>,
 ): number[] {
   const { thresholds } = defaultGradeConfig;
+  // material-floor grades come from centipawns, not the win-chance drop
+  if (fixture.tags.includes("material-floor")) return [];
   switch (fixture.expect.grade) {
     case "best":
       return analysis.moveUci === analysis.linesBefore[0]?.uci
@@ -141,4 +159,17 @@ function gradeThresholds(
     case "blunder":
       return [thresholds.mistake];
   }
+}
+
+function centipawnLoss(analysis: ReturnType<typeof gradeMove>): number {
+  // the kid is the side to move before the move
+  const kid = analysis.fenBefore.split(" ")[1] === "b" ? "b" : "w";
+  const before = toKidScore(analysis.linesBefore[0]!, kid, kid);
+  const after = toKidScore(
+    analysis.linesAfter[0]!,
+    kid === "w" ? "b" : "w",
+    kid,
+  );
+  if ("mate" in before || "mate" in after) return 0;
+  return before.cp - after.cp;
 }
