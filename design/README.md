@@ -16,10 +16,10 @@ The visual system for pawnpal: tokens, components, screens, mascot and assets. O
 | `scripts/check-contrast.mjs` | Checks every text and UI color pair against WCAG minimums. Exits 1 on failure |
 
 ```bash
-node design/scripts/build-pip.mjs          # regenerate Pip SVGs
-node design/scripts/build-pieces.mjs       # regenerate the friendly piece set
-node design/scripts/build-tokens-json.mjs  # regenerate tokens.json after editing tokens.css
-node design/scripts/check-contrast.mjs     # all pairs must pass
+bun run node design/scripts/build-pip.mjs          # regenerate Pip SVGs
+bun run node design/scripts/build-pieces.mjs       # regenerate the friendly piece set
+bun run node design/scripts/build-tokens-json.mjs  # regenerate tokens.json after editing tokens.css
+bun run node design/scripts/check-contrast.mjs     # all pairs must pass
 ```
 
 ## Direction

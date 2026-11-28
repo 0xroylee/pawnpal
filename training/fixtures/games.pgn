@@ -1,0 +1,141 @@
+[Event "Synthetic Training Fixture 01"]
+[Site "fixture:001"]
+[Date "????.??.??"]
+[Round "1"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[WhiteElo "900"]
+[BlackElo "1000"]
+
+1. h4 c6 2. c4 f6 3. e3 Qc7 4. Na3 a5 5. g4 d5 6. f3 Ra6 7. Ne2 Bd7 8. Nd4 Bc8 9. Ne2 Kd8 10. Nb5 Qg3+ 11. Nxg3 Ke8 12. Bd3 Rb6 13. Rh2 Bf5 14. Bb1 Kd7 15. d3 cxb5 16. Rc2 d4 17. Nh1 Rc6 *
+
+[Event "Synthetic Training Fixture 02"]
+[Site "fixture:002"]
+[Date "????.??.??"]
+[Round "2"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[WhiteElo "1700"]
+[BlackElo "950"]
+
+1. Nh3 e6 2. b3 Ba3 3. g4 g5 4. Bb2 Ke7 5. f4 d6 6. Kf2 Nc6 7. Bd4 Ke8 8. Nxa3 Nce7 9. Qb1 b5 10. e3 Kf8 11. Qd1 a6 12. Kf3 h6 13. Rc1 Bb7+ *
+
+[Event "Synthetic Training Fixture 03"]
+[Site "fixture:003"]
+[Date "????.??.??"]
+[Round "3"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[WhiteElo "450"]
+[BlackElo "1750"]
+
+1. g3 c6 2. Nf3 b6 3. b3 h5 4. Bb2 Rh6 5. Nc3 c5 6. h3 d6 7. g4 Ba6 8. Qb1 Re6 9. Ne4 Nc6 10. Ne5 c4 11. Nf3 Ne5 *
+
+[Event "Synthetic Training Fixture 04"]
+[Site "fixture:004"]
+[Date "????.??.??"]
+[Round "4"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[WhiteElo "1200"]
+[BlackElo "1650"]
+
+1. g4 Na6 2. a3 Rb8 3. b3 c5 4. d4 b6 5. Qd3 b5 6. Qe3 h6 7. dxc5 Nxc5 8. c3 Rb6 9. f4 b4 10. cxb4 f6 11. Qc3 Ne4 12. f5 h5 13. Qxc8 a5 14. Qa6 Kf7 15. Bh3 *
+
+[Event "Synthetic Training Fixture 05"]
+[Site "fixture:005"]
+[Date "????.??.??"]
+[Round "5"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[WhiteElo "1000"]
+[BlackElo "500"]
+
+1. f4 h5 2. b4 c6 3. d4 Qb6 4. a4 Qb5 5. Ba3 Rh7 6. e3 Qa5 7. Qg4 Rh8 8. Qf5 e6 9. Qg6 Bc5 10. c3 Nh6 11. Kf2 Bxd4 12. Be2 Na6 13. Bd1 h4 14. f5 Qxb4 15. Qxh6 Qxb1 *
+
+[Event "Synthetic Training Fixture 06"]
+[Site "fixture:006"]
+[Date "????.??.??"]
+[Round "6"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[WhiteElo "1800"]
+[BlackElo "1200"]
+
+1. Nf3 b6 2. Na3 d6 3. b3 Na6 4. b4 h6 5. Rb1 Bf5 6. Ne5 b5 7. Nd3 e5 8. Rb2 e4 9. g3 Ne7 10. h3 Rc8 11. g4 Ra8 12. Nxb5 Rc8 13. h4 Bd7 14. Nc3 Rb8 *
+
+[Event "Synthetic Training Fixture 07"]
+[Site "fixture:007"]
+[Date "????.??.??"]
+[Round "7"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[WhiteElo "900"]
+[BlackElo "1000"]
+
+1. h4 c5 2. f3 g6 3. g3 a5 4. Rh2 g5 5. d4 b6 6. g4 Qc7 7. Rf2 h6 8. hxg5 f6 9. f4 cxd4 10. g6 a4 11. Bg2 Qb7 12. Nc3 d6 13. Kd2 Qf3 14. b3 e6 15. Ne4 Bb7 16. Nh3 Ra5 17. Neg5 d3 18. Qh1 Qg3 19. Rb1 *
+
+[Event "Synthetic Training Fixture 08"]
+[Site "fixture:008"]
+[Date "????.??.??"]
+[Round "8"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[WhiteElo "1700"]
+[BlackElo "950"]
+
+1. f4 f5 2. g3 g5 3. Nh3 Bg7 4. c3 c5 5. a3 Qc7 6. b4 a5 7. g4 Qb6 8. Bg2 Be5 9. gxf5 gxf4 10. Kf1 Qf6 11. Qe1 Qc6 *
+
+[Event "Synthetic Training Fixture 09"]
+[Site "fixture:009"]
+[Date "????.??.??"]
+[Round "9"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[WhiteElo "450"]
+[BlackElo "1750"]
+
+1. c3 f5 2. e4 Kf7 3. e5 Nf6 4. d3 a5 5. Bd2 Ke8 6. Qg4 Ra7 7. Kd1 Ne4 8. Qxf5 Rg8 9. Kc1 d5 10. b3 d4 11. Be2 h6 12. Be3 c6 13. h4 Na6 14. Qf3 Qd7 15. Rh3 Nb4 16. a4 Qf5 *
+
+[Event "Synthetic Training Fixture 10"]
+[Site "fixture:010"]
+[Date "????.??.??"]
+[Round "10"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[WhiteElo "1200"]
+[BlackElo "1650"]
+
+1. a4 b5 2. c4 bxa4 3. Nf3 f6 4. Ra3 a5 5. e3 d5 6. c5 Bf5 7. Nd4 Bg6 8. Ne6 Nc6 9. h3 Qd6 10. Rc3 Bf7 11. g3 Qe5 *
+
+[Event "Synthetic Training Fixture 11"]
+[Site "fixture:011"]
+[Date "????.??.??"]
+[Round "11"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+[WhiteElo "1000"]
+[BlackElo "500"]
+
+1. a4 Na6 2. a5 Nc5 3. Ra2 Nd3+ 4. cxd3 a6 5. b4 e5 6. f4 d5 7. Qa4+ Bd7 8. d4 Nh6 9. Ra3 exd4 10. Kd1 c5 11. g3 Nf5 12. d3 Qb6 13. Bb2 Bxa4+ 14. Kc1 Ra7 15. Rb3 Nxg3 16. hxg3 Kd8 17. Nh3 g6 18. Rc3 Bc2 *
+
+[Event "Synthetic Training Fixture 12"]
+[Site "fixture:012"]
+[Date "????.??.??"]
+[Round "12"]
+[White "?"]
+[Black "?"]
+[Result "*"]
+
+1. c3 Nf6 2. d3 g6 3. d4 d6 4. a4 Be6 5. Nd2 Bd7 6. b3 g5 7. e4 Nxe4 8. Bd3 Be6 9. Ra3 f6 10. d5 Bf5 11. Bc2 h5 12. g3 Nxg3 13. Qxh5+ Kd7 14. hxg3 Bh7 *

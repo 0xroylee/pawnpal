@@ -103,9 +103,108 @@ describe("buildRephraseRequest", () => {
 
   it("produces byte-identical JSON for identical inputs", () => {
     expect(JSON.stringify(build("praise", 9))).toBe(
-      JSON.stringify(build("praise", 9)),
+      JSON.stringify({
+        model: "local-model",
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are Pip, a friendly chess coach talking to a child aged 9. Rewrite the coach note for the child in at most two short sentences. Use only the facts given. Never mention a move, square or piece that isn't in the facts. No numbers, no evaluations, no notation unless it's listed in the facts. Keep it to one cheerful sentence.",
+          },
+          {
+            role: "user",
+            content: `${JSON.stringify(
+              {
+                schemaVersion: 1,
+                pieces: [
+                  { owner: "yours", piece: "knight", square: "f3" },
+                  { owner: "theirs", piece: "rook", square: "e5" },
+                ],
+                moves: ["Nxe5"],
+                squares: ["f3", "e5"],
+                betterMove: "Nxe5",
+                kind: "missed-capture",
+              },
+              null,
+              2,
+            )}\nReference note: Can you find a safe square?`,
+          },
+        ],
+        temperature: 0.6,
+        max_tokens: 120,
+        stream: false,
+      }),
     );
   });
+
+  it.each(["explain", "reveal", "praise"] as const)(
+    "keeps %s identical across versions",
+    (mode) => {
+      const input = {
+        fact,
+        mode,
+        templateText: "Nxe5 on e5",
+        kidColor: "w" as const,
+        language: "en" as const,
+      };
+      const original = buildRephraseRequest(input, { model: "local" });
+      for (const promptVersion of [1, 3] as const)
+        expect(
+          buildRephraseRequest(input, { model: "local", promptVersion }),
+        ).toEqual(original);
+    },
+  );
+
+  it.each(["nudge", "hint"] as const)(
+    "emits only structured facts for %s regardless of the reference note",
+    (mode) => {
+      const expected = {
+        schemaVersion: 1,
+        pieces: [
+          { owner: "yours", piece: "knight" },
+          { owner: "theirs", piece: "rook" },
+        ],
+        mateIn: 2,
+        kind: "missed-capture",
+      };
+      for (const templateText of [
+        "Try Nxe5.",
+        "Try NXE5+.",
+        "Try Nf3xe5+.",
+        "Try exd6 e.p..",
+        "Consider e2e4.",
+        "Look at E5.",
+        "Try Nf3.",
+        "Try O-O.",
+        "Try 0-0-0#.",
+        "Try e8Q+.",
+      ]) {
+        const content = buildRephraseRequest(
+          {
+            fact: { ...fact, mateIn: 2 },
+            mode,
+            templateText,
+            kidColor: "w",
+            language: "en",
+          },
+          { model: "local", promptVersion: 3 },
+        ).messages[1].content;
+        expect(content).toBe(JSON.stringify(expected, null, 2));
+        expect(content).not.toContain("Reference note");
+        expect(content).not.toContain(templateText);
+        expect(content).not.toMatch(/[a-h][1-8]|o-o|0-0/i);
+      }
+      const withoutMate = buildRephraseRequest(
+        { fact, mode, templateText: "note", kidColor: "w", language: "en" },
+        { model: "local", promptVersion: 3 },
+      ).messages[1].content;
+      expect(Object.keys(JSON.parse(withoutMate))).toEqual([
+        "schemaVersion",
+        "pieces",
+        "kind",
+      ]);
+    },
+  );
 
   it.each(["w", "b"] as const)(
     "uses the kid's color when the better mover is the opponent's piece (%s kid)",

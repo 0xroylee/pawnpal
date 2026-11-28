@@ -1,0 +1,8 @@
+{"id":"valid-01","text":"Take a calm moment and look carefully for a safe and useful idea in this position."}
+{"id":"near-duplicate-01","text":"Take a calm moment and look carefully for a safe and useful idea in this position!","expectedReason":"duplicate"}
+{"id":"unknown-square-01","text":"Look at a2.","expectedReason":"unknown-square"}
+{"id":"unknown-piece-01","text":"Your queen can find a safe idea.","expectedReason":"unknown-piece"}
+{"id":"digits-01","text":"Try move 2.","expectedReason":"digits"}
+{"id":"better-move-01","text":"Play Nxg3.","expectedReason":"reveals-better-move"}
+{"id":"blame-01","text":"That was a careless move.","expectedReason":"blame"}
+{"id":"thinking-01","text":"<think>private thought</think>Your knight has a good idea."}

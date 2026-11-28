@@ -149,8 +149,11 @@ test("resumes the saved board after a server crash and exports the finished game
     await page.getByRole("button", { name: "Data and export" }).click();
     const download = page.waitForEvent("download");
     await page.getByRole("link", { name: "Download Mina's PGN" }).click();
-    expect((await download).suggestedFilename()).toBe("pawnpal-games.pgn");
+    const pgn = await download;
+    expect(pgn.suggestedFilename()).toBe("pawnpal-games.pgn");
+    expect(await pgn.failure()).toBeNull();
   } finally {
+    await page.context().close();
     if (server) await stopServer(server.child, "SIGTERM");
     await rm(home, { recursive: true, force: true });
   }

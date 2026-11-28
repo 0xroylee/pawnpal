@@ -8,3 +8,4 @@ bun.lock
 design/
 docs/
 training/runs/
+training/dist/

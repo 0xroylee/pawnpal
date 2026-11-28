@@ -6,6 +6,7 @@ import {
   stripThinking,
   validateRephrase,
 } from "../../shared/coach/validateRephrase.ts";
+import { shouldCallLlm } from "../../shared/coach/rephrasePolicy.ts";
 import type {
   RephraseReason,
   RephraseRequestInput,
@@ -32,10 +33,7 @@ export async function rephrase(options: {
     return { text: options.input.templateText, source: "template", reason };
   };
 
-  if (
-    (options.input.mode === "nudge" || options.input.mode === "hint") &&
-    isCastlingBetterMove(options.input.fact)
-  ) {
+  if (!shouldCallLlm(options.input)) {
     return fallback("reveals-better-move");
   }
 
@@ -55,15 +53,4 @@ export async function rephrase(options: {
   } catch (error) {
     return fallback(error instanceof LlmError ? error.code : "network");
   }
-}
-
-function isCastlingBetterMove(fact: RephraseRequestInput["fact"]): boolean {
-  if (fact.betterMoveSan && /^O-O(?:-O)?[+#]?$/.test(fact.betterMoveSan)) {
-    return true;
-  }
-
-  return (
-    ["e1g1", "e1c1", "e8g8", "e8c8"].includes(fact.betterMoveUci ?? "") &&
-    (fact.betterMover === undefined || fact.betterMover.type === "k")
-  );
 }

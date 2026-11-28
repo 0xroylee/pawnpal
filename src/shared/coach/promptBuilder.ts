@@ -13,6 +13,10 @@ export type ChatCompletionRequest = {
   reasoning_effort?: "none";
 };
 
+// Version 2 was retired.
+export type PromptVersion = 1 | 3;
+export const PROMPT_VERSION: PromptVersion = 1;
+
 const MODE_RULES = {
   nudge: "Do not reveal the better move.",
   explain: "Say what happens next in plain words.",
@@ -23,7 +27,7 @@ const MODE_RULES = {
 
 export function buildRephraseRequest(
   input: RephraseRequestInput,
-  options: { model: string },
+  options: { model: string; promptVersion?: PromptVersion },
 ): ChatCompletionRequest {
   const age = input.kidAge ?? "about 8";
   const systemContent =
@@ -32,8 +36,11 @@ export function buildRephraseRequest(
     "Use only the facts given. Never mention a move, square or piece that isn't in the facts. " +
     "No numbers, no evaluations, no notation unless it's listed in the facts. " +
     MODE_RULES[input.mode];
+  const version = options.promptVersion ?? PROMPT_VERSION;
+  const restricted =
+    version !== 1 && (input.mode === "nudge" || input.mode === "hint");
   const factJson = JSON.stringify(
-    factToPromptJson(input.fact, input.kidColor),
+    factToPromptJson(input.fact, input.kidColor, restricted ? version : 1),
     null,
     2,
   );
@@ -44,7 +51,9 @@ export function buildRephraseRequest(
       { role: "system", content: systemContent },
       {
         role: "user",
-        content: `${factJson}\nReference note: ${input.templateText}`,
+        content: restricted
+          ? factJson
+          : `${factJson}\nReference note: ${input.templateText}`,
       },
     ],
     temperature: 0.6,
@@ -55,9 +64,9 @@ export function buildRephraseRequest(
 
 type PromptFactJson = {
   schemaVersion: CoachFact["schemaVersion"];
-  pieces: { owner: "yours" | "theirs"; piece: string; square: string }[];
-  moves: string[];
-  squares: string[];
+  pieces: { owner: "yours" | "theirs"; piece: string; square?: string }[];
+  moves?: string[];
+  squares?: string[];
   betterMove?: string;
   mateIn?: number;
   kind: CoachFact["kind"];
@@ -66,17 +75,17 @@ type PromptFactJson = {
 function factToPromptJson(
   fact: CoachFact,
   inputKidColor: "w" | "b",
+  version: PromptVersion,
 ): PromptFactJson {
   return {
     schemaVersion: fact.schemaVersion,
     pieces: fact.pieces.map((piece) => ({
       owner: piece.color === inputKidColor ? "yours" : "theirs",
       piece: PIECE_WORDS[piece.type].singular,
-      square: piece.square,
+      ...(version === 3 ? {} : { square: piece.square }),
     })),
-    moves: fact.moves,
-    squares: fact.squares,
-    ...(fact.betterMoveSan === undefined
+    ...(version === 3 ? {} : { moves: fact.moves, squares: fact.squares }),
+    ...(version !== 1 || fact.betterMoveSan === undefined
       ? {}
       : { betterMove: fact.betterMoveSan }),
     ...(fact.mateIn === undefined ? {} : { mateIn: fact.mateIn }),
