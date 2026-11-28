@@ -250,7 +250,7 @@ export async function runBaseline(reasoningOff = false) {
     "",
     reasoningOff ? "### Reproduce the run" : "## Reproduce the run",
     "",
-    `Start Ollama on loopback, pull both exact tags above, install the locked dependencies with \`npm ci\`, and run \`node training/run-baseline.mjs${reasoningOff ? " --ollama-no-thinking" : ""}\` from the repository root.`,
+    `Start Ollama on loopback, pull both exact tags above, install the locked dependencies with \`bun install --frozen-lockfile\`, and run \`node training/run-baseline.mjs${reasoningOff ? " --ollama-no-thinking" : ""}\` from the repository root.`,
     `The local output in \`${runDirectory}\` contains the case list, per-case outcomes, fixture hashes, and full model digests. The case list SHA-256 is \`${sha256(caseData)}\`.`,
     "",
   ].join("\n");

@@ -3,7 +3,7 @@
 Run this check before a release from the repository root with Node 22 and the locked dependencies.
 
 ```sh
-npm ci
+bun install --frozen-lockfile
 node tools/calibrate/run.mjs
 ```
 

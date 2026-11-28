@@ -21,13 +21,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-          cache: npm
-      - run: npm ci
-      - run: npm run check:native
-      - run: npm run check:licenses
-      - run: npm run typecheck
-      - run: npm run lint
-      - run: npm test
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run check:native
+      - run: bun run check:licenses
+      - run: bun run typecheck
+      - run: bun run lint
+      - run: bun run test
   browser:
     strategy:
       fail-fast: false
@@ -39,15 +39,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - run: npm run build
-      - run: npm run e2e
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run playwright install --with-deps chromium
+      - run: bun run build
+      - run: bun run e2e
       - if: runner.os == 'macOS'
-        run: npx playwright install webkit
+        run: bun run playwright install webkit
       - if: runner.os == 'macOS'
-        run: npm run e2e -- --project=tablet
+        run: bun run e2e --project=tablet
         env:
           PAWNPAL_E2E_WEBKIT: "1"
       - uses: actions/upload-artifact@v4
@@ -67,9 +67,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm run build
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run build
       - run: npm run smoke:package
   publish:
     if: startsWith(github.ref, 'refs/tags/v')
@@ -84,11 +84,11 @@ jobs:
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
-          cache: npm
+      - uses: oven-sh/setup-bun@v2
       - name: Check tag version
         run: node -e 'if (process.env.GITHUB_REF_NAME !== "v" + require("./package.json").version) process.exit(1)'
-      - run: npm ci
-      - run: npm run build
+      - run: bun install --frozen-lockfile
+      - run: bun run build
       - run: npm run check:pack
       - run: npm publish --access public --provenance
         env:

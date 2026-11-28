@@ -84,7 +84,7 @@ pawnpal/
 └── docs/specs/
 ```
 
-It's a single npm package. `npm run build` outputs `dist/server` and `dist/web`.
+It's a single npm package. `bun run build` outputs `dist/server` and `dist/web`.
 
 ## Shared types (sketch)
 

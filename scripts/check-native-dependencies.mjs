@@ -1,16 +1,6 @@
-import { execFileSync } from "node:child_process";
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
-
-const npm = process.env.npm_execpath;
-if (!npm) throw new Error("Run npm run check:native");
-const [, ...dependencies] = execFileSync(
-  process.execPath,
-  [npm, "ls", "--omit=dev", "--all", "--parseable"],
-  { encoding: "utf8" },
-)
-  .trim()
-  .split(/\r?\n/);
+import { installedDependencies } from "./installed-dependencies.mjs";
 
 const nativeFiles = [];
 function scan(directory) {
@@ -25,7 +15,7 @@ function scan(directory) {
       nativeFiles.push(path);
   }
 }
-for (const directory of dependencies) scan(directory);
+for (const directory of installedDependencies().keys()) scan(directory);
 if (nativeFiles.length)
   throw new Error(
     `Production dependencies contain native files:\n${nativeFiles.join("\n")}`,

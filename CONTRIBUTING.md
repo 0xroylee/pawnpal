@@ -1,23 +1,28 @@
 # Contributing to Pawnpal
 
-Use Node 22.13 or newer. Install the locked dependencies, then start the local server and web development build.
+Use Bun 1.4.4 and Node.js 22.13 or newer. Install the locked dependencies, then start the local server and web development build.
 
 ```sh
-npm ci
-npm run dev
+bun install --frozen-lockfile
+bun run dev
 ```
 
 Run the same checks as CI before sending a change.
 
 ```sh
-npm run typecheck
-npm run lint
-npm run check:native
-npm run check:licenses
-npm test
-npx playwright install chromium
-npm run build
-npm run e2e
+bun run typecheck
+bun run lint
+bun run check:native
+bun run check:licenses
+bun run test
+bun run playwright install chromium
+bun run build
+bun run e2e
+```
+
+The package smoke test uses npm to install and run the tarball as a player would.
+
+```sh
 npm run smoke:package
 ```
 
