@@ -53,7 +53,7 @@ Key rules:
 - **Better-move arrow is blue and solid; threat arrow is orange and dashed; both have a white halo.** An orange arrow on a green board can disappear for color-blind kids. The halo and the dash fix that without depending on color.
 - **Kid buttons are 72px, not 56px.** NN/g recommends about 2 cm targets for kids.
 - **"Give up" moved to the top bar,** away from the bottom edge where kids tap by accident.
-- **On portrait tablets, the opponent sits in the top bar and the kid's row holds the Hint button.** That keeps the board at 600px on a 768×1024 screen.
+- **On portrait tablets, the opponent sits in the top bar, the coach panel moves under the board, and the kid's row holds the Hint button.** That keeps the board at 600px on a 768×1024 screen.
 
 ## Research notes
 
