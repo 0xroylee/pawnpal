@@ -15,6 +15,7 @@ Any one of these sends the change back.
 - A server route that reads a body without `jsonBody()` and a zod schema, or a parent route that skips `ParentGate`.
 - A change under `design/assets/pieces/horsey/`, a hand-edited generated file, or a new dependency without updated `THIRD_PARTY_NOTICES`.
 - A test, fixture threshold or validator rule loosened to make the change pass.
+- A new unit test, or a behavior change with no e2e spec.
 
 ## Spec
 
@@ -51,8 +52,8 @@ Any one of these sends the change back.
 
 ## Tests and checks
 
-- The change adds or updates tests at the right level: colocated unit tests, `tests/integration/` for real Stockfish, `tests/e2e/` for user flows. See the [test patterns](docs/agents/code-patterns.md#tests).
-- The author reports `bun run typecheck`, `bun run lint` and `bun run test` results. UI, route and engine changes also report `bun run build && bun run e2e`.
+- The change proves its behavior with an e2e spec that runs the production build against the real server. It adds no unit tests and no cases to the existing ones. See [Testing](AGENTS.md#testing) and the [test patterns](docs/agents/code-patterns.md#tests).
+- The author reports `bun run typecheck`, `bun run lint`, `bun run test` and `bun run build && bun run e2e` results.
 - Packaging, CLI or dependency changes also report `bun run check:native`, `bun run check:licenses` and `bun run check:pack`.
 - Tablet layout changes on macOS report the WebKit run: `PAWNPAL_E2E_WEBKIT=1 bun run e2e --project=tablet`.
 

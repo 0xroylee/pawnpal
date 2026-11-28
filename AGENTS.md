@@ -45,10 +45,10 @@ Use American English Bella (`af_bella`) from `hexgrad/Kokoro-82M` v1.0 at revisi
 ### Always
 
 - Put every user-facing string in `src/web/i18n/en.json` and read it through `t()` or the coach template helpers. `tests/unit/i18n-scan.test.ts` fails on stray text.
-- Ship a test with the change. Coach logic gets a position fixture.
+- Prove the change with an e2e spec. [Testing](#testing) says how.
 - Validate every server request body with a zod schema through `jsonBody()`.
 - Keep `src/web/coach/` and `src/shared/` free of React.
-- Run `bun run typecheck`, `bun run lint` and `bun run test` before you report a change as done, and include the results.
+- Run `bun run typecheck`, `bun run lint`, `bun run test` and `bun run build && bun run e2e` before you report a change as done, and include the results.
 
 ### Ask first
 
@@ -69,14 +69,27 @@ Use American English Bella (`af_bella`) from `hexgrad/Kokoro-82M` v1.0 at revisi
 - Hand-edit generated files: `design/tokens.json`, `design/assets/pip/`, `design/assets/pieces/pawnpal/`, `public/engine/`, `dist/`, `bun.lock`. Run the script that writes them.
 - Install with npm. The repo uses Bun 1.4.4 and `bun.lock`. npm only runs the package smoke test.
 - Loosen a test, fixture or validator so a change passes.
+- Add a unit test. New behavior gets an e2e spec instead.
+
+## Testing
+
+We don't write simple unit tests. We test the real production app end to end.
+
+- Prove every change with a Playwright spec in `tests/e2e/`. Specs run the production build (`bun run build`) served by the real CLI server, `bin/pawnpal.js`, in a real browser: Chrome, plus WebKit for the `tablet` project.
+- Don't add `*.test.ts` or `*.test.tsx` files, and don't add cases to the existing ones. That covers components, hooks, CSS rules and helpers.
+- The existing Vitest suites stay and run in CI, including the i18n scan and the coach fixture suites. When a change breaks one, update it to the new behavior without loosening it.
+- Reach a state the way a kid or parent would, or through the setup hooks the server turns on with `PAWNPAL_DEV=1`: the HTTP API, `?fen=` through `openDevFen`, and the replay analyst with recorded engine lines. Don't stub Pawnpal's own API with `page.route`, and don't add test-only code paths to `src/`.
+- For coach logic, record the position in `tests/fixtures/coach/` and replay it in a spec. The fixture suites check the new record too.
+- Keep specs deterministic. Pick positions where the computer's reply is forced, or don't depend on the reply.
+- Check layout in the browser. Measure element boxes at 1280x800 and 768x1024 instead of asserting CSS text.
 
 ## Workflow
 
 1. Find the feature in the [feature map](docs/agents/feature-map.md) and read its spec. The acceptance criteria and test plan define done.
 2. Read the code and tests near the change, and match them. The [code patterns](docs/agents/code-patterns.md) list the house style.
-3. Write a failing test. For coach work, start from a fixture in `tests/fixtures/coach/`.
+3. Write a failing e2e spec. For coach work, record the position in `tests/fixtures/coach/` first and replay it.
 4. Make the smallest change that passes it. Keep chess logic pure, and inject time, randomness, `fetch` and the engine.
-5. Run the core checks. Add `bun run build && bun run e2e` when the change touches UI, routes or the engine.
+5. Run the checks, including `bun run build && bun run e2e`.
 6. Check your diff against [REVIEW.md](REVIEW.md).
 7. Report what changed, which checks ran and their results, and anything you skipped or left open.
 

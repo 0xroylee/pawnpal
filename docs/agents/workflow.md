@@ -24,8 +24,7 @@ bun run dev
 
 | You changed                        | Run                                                                                   |
 | ---------------------------------- | ------------------------------------------------------------------------------------- |
-| Anything                           | `bun run typecheck`, `bun run lint`, `bun run test`                                   |
-| UI, routes, engine, or CSS         | add `bun run build` and `bun run e2e`                                                 |
+| Anything                           | `bun run typecheck`, `bun run lint`, `bun run test`, `bun run build`, `bun run e2e` |
 | Tablet layout (macOS)              | add `bun run playwright install webkit` and `PAWNPAL_E2E_WEBKIT=1 bun run e2e --project=tablet` |
 | Dependencies, build, CLI, package  | add `bun run check:native`, `bun run check:licenses`, `bun run check:pack`, `npm run smoke:package` |
 | Level settings                     | add `node tools/calibrate/run.mjs` (1,600 games, so ask before starting it)            |
@@ -45,7 +44,7 @@ Adding a fact kind changes the `CoachFact` contract, so ask first.
 4. Register it in `allDetectors` in `detectors/index.ts` and place it in `FACT_PRIORITY` in `priority.ts`.
 5. Add 2 or 3 numbered variants for each mode to `src/web/i18n/en.json`: `coach.<kind>.explain.1`, plus `nudge`, `reveal`, `praise` and `late`, and `hint.tier2.<kind>.1`. `messageKeys` in `templates.ts` finds them by prefix. Add board marks in `annotations.ts` if the kind needs its own arrows or rings.
 6. Check that `validateRephrase` and the prompt builder accept the new kind's squares and moves.
-7. Run the fixture suite, `tests/unit/coach-wording.test.ts`, and then the browser through `?fen=`.
+7. Run the fixture suite and `tests/unit/coach-wording.test.ts`, then add an e2e spec that replays one of the new fixtures through `?fen=`.
 
 ### Add or change a string
 
@@ -60,7 +59,7 @@ For Pip's lines, follow [Pip's voice](../pip-voice.md) and keep the facts identi
 1. Add the request and response zod schemas to `src/server/db/schemas.ts`.
 2. Add the route to `db/routes.ts` or `parent/routes.ts`. Read the body with `jsonBody(context, schema)` and throw `LibraryFault` for client errors. Parent routes check `ParentGate` first.
 3. Put SQL in a `Library` method, not in the route.
-4. Test it with `app.request()` in the matching server test file. Pass `fetch` or `now` through the dependencies argument instead of mocking globals.
+4. Cover it with an e2e spec that reaches it through the screen that uses it, or through `page.request` when no screen uses it yet. Pass `fetch` or `now` through the dependencies argument instead of mocking globals.
 5. Call it from the web through `src/web/game/libraryClient.ts` or `src/web/parent/client.ts`.
 
 ### Change the database
@@ -69,7 +68,7 @@ Ask first. Saved data on families' machines has to survive the upgrade.
 
 1. Add the next numbered file in `src/server/db/migrations/`. Never edit a migration that has shipped.
 2. Update `Library`, the zod schemas, and the shared types in `src/shared/game/`.
-3. Add a test in `src/server/library.test.ts` that opens a database at the old schema and migrates it.
+3. Add an e2e spec that starts the server on a home directory holding a database at the old schema and checks the saved data after the upgrade. `saved-game.spec.ts` shows how a spec starts its own server.
 
 ### Change a dependency
 
